@@ -10490,7 +10490,7 @@ public partial class MainViewModel :
                 var answer = await MessageBox.Show(
                     Window!,
                     Se.Language.General.Error,
-                    Se.Language.Main.ErrorLoadVideoFilePrompt,
+                    string.Format(Se.Language.Main.ErrorLoadVideoFilePrompt, fileName),
                     MessageBoxButtons.YesNo,
                     MessageBoxIcon.Question);
                 if (answer == MessageBoxResult.Yes)
