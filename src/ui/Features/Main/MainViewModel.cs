@@ -10457,7 +10457,7 @@ public partial class MainViewModel :
                     return;
                 }
             }
-            
+
             if (ext == ".mcc")
             {
                 var lines = FileUtil.ReadAllTextShared(fileName, Encoding.ASCII).SplitToLines();
@@ -10480,12 +10480,31 @@ public partial class MainViewModel :
             {
                 if (ImportSubtitleFromDivX(fileName))
                 {
+                    return;
                 }
-                else
+            }
+
+            // check for video files ext and size >1 MB
+            if (fileSize > 1_000_000 && Utilities.VideoFileExtensions.Contains(ext.ToLowerInvariant()))
+            {
+                var answer = await MessageBox.Show(
+                    Window!,
+                    Se.Language.General.Error,
+                    Se.Language.Main.ErrorLoadVideoFilePrompt,
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+                if (answer == MessageBoxResult.Yes)
                 {
-                    //   MessageBox.Show(_language.NotAValidXSubFile);
+                    await VideoOpenFile(fileName);
                 }
 
+                return;
+            }
+
+            // check for large file size - cannot be a subtitle file
+            if (fileSize > 100_000_000)
+            {
+                await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadLargeFile, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -10506,29 +10525,6 @@ public partial class MainViewModel :
 
             if (subtitle == null)
             {
-                // check for large file size (> 2 GB) - cannot be a subtitle file
-                if (fileSize > 2_000_000_000)
-                {
-                    await MessageBox.Show(Window!, Se.Language.General.Error, Se.Language.Main.ErrorLoadLargeFile, MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                    // check if file is a video file - prompt to open as video
-                    if (Utilities.VideoFileExtensions.Contains(ext.ToLowerInvariant()))
-                    {
-                        var answer = await MessageBox.Show(
-                            Window!,
-                            Se.Language.General.Error,
-                            Se.Language.Main.ErrorLoadVideoFilePrompt,
-                            MessageBoxButtons.YesNo,
-                            MessageBoxIcon.Question);
-                        if (answer == MessageBoxResult.Yes)
-                        {
-                            await VideoOpenFile(fileName);
-                        }
-                    }
-
-                    return;
-                }
-
                 if (FileUtil.IsSpDvdSup(fileName))
                 {
                     ImportAndOcrSpDvdSup(fileName);
