@@ -640,6 +640,29 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Install flatpak
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak
+
+      # Cache the Freedesktop SDK + dotnet extension so we don't re-download
+      # ~6 GB of runtimes on every CI run. Bump the key suffix (-v1) to invalidate.
+      - name: Cache flatpak runtimes
+        id: flatpak-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/flatpak
+          key: flatpak-fd24.08-dotnet10-v1
+
+      - name: Install Freedesktop SDK + dotnet extension
+        if: steps.flatpak-cache.outputs.cache-hit != 'true'
+        run: |
+          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak --user install -y --noninteractive flathub \
+            org.freedesktop.Platform//24.08 \
+            org.freedesktop.Sdk//24.08 \
+            org.freedesktop.Sdk.Extension.dotnet10//24.08
+
       - name: Regenerate nuget-sources.json
         run: bash installer/flatpak/generate-nuget-sources.sh
 
@@ -684,7 +707,7 @@ jobs:
         with:
           bundle: SubtitleEdit-linux-x64.flatpak
           manifest-path: installer/flatpak/dk.nikse.subtitleedit.yaml
-          cache-key: flatpak-builder-${{ github.sha }}
+          cache-key: flatpak-builder-${{ hashFiles('installer/flatpak/dk.nikse.subtitleedit.yaml', 'installer/flatpak/nuget-sources.json') }}
           arch: x86_64
 
       - name: Upload flatpak bundle artifact
