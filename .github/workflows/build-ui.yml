@@ -43,7 +43,7 @@ jobs:
       - name: Extract version from Se.cs
         shell: pwsh
         run: |
-          $seContent = Get-Content "src/UI/Logic/Config/Se.cs" -Raw
+          $seContent = Get-Content "src/ui/Logic/Config/Se.cs" -Raw
           $m = [regex]::Match($seContent, 'public\s+static\s+string\s+Version\s*\{[^}]+\}\s*=\s*"v([^"]+)"')
           if (-not $m.Success) { throw "Could not find Version in Se.cs" }
           $versionString = $m.Groups[1].Value
@@ -201,7 +201,7 @@ jobs:
       - name: Extract version from Se.cs
         run: |
           set -e
-          line=$(grep -E 'public[[:space:]]+static[[:space:]]+string[[:space:]]+Version[[:space:]]*\{' src/UI/Logic/Config/Se.cs)
+          line=$(grep -E 'public[[:space:]]+static[[:space:]]+string[[:space:]]+Version[[:space:]]*\{' src/ui/Logic/Config/Se.cs)
           version_string=$(printf '%s' "$line" | sed -E 's/.*"v([^"]+)".*/\1/')
           numeric_part="${version_string%%-*}"
           suffix=""
@@ -574,7 +574,7 @@ jobs:
       - name: Extract version from Se.cs
         run: |
           set -e
-          line=$(grep -E 'public[[:space:]]+static[[:space:]]+string[[:space:]]+Version[[:space:]]*\{' src/UI/Logic/Config/Se.cs)
+          line=$(grep -E 'public[[:space:]]+static[[:space:]]+string[[:space:]]+Version[[:space:]]*\{' src/ui/Logic/Config/Se.cs)
           version_string=$(printf '%s' "$line" | sed -E 's/.*"v([^"]+)".*/\1/')
           numeric_part="${version_string%%-*}"
           suffix=""
