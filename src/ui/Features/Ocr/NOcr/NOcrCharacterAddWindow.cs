@@ -253,7 +253,7 @@ public class NOcrCharacterAddWindow : Window
                 panelLinesToDraw,
                 UiUtil.MakeLabel("Algorithm").WithMarginTop(5),
                 comboBoxAlgorithm,
-                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LinesGeneratedInfo)).WithMarginTop(5),
+                UiUtil.MakeLabel(string.Empty).WithBindText(vm, nameof(vm.LinesGeneratedInfo)).WithMarginTop(5).WithFontSize(9),
                 UiUtil.MakeButton(Se.Language.Ocr.AutoDrawAgain, vm.DrawAgainCommand).WithMinWidth(100).WithMarginTop(10).WithLeftAlignment().WithMarginLeft(0),
                 buttonClear.WithMinWidth(100).WithMarginTop(5).WithLeftAlignment().WithMarginLeft(0),
             }
