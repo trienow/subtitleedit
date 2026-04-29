@@ -10079,6 +10079,8 @@ public partial class MainViewModel :
     {
         var columns = SubtitleGrid.Columns.Where(p => p.IsVisible).ToList();
 
+        var showHideWidth = MeasureShowHideColumnWidth();
+
         var numberOfStarColumns = 0;
         for (var i = 0; i < columns.Count; i++)
         {
@@ -10089,7 +10091,8 @@ public partial class MainViewModel :
             if (column.Header.ToString() == Se.Language.General.Show ||
                 column.Header.ToString() == Se.Language.General.Hide)
             {
-                column.Width = new DataGridLength(column.MinWidth, DataGridLengthUnitType.Pixel);
+                var width = Math.Max(column.MinWidth, showHideWidth);
+                column.Width = new DataGridLength(width, DataGridLengthUnitType.Pixel);
                 continue;
             }
             else
@@ -10131,6 +10134,34 @@ public partial class MainViewModel :
         }
 
         SubtitleGrid.UpdateLayout();
+    }
+
+    private double MeasureShowHideColumnWidth()
+    {
+        // Use "8" digits — typically the widest digit glyph in proportional fonts.
+        var sample = Se.Settings.General.UseFrameMode ? "88:88:88.88" : "88:88:88,888";
+        if (Se.Settings.General.CurrentVideoOffsetInMs < 0)
+        {
+            sample = "-" + sample;
+        }
+
+        var fontFamily = SubtitleGrid.FontFamily ?? FontFamily.Default;
+        var typeface = new Typeface(fontFamily);
+        var fontSize = SubtitleGrid.FontSize > 0 ? SubtitleGrid.FontSize : Se.Settings.Appearance.SubtitleGridFontSize;
+
+        var formattedText = new FormattedText(
+            sample,
+            CultureInfo.CurrentCulture,
+            FlowDirection.LeftToRight,
+            typeface,
+            fontSize,
+            Brushes.Black);
+
+        var cellPadding = Se.Settings.Appearance.GridCompactMode ? 0 : 8; // cell theme: 4 left + 4 right
+        const int textBlockMargin = 8; // Avalonia DataGridTextColumn wraps text in TextBlock with Margin=Thickness(4)
+        // Scale safety buffer with font size: gridline + sort indicator chrome + sub-pixel rounding grows with size.
+        var safetyBuffer = Math.Max(10.0, fontSize);
+        return Math.Ceiling(formattedText.Width) + cellPadding + textBlockMargin + safetyBuffer;
     }
 
     private void SelectAllRows()
