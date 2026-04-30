@@ -101,9 +101,9 @@ public static class InitToolbar
             stackPanelLeft.Children.Add(new Button
             {
                 Content = MakeImage("Save"),
-                Command = vm.CommandFileSaveCommand,
+                Command = vm.CommandFileSaveAsCommand,
                 Background = Brushes.Transparent,
-                [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SaveHint, shortcuts, nameof(vm.CommandFileSaveCommand)),
+                [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.SaveHint, shortcuts, nameof(vm.CommandFileSaveAsCommand)),
             });
             isLastSeparator = false;
         }
