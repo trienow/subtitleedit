@@ -2421,6 +2421,7 @@ public partial class OcrViewModel : ObservableObject
                             if (SelectedDictionary != null)
                             {
                                 UserWordsHelper.AddToUserDictionary(result.Word, SelectedDictionary.GetFiveLetterLanguageName() ?? "en_US");
+                                _ocrFixEngine.SkipAll(result.Word);
                             }
 
                             _ocrFixEngine.ReloadNames();
