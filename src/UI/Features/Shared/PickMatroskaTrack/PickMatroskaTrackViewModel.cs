@@ -41,6 +41,8 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
     private MatroskaFile? _matroskaFile;
     private string _fileName;
 
+    private string? _parkedWindowTitle = null;
+
     public PickMatroskaTrackViewModel(IFileHelper fileHelper, IWindowService windowService)
     {
         _fileHelper = fileHelper;
@@ -213,6 +215,17 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
         TrackChanged();
     }
 
+    private void MatroskaProgress(long position, long total)
+    {
+
+        if (Window?.Title is not null)
+        {
+            _parkedWindowTitle ??= Window.Title;
+            Window.Title = _parkedWindowTitle + " " + Math.Round(((decimal)position / total) * 100) + "%";
+        }
+        // UpdateProgress(position, total, _language.ParsingMatroskaFile);
+    }
+
     private bool TrackChanged()
     {
         var selectedTrack = SelectedTrack;
@@ -223,7 +236,7 @@ public partial class PickMatroskaTrackViewModel : ObservableObject
 
         Rows.Clear();
         var trackInfo = selectedTrack.MatroskaTrackInfo!;
-        var subtitles = _matroskaFile?.GetSubtitle(trackInfo.TrackNumber, null);
+        var subtitles = _matroskaFile?.GetSubtitle(trackInfo.TrackNumber, MatroskaProgress);
         if (trackInfo.CodecId == MatroskaTrackType.SubRip && subtitles != null)
         {
             AddTextContent(trackInfo, subtitles, new SubRip());
