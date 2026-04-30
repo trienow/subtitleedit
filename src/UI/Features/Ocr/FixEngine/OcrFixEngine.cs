@@ -69,6 +69,8 @@ public partial class OcrFixEngine : IOcrFixEngine, IDoSpell
         var names = ReloadNames();
         _wordSplitList = StringWithoutSpaceSplitToWords.LoadWordSplitList(Se.DictionariesFolder, _threeLetterIsoLanguageName, names);
         _ocrFixReplaceList = OcrFixReplaceList2.FromLanguageId(_threeLetterIsoLanguageName);
+        string? fiveLetterName2 = SpellCheckDictionaryDisplay.GetFiveLetterLanguageName(_fiveLetterName);
+        _spellCheckWordLists = new SpellCheckWordLists(fiveLetterName2 ?? "en_US", this);
     }
 
     public OcrFixLineResult FixOcrErrors(int index, OcrSubtitleItem item, bool doTryToGuessUnknownWords)
@@ -380,6 +382,8 @@ public partial class OcrFixEngine : IOcrFixEngine, IDoSpell
 
     private bool IsSpelledCorrect(string s)
     {
+        s = s.Replace("<i>", "").Replace("</i>", "");
+
         if (_spellCheckManager.IsWordCorrect(s))
         {
             return true;
@@ -387,10 +391,12 @@ public partial class OcrFixEngine : IOcrFixEngine, IDoSpell
 
         if (s.Contains(' '))
         {
-            var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            List<SpellCheckWord> parts = SpellCheckWordLists.Split(s);
+            //var parts = s.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             foreach (var part in parts)
             {
-                if (!_spellCheckManager.IsWordCorrect(part.Trim('¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟')))
+                //if (!_spellCheckManager.IsWordCorrect(part.Trim('¡', '¿', ',', '.', '!', '?', ':', ';', '(', ')', '[', ']', '{', '}', '+', '-', '£', '\\', '"', '”', '„', '“', '«', '»', '#', '&', '%', '\r', '\n', '؟')))
+                if(!_spellCheckManager.IsWordCorrect(part, s))
                 {
                     return false;
                 }
