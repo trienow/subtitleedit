@@ -8,7 +8,7 @@
 # a built-in Python snippet restores via system dotnet and produces identical output.
 #
 # Run this script whenever NuGet dependencies change, then commit both
-# nuget-sources.json and src/UI/packages.lock.json alongside the manifest.
+# nuget-sources.json and src/ui/packages.lock.json alongside the manifest.
 #
 # Requires (preferred): flatpak, org.freedesktop.Sdk//24.08,
 #                       org.freedesktop.Sdk.Extension.dotnet10//24.08, python3
@@ -17,7 +17,7 @@
 # Usage (from repo root):
 #   ./installer/flatpak/generate-nuget-sources.sh
 #   ./installer/flatpak/generate-nuget-sources.sh \
-#       "src/UI/UI.csproj" \
+#       "src/ui/UI.csproj" \
 #       "installer/flatpak/nuget-sources.json"
 
 set -e
@@ -25,7 +25,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-PROJECT_PATH="${1:-src/UI/UI.csproj}"
+PROJECT_PATH="${1:-src/ui/UI.csproj}"
 OUTPUT="${2:-installer/flatpak/nuget-sources.json}"
 
 GENERATOR="$SCRIPT_DIR/flatpak-dotnet-generator.py"
@@ -117,17 +117,10 @@ for sha_file in pkgs_dir.glob("**/*.nupkg.sha512"):
     version = sha_file.parent.name
     name    = sha_file.parent.parent.name
     filename = f"{name}.{version}.nupkg"
-    # The flatpak build targets linux-x64 / linux-arm64 only, but dotnet restore
-    # on a non-Linux host may drag in host-RID runtime packs (win-*, osx-*, etc.)
-    # Those are wasted bandwidth and bloat the offline cache, so drop them.
-    lower = name.lower()
-    if any(tag in lower for tag in (
-        ".win-", ".win10-", ".windowsdesktop.",
-        ".osx-", ".osx.", ".mac-", ".maccatalyst-",
-        ".android-", ".ios-", ".tvos-",
-        ".freebsd-",
-    )):
-        continue
+    # Don't filter by RID. Old PackageReferences (e.g. System.Net.Http 4.3.x)
+    # declare runtime.osx.*, runtime.win-*, etc. as transitive deps that NuGet
+    # must be able to resolve during restore even when targeting linux-x64.
+    # Stripping them by platform causes NU1101 inside the flatpak sandbox.
     url = f"https://api.nuget.org/v3-flatcontainer/{name}/{version}/{filename}"
     sha512_b64 = sha_file.read_text().strip()
     sha512_hex = binascii.hexlify(base64.b64decode(sha512_b64)).decode("ascii")
@@ -228,5 +221,5 @@ PYTHON
 
 echo ""
 echo "\u2713 Generated: $OUTPUT"
-echo "  Commit this file alongside src/UI/packages.lock.json and the manifest."
+echo "  Commit this file alongside src/ui/packages.lock.json and the manifest."
 echo "  Re-run this script whenever NuGet dependencies change."

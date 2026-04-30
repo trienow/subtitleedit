@@ -40,6 +40,29 @@ jobs:
         with:
           dotnet-version: '10.0.x'
 
+      - name: Extract version from Se.cs
+        shell: pwsh
+        run: |
+          $seContent = Get-Content "src/ui/Logic/Config/Se.cs" -Raw
+          $m = [regex]::Match($seContent, 'public\s+static\s+string\s+Version\s*\{[^}]+\}\s*=\s*"v([^"]+)"')
+          if (-not $m.Success) { throw "Could not find Version in Se.cs" }
+          $versionString = $m.Groups[1].Value
+          $parts = $versionString -split '-', 2
+          $numericFields = $parts[0].Split('.')
+          $major = [int]$numericFields[0]
+          $minor = if ($numericFields.Length -gt 1) { [int]$numericFields[1] } else { 0 }
+          $build = if ($numericFields.Length -gt 2) { [int]$numericFields[2] } else { 0 }
+          $revision = 0
+          if ($parts.Length -gt 1) {
+            $rm = [regex]::Match($parts[1], '\d+$')
+            if ($rm.Success) { $revision = [int]$rm.Value }
+          }
+          $appVerFull = "$major.$minor.$build.$revision"
+          "APP_VER_DISPLAY=$versionString" >> $env:GITHUB_ENV
+          "APP_VER_FULL=$appVerFull"       >> $env:GITHUB_ENV
+          Write-Host "APP_VER_DISPLAY=$versionString"
+          Write-Host "APP_VER_FULL=$appVerFull"
+
       - name: Restore dependencies
         run: dotnet restore
 
@@ -56,19 +79,25 @@ jobs:
 
       - name: Publish Windows x64 app
         run: |
-          dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-x64 --self-contained true `
+          dotnet publish src/ui/UI.csproj -c ${{ inputs.build_configuration }} -r win-x64 --self-contained true `
             -p:PublishSingleFile=true `
             -p:DebugSymbols=false `
             -p:DebugType=none `
+            -p:Version=$env:APP_VER_FULL `
+            -p:FileVersion=$env:APP_VER_FULL `
+            -p:InformationalVersion=$env:APP_VER_DISPLAY `
             -o ./publish/windows-x64
           Copy-Item "libmpv-temp/libmpv-2.dll" "./publish/windows-x64/"
 
       - name: Publish Windows ARM64 app
         run: |
-          dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
+          dotnet publish src/ui/UI.csproj -c ${{ inputs.build_configuration }} -r win-arm64 --self-contained true `
             -p:PublishSingleFile=true `
             -p:DebugSymbols=false `
             -p:DebugType=none `
+            -p:Version=$env:APP_VER_FULL `
+            -p:FileVersion=$env:APP_VER_FULL `
+            -p:InformationalVersion=$env:APP_VER_DISPLAY `
             -o ./publish/windows-arm64
 
       # - name: Setup WiX
@@ -101,12 +130,15 @@ jobs:
 
       - name: Publish Windows x64 app (framework-dependent, for Inno Setup)
         run: |
-          dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r win-x64 --self-contained false `
+          dotnet publish src/ui/UI.csproj -c ${{ inputs.build_configuration }} -r win-x64 --self-contained false `
             -p:PublishSingleFile=true `
             -p:DebugSymbols=false `
             -p:DebugType=none `
-            -o ./src/UI/bin/Release/net10.0/publish
-          Copy-Item "libmpv-temp/libmpv-2.dll" "./src/UI/bin/Release/net10.0/publish/"
+            -p:Version=$env:APP_VER_FULL `
+            -p:FileVersion=$env:APP_VER_FULL `
+            -p:InformationalVersion=$env:APP_VER_DISPLAY `
+            -o ./src/ui/bin/Release/net10.0/publish
+          Copy-Item "libmpv-temp/libmpv-2.dll" "./src/ui/bin/Release/net10.0/publish/"
 
       - name: Install Inno Setup
         run: choco install innosetup -y --no-progress
@@ -166,6 +198,28 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+      - name: Extract version from Se.cs
+        run: |
+          set -e
+          line=$(grep -E 'public[[:space:]]+static[[:space:]]+string[[:space:]]+Version[[:space:]]*\{' src/ui/Logic/Config/Se.cs)
+          version_string=$(printf '%s' "$line" | sed -E 's/.*"v([^"]+)".*/\1/')
+          numeric_part="${version_string%%-*}"
+          suffix=""
+          case "$version_string" in
+            *-*) suffix="${version_string#*-}" ;;
+          esac
+          dot_count=$(printf '%s' "$numeric_part" | tr -cd '.' | wc -c | tr -d ' ')
+          case "$dot_count" in
+            0) numeric_part="${numeric_part}.0.0" ;;
+            1) numeric_part="${numeric_part}.0" ;;
+          esac
+          revision=$(printf '%s' "$suffix" | grep -oE '[0-9]+$' || true)
+          revision=${revision:-0}
+          app_ver_full="${numeric_part}.${revision}"
+          echo "APP_VER_DISPLAY=$version_string" >> "$GITHUB_ENV"
+          echo "APP_VER_FULL=$app_ver_full" >> "$GITHUB_ENV"
+          echo "APP_VER_DISPLAY=$version_string"
+          echo "APP_VER_FULL=$app_ver_full"
       - name: Restore dependencies
         run: dotnet restore
       - name: Build
@@ -287,10 +341,13 @@ jobs:
       # Process x64 build first, then clean up before ARM64
       - name: Publish macOS x64 app
         run: |
-          dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-x64 --self-contained true \
+          dotnet publish src/ui/UI.csproj -c ${{ inputs.build_configuration }} -r osx-x64 --self-contained true \
             -p:PublishSingleFile=true \
             -p:DebugSymbols=false \
             -p:DebugType=none \
+            -p:Version="$APP_VER_FULL" \
+            -p:FileVersion="$APP_VER_FULL" \
+            -p:InformationalVersion="$APP_VER_DISPLAY" \
             -o ./publish/macos-x64
 
           echo "Disk space after x64 publish:"; df -h /
@@ -368,11 +425,14 @@ jobs:
       - name: Publish macOS ARM64 app
         run: |
           echo "Disk space before ARM64 publish:"; df -h /
-          
-          dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r osx-arm64 --self-contained true \
+
+          dotnet publish src/ui/UI.csproj -c ${{ inputs.build_configuration }} -r osx-arm64 --self-contained true \
             -p:PublishSingleFile=true \
             -p:DebugSymbols=false \
             -p:DebugType=none \
+            -p:Version="$APP_VER_FULL" \
+            -p:FileVersion="$APP_VER_FULL" \
+            -p:InformationalVersion="$APP_VER_DISPLAY" \
             -o ./publish/macos-arm64
 
           echo "Disk space after ARM64 publish:"; df -h /
@@ -502,7 +562,7 @@ jobs:
  
   build-linux:
     runs-on: ubuntu-latest
-    
+
     steps:
       - uses: actions/checkout@v5
 
@@ -510,6 +570,29 @@ jobs:
         uses: actions/setup-dotnet@v5
         with:
           dotnet-version: '10.0.x'
+
+      - name: Extract version from Se.cs
+        run: |
+          set -e
+          line=$(grep -E 'public[[:space:]]+static[[:space:]]+string[[:space:]]+Version[[:space:]]*\{' src/ui/Logic/Config/Se.cs)
+          version_string=$(printf '%s' "$line" | sed -E 's/.*"v([^"]+)".*/\1/')
+          numeric_part="${version_string%%-*}"
+          suffix=""
+          case "$version_string" in
+            *-*) suffix="${version_string#*-}" ;;
+          esac
+          dot_count=$(printf '%s' "$numeric_part" | tr -cd '.' | wc -c | tr -d ' ')
+          case "$dot_count" in
+            0) numeric_part="${numeric_part}.0.0" ;;
+            1) numeric_part="${numeric_part}.0" ;;
+          esac
+          revision=$(printf '%s' "$suffix" | grep -oE '[0-9]+$' || true)
+          revision=${revision:-0}
+          app_ver_full="${numeric_part}.${revision}"
+          echo "APP_VER_DISPLAY=$version_string" >> "$GITHUB_ENV"
+          echo "APP_VER_FULL=$app_ver_full" >> "$GITHUB_ENV"
+          echo "APP_VER_DISPLAY=$version_string"
+          echo "APP_VER_FULL=$app_ver_full"
 
       - name: Restore dependencies
         run: dotnet restore
@@ -522,10 +605,13 @@ jobs:
 
       - name: Publish Linux x64 app
         run: |
-          dotnet publish src/UI/UI.csproj -c ${{ inputs.build_configuration }} -r linux-x64 --self-contained true \
+          dotnet publish src/ui/UI.csproj -c ${{ inputs.build_configuration }} -r linux-x64 --self-contained true \
             -p:PublishSingleFile=true \
             -p:DebugSymbols=false \
             -p:DebugType=none \
+            -p:Version="$APP_VER_FULL" \
+            -p:FileVersion="$APP_VER_FULL" \
+            -p:InformationalVersion="$APP_VER_DISPLAY" \
             -o ./publish/linux-x64
 
       - name: Create Linux TAR package
@@ -544,36 +630,96 @@ jobs:
           name: linux-tar-package
           path: ./SubtitleEdit-Linux-x64.tar.gz
 
-  # build-linux-flatpak:
-  #   runs-on: ubuntu-latest
-  #   container:
-  #     image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
-  #     options: --privileged
+  regenerate-flatpak-nuget-sources:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
 
-  #   steps:
-  #     - uses: actions/checkout@v5
+      - name: Set up .NET SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
 
-  #     - name: Update metainfo version/date from Se.cs
-  #       run: bash installer/flatpak/update-metainfo-version.sh
+      - name: Install flatpak
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flatpak
 
-  #     - name: Build flatpak bundle
-  #       uses: flatpak/flatpak-github-actions/flatpak-builder@v6
-  #       with:
-  #         bundle: SubtitleEdit-linux-x64.flatpak
-  #         manifest-path: installer/flatpak/dk.nikse.subtitleedit.yaml
-  #         cache-key: flatpak-builder-${{ hashFiles('installer/flatpak/dk.nikse.subtitleedit.yaml', 'installer/flatpak/nuget-sources.json') }}
-  #         arch: x86_64
+      # Cache the Freedesktop SDK + dotnet extension so we don't re-download
+      # ~6 GB of runtimes on every CI run. Bump the key suffix (-v1) to invalidate.
+      - name: Cache flatpak runtimes
+        id: flatpak-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/flatpak
+          key: flatpak-fd24.08-dotnet10-v1
 
-  #     - name: Upload flatpak bundle artifact
-  #       uses: actions/upload-artifact@v5
-  #       with:
-  #         name: flatpak-bundle
-  #         path: SubtitleEdit-linux-x64.flatpak
-  #         overwrite: true
+      - name: Install Freedesktop SDK + dotnet extension
+        if: steps.flatpak-cache.outputs.cache-hit != 'true'
+        run: |
+          flatpak --user remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          flatpak --user install -y --noninteractive flathub \
+            org.freedesktop.Platform//24.08 \
+            org.freedesktop.Sdk//24.08 \
+            org.freedesktop.Sdk.Extension.dotnet10//24.08
+
+      - name: Regenerate nuget-sources.json
+        run: bash installer/flatpak/generate-nuget-sources.sh
+
+      - name: Verify nuget-sources.json is consistent with UI.csproj
+        run: |
+          if ! git diff --quiet -- installer/flatpak/nuget-sources.json; then
+            echo "::notice::nuget-sources.json was stale and has been regenerated for this build."
+            git --no-pager diff --stat -- installer/flatpak/nuget-sources.json
+          else
+            echo "nuget-sources.json is already up to date."
+          fi
+
+      - name: Upload regenerated nuget-sources.json
+        uses: actions/upload-artifact@v5
+        with:
+          name: flatpak-nuget-sources
+          path: installer/flatpak/nuget-sources.json
+          if-no-files-found: error
+          overwrite: true
+
+  build-linux-flatpak:
+    needs: regenerate-flatpak-nuget-sources
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-24.08
+      options: --privileged
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Download regenerated nuget-sources.json
+        uses: actions/download-artifact@v5
+        with:
+          name: flatpak-nuget-sources
+          path: installer/flatpak/
+
+      - name: Update metainfo version/date from Se.cs
+        run: bash installer/flatpak/update-metainfo-version.sh
+
+      - name: Build flatpak bundle
+        uses: flatpak/flatpak-github-actions/flatpak-builder@v6
+        with:
+          bundle: SubtitleEdit-linux-x64.flatpak
+          manifest-path: installer/flatpak/dk.nikse.subtitleedit.yaml
+          cache-key: flatpak-builder-${{ hashFiles('installer/flatpak/dk.nikse.subtitleedit.yaml', 'installer/flatpak/nuget-sources.json') }}
+          arch: x86_64
+
+      - name: Upload flatpak bundle artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: flatpak-bundle
+          path: SubtitleEdit-linux-x64.flatpak
+          overwrite: true
 
   create-release:
     if: ${{ inputs.create_release }}
-    needs: [build-windows, build-macos, build-linux]
+    needs: [build-windows, build-macos, build-linux, build-linux-flatpak]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -605,6 +751,7 @@ jobs:
           cp ./artifacts/windows-zip-packages/*.zip ./release-assets/
           cp ./artifacts/macos-dmg-packages/*.dmg ./release-assets/
           cp ./artifacts/linux-tar-package/*.tar.gz ./release-assets/
+          cp ./artifacts/flatpak-bundle/*.flatpak ./release-assets/
 
           # List all files that will be uploaded
           echo "Release assets:"
@@ -633,6 +780,7 @@ jobs:
             - **macOS ARM64 (Apple Silicon - M1/M2/M3/M4 architecture):** [SubtitleEdit-macOS-ARM64.dmg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-ARM64.dmg)
             - **macOS x64 (Intel 64-bit):** [SubtitleEdit-macOS-x64.dmg](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-macOS-x64.dmg)
             - **Linux x64 (tarball):** [SubtitleEdit-Linux-x64.tar.gz](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-Linux-x64.tar.gz)
+            - **Linux x64 (Flatpak):** [SubtitleEdit-linux-x64.flatpak](https://github.com/${{ github.repository }}/releases/download/${{ steps.tag.outputs.tag }}/SubtitleEdit-linux-x64.flatpak)
       
             ### Installation
             1. Read and fix requirements, please see [System Requirements](https://github.com/niksedk/subtitleedit-avalonia#system-requirements)
@@ -653,3 +801,4 @@ jobs:
             ./release-assets/SubtitleEdit-macOS-ARM64.dmg
             ./release-assets/SubtitleEdit-macOS-x64.dmg
             ./release-assets/SubtitleEdit-Linux-x64.tar.gz
+            ./release-assets/SubtitleEdit-linux-x64.flatpak

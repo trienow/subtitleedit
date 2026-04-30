@@ -2,6 +2,52 @@
 Subtitle Edit Changelog
 
 
+v5.0.0-beta20 (29th April 2026)
+
+* Add menu toggle for waveform toolbar - thx Ironship
+* Add auto-language for CrispASR glm/parakeet/Qwen3
+* Append missing extension on save as - thx Ironship
+* Allow speech-to-text ETA to increase - thx Ironship
+* Preserve line breaks in compare HTML export - thx Ironship
+* Update Polish translation - thx potplayer-fanpack
+* Update Korean translation - thx Hackjjang
+* Update CrispASR download links
+* Update Kokoro TTS engine to v0.1.1
+* Try to make toolbar more accessible - thx kylesskim-sys
+* Fix Flatpak release bundle publishing
+* Fix repeated video surface click toggles - thx Ironship
+* Fix regex multiline anchors with CRLF text - thx Ironship
+* Fix adjust duration percent calculation - thx Ironship
+* Fix TT family properties export - thx Ironship
+* Feature complete "seconv" (command line conversion tool) 
+* Atomic save and shared lock for NOcrDb - thx Zoltán
+* Add "Merge selected lines bilingual" shortcut - thx jackqk
+* Stamp executable with version from Se.cs in publish steps - thx Zoltán
+
+-----------------------------------------------------------------------------------------------------
+
+v5.0.0-beta19 (26th April 2026)
+
+* Rename "Whisper" folder to "SpeechToText"
+* Rename "TTS" folder to "TextToSpeech"
+* Improve nOcr quality in Batch Convert
+* Auto-detect pixels-is-space and language for BinaryOcr/nOcr in Batch Convert
+* Add BinaryOcr engine in Batch Convert
+* Delete temp files between batch speech-to-text items - thx xjlin0/cookesan
+* Add speech-to-text for new waveform selection - thx Ivo
+* Remember size/pos for translate window - thx Milo
+* More user friendly single-file-batch-speech-to-text - thx GrampaWildWilly
+* Check for large file in open to avoid crash - thx GrampaWildWilly
+* Update CrispASR urls
+* Update Italian translation - thx bovirus
+* Improve "Center text in subtitle text box" - thx enji1000
+* Improve position detect for OCR
+* Improve Qwen3 TTS (Qwen3-TTS-12Hz-1.7B model + Windows-CPU-only-build) 
+* Update Jananese translation - thx hisui3393
+* Add Kokoro TTS
+
+-----------------------------------------------------------------------------------------------------
+
 v5.0.0-beta18 (24th April 2026)
 
 * Improve auto-translate error messages - thx hisui3393
