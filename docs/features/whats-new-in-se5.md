@@ -14,9 +14,10 @@ Subtitle Edit 5 is the Avalonia-based, cross-platform version of Subtitle Edit. 
 
 ## Editing and Grid
 
+- **Show formatting in grid** — formatting tags (italic, bold, color, etc.) can now be rendered visually in the subtitle grid.
+- Edit controls Show/Hide/Duration are now optional and can be toggled on/off.
 - Deleting many lines at once in the subtitle grid / list view is dramatically faster.
 - New **Tools → Change formatting** dialog for adding or removing italic, bold, underline, and other formatting across selected lines.
-- **Show formatting in grid** — formatting tags (italic, bold, color, etc.) are now rendered visually in the subtitle grid.
 
 ## Video
 

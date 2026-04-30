@@ -102,6 +102,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "features", "features", "{88
 		docs\features\transparent-subtitles.md = docs\features\transparent-subtitles.md
 		docs\features\video-player.md = docs\features\video-player.md
 		docs\features\visual-sync.md = docs\features\visual-sync.md
+		docs\features\whats-new-in-se5.md = docs\features\whats-new-in-se5.md
 		docs\features\word-lists.md = docs\features\word-lists.md
 	EndProjectSection
 EndProject
