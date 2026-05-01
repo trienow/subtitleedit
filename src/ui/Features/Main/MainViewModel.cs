@@ -14202,10 +14202,27 @@ public partial class MainViewModel :
                 {
                     _dragSelectStartIndex = rowIndex;
                     _dragSelectLastIndex = rowIndex;
-                    e.Pointer.Capture(control);
                 }
             }
         }
+    }
+
+    public void SubtitleGridDropHost_DoubleTapped(object? sender, TappedEventArgs e)
+    {
+        var rowIndex = GetDataGridRowIndexFromPoint(e.GetPosition(SubtitleGrid));
+        if (rowIndex < 0 || rowIndex >= Subtitles.Count)
+        {
+            return;
+        }
+
+        StopSubtitleGridDragSelectAutoScroll();
+        _dragSelectStartIndex = -1;
+        _dragSelectLastIndex = -1;
+        _dragSelectHasMoved = false;
+
+        SubtitleGrid.SelectedItem = Subtitles[rowIndex];
+        OnSubtitleGridDoubleTapped(SubtitleGrid, e);
+        e.Handled = true;
     }
 
     private int GetDataGridRowIndexFromPoint(Avalonia.Point position)
@@ -14248,8 +14265,17 @@ public partial class MainViewModel :
             return;
         }
 
+        var wasDragging = _dragSelectHasMoved;
         DragSelectSubtitleGridToIndex(currentIndex);
-        e.Handled = _dragSelectHasMoved;
+        if (_dragSelectHasMoved)
+        {
+            if (!wasDragging && sender is Control control)
+            {
+                e.Pointer.Capture(control);
+            }
+
+            e.Handled = true;
+        }
     }
 
     private void DragSelectSubtitleGridToIndex(int currentIndex)

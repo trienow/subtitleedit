@@ -36,6 +36,7 @@ public static partial class InitListViewAndEditBox
             if (vm.SubtitleGridDropHost != null)
             {
                 vm.SubtitleGridDropHost.PointerPressed -= vm.SubtitleGrid_PointerPressed;
+                vm.SubtitleGridDropHost.RemoveHandler(InputElement.DoubleTappedEvent, vm.SubtitleGridDropHost_DoubleTapped);
                 vm.SubtitleGridDropHost.RemoveHandler(InputElement.PointerPressedEvent, vm.SubtitleGrid_PointerPressed);
                 vm.SubtitleGridDropHost.RemoveHandler(InputElement.PointerReleasedEvent, vm.SubtitleGrid_PointerReleased);
                 vm.SubtitleGridDropHost.RemoveHandler(InputElement.PointerMovedEvent, vm.SubtitleGrid_PointerMoved);
@@ -109,8 +110,8 @@ public static partial class InitListViewAndEditBox
         dropHost.AddHandler(DragDrop.DragOverEvent, vm.SubtitleGridOnDragOver, RoutingStrategies.Bubble);
         dropHost.AddHandler(DragDrop.DropEvent, vm.SubtitleGridOnDrop, RoutingStrategies.Bubble);
 
-        vm.SubtitleGrid.DoubleTapped += vm.OnSubtitleGridDoubleTapped;
         vm.SubtitleGrid.Tapped += vm.OnSubtitleGridSingleTapped;
+        dropHost.AddHandler(InputElement.DoubleTappedEvent, vm.SubtitleGridDropHost_DoubleTapped, RoutingStrategies.Bubble, handledEventsToo: true);
 
         var fullTimeConverter = new TimeSpanToDisplayFullConverter();
         var shortTimeConverter = new TimeSpanToDisplayShortConverter();
