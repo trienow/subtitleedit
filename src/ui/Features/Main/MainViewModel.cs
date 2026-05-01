@@ -12469,6 +12469,8 @@ public partial class MainViewModel :
             }
         }
 
+        ComboBoxSubtitleFormatChanged(null, new SelectionChangedEventArgs(Avalonia.Controls.Primitives.SelectingItemsControl.SelectionChangedEvent, Array.Empty<object>(), Array.Empty<object>()));
+
         Task.Run(async () =>
         {
             if (Se.Settings.Appearance.RightToLeft)
@@ -12488,7 +12490,7 @@ public partial class MainViewModel :
                 {
                     Window.Activate();
                     SubtitleGrid.Focus();
-
+                    
                     SurroundWith1Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround1Left, Se.Settings.Surround1Right);
                     SurroundWith2Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround2Left, Se.Settings.Surround2Right);
                     SurroundWith3Text = string.Format(Se.Language.Options.Shortcuts.SurroundWithXY, Se.Settings.Surround3Left, Se.Settings.Surround3Right);
