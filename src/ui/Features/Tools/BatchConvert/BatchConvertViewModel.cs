@@ -14,6 +14,8 @@ using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
+using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
+using Nikse.SubtitleEdit.Features.Files.Export.ExportEbuStl;
 using Nikse.SubtitleEdit.Features.Files.ExportImageBased;
 using Nikse.SubtitleEdit.Features.Main;
 using Nikse.SubtitleEdit.Features.Ocr;
@@ -180,10 +182,21 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private int _splitBreakMaxNumberOfLines;
     [ObservableProperty] private bool _splitBreakRebalanceLongLines;
 
+    // ASSA change resolution
+    [ObservableProperty] private int _assaChangeResolutionTargetWidth;
+    [ObservableProperty] private int _assaChangeResolutionTargetHeight;
+    [ObservableProperty] private bool _assaChangeResolutionChangeMargins;
+    [ObservableProperty] private bool _assaChangeResolutionChangeFontSize;
+    [ObservableProperty] private bool _assaChangeResolutionChangePosition;
+    [ObservableProperty] private bool _assaChangeResolutionChangeDrawing;
+
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
     public ScrollViewer FunctionContainer { get; internal set; }
+
+    public string EbuHeader { get; private set; } = string.Empty;
+    public byte EbuJustificationCode { get; private set; } = 2;
 
     private List<BatchConvertItem> _allBatchItems;
     private readonly System.Timers.Timer _filesTimer;
@@ -310,6 +323,13 @@ public partial class BatchConvertViewModel : ObservableObject
 
         ChangeSpeedPercent = 100;
 
+        AssaChangeResolutionTargetWidth = 1920;
+        AssaChangeResolutionTargetHeight = 1080;
+        AssaChangeResolutionChangeMargins = true;
+        AssaChangeResolutionChangeFontSize = true;
+        AssaChangeResolutionChangePosition = true;
+        AssaChangeResolutionChangeDrawing = true;
+
         FixCommonErrorsProfile = LoadDefaultProfile();
 
         _targetFormatsWithSettings = new List<string>
@@ -318,6 +338,7 @@ public partial class BatchConvertViewModel : ObservableObject
             BatchConverter.FormatBluRaySup,
             BatchConverter.FormatCustomTextFormat,
             BatchConverter.FormatDostImage,
+            BatchConverter.FormatEbuStl,
             BatchConverter.FormatFcpImage,
             BatchConverter.FormatImagesWithTimeCodesInFileName,
             BatchConverter.FormatVobSub,
@@ -966,6 +987,19 @@ public partial class BatchConvertViewModel : ObservableObject
             return;
         }
 
+        if (targetFormat == BatchConverter.FormatEbuStl)
+        {
+            var result = await _windowService.ShowDialogAsync<ExportEbuStlWindow, ExportEbuStlViewModel>(Window,
+                vm => { vm.Initialize(new Subtitle()); });
+
+            if (result.OkPressed)
+            {
+                EbuHeader = result.Subtitle.Header ?? string.Empty;
+                EbuJustificationCode = result.JustificationCode;
+            }
+            return;
+        }
+
         IExportHandler? exportHandler = null;
 
         if (targetFormat == BatchConverter.FormatBdnXml)
@@ -1362,6 +1396,8 @@ public partial class BatchConvertViewModel : ObservableObject
             AssaUseSourceStylesIfPossible = Se.Settings.Tools.BatchConvert.AssaUseSourceStylesIfPossible,
             AssaHeader = Se.Settings.Tools.BatchConvert.AssaHeader,
             AssaFooter = Se.Settings.Tools.BatchConvert.AssaFooter,
+            EbuHeader = EbuHeader,
+            EbuJustificationCode = EbuJustificationCode,
 
             AdjustDuration = new BatchConvertConfig.AdjustDurationSettings
             {
@@ -1513,6 +1549,17 @@ public partial class BatchConvertViewModel : ObservableObject
             {
                 IsActive = activeFunctions.Contains(BatchConvertFunctionType.RemoveLineBreaks),
                 OnlyShortLines = RemoveLineBreaksOnlyShortLines,
+            },
+
+            AssaChangeResolution = new BatchConvertConfig.AssaChangeResolutionSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.AssaChangeResolution),
+                TargetWidth = AssaChangeResolutionTargetWidth,
+                TargetHeight = AssaChangeResolutionTargetHeight,
+                ChangeMargins = AssaChangeResolutionChangeMargins,
+                ChangeFontSize = AssaChangeResolutionChangeFontSize,
+                ChangePosition = AssaChangeResolutionChangePosition,
+                ChangeDrawing = AssaChangeResolutionChangeDrawing,
             },
         };
     }

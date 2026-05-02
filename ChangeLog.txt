@@ -17,6 +17,10 @@ v5.0.0-beta21 (xth May 2026)
 * Fix for click on video player (regression) - thx JDJD777
 * Fix ASSA toolbar not visible when default format is ASSA - thx farisruhi 
 * Add Bulgarian translation - thx jekovcar
+* Improve alignment detection for OCR
+* Binary edit - allow import of image subs from mkv
+* Seveal fixes for nOCR + subtitle text import/export
+* Add "/batchconvertui" / "--batchconvertui" command line options to open batch convert UI only
 
 -----------------------------------------------------------------------------------------------------
 

@@ -1,6 +1,7 @@
 ﻿using Avalonia.Skia;
 using Nikse.SubtitleEdit.UiLogic.Export;
 using Nikse.SubtitleEdit.Core.BluRaySup;
+using Nikse.SubtitleEdit.Features.Assa.ResolutionResampler;
 using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
@@ -328,6 +329,14 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             if (kvp.Key == _config.TargetFormatName && item.Subtitle != null)
             {
                 var format = kvp.Value;
+
+                if (format is Ebu && !string.IsNullOrEmpty(_config.EbuHeader))
+                {
+                    item.Subtitle.Header = _config.EbuHeader;
+                    Ebu.EbuUiHelper ??= new UiEbuSaveHelper();
+                    Ebu.EbuUiHelper.JustificationCode = _config.EbuJustificationCode;
+                }
+
                 if (format is IBinaryPersistableSubtitle binaryPersistableSubtitle)
                 {
                     SaveSubtitleFormat(item, binaryPersistableSubtitle, format, cancellationToken);
@@ -1394,6 +1403,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = RemoveLineBreaks(s);
             s = RemoveTextForHearingImpaired(s, Language);
             s = FixRightToLeft(s);
+            s = AssaChangeResolution(s);
         }
 
         return s;
@@ -1860,6 +1870,68 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 ? Nikse.SubtitleEdit.Core.Forms.FixCommonErrors.Helper.FixShortLines(paragraph.Text, Language)
                 : Utilities.UnbreakLine(paragraph.Text);
         }
+
+        return subtitle;
+    }
+
+    private Subtitle AssaChangeResolution(Subtitle subtitle)
+    {
+        if (!_config.AssaChangeResolution.IsActive)
+        {
+            return subtitle;
+        }
+
+        if (subtitle.OriginalFormat == null || subtitle.OriginalFormat.Name != AdvancedSubStationAlpha.NameOfFormat)
+        {
+            return subtitle;
+        }
+
+        var c = _config.AssaChangeResolution;
+        if (!c.ChangeMargins && !c.ChangeFontSize && !c.ChangePosition && !c.ChangeDrawing)
+        {
+            return subtitle;
+        }
+
+        if (string.IsNullOrEmpty(subtitle.Header))
+        {
+            subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+        }
+
+        var sourceWidth = 384;
+        var sourceHeight = 288;
+
+        var oldPlayResX = AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResX", "[Script Info]", subtitle.Header);
+        if (int.TryParse(oldPlayResX, out var w) && w > 0)
+        {
+            sourceWidth = w;
+        }
+
+        var oldPlayResY = AdvancedSubStationAlpha.GetTagValueFromHeader("PlayResY", "[Script Info]", subtitle.Header);
+        if (int.TryParse(oldPlayResY, out var h) && h > 0)
+        {
+            sourceHeight = h;
+        }
+
+        if (c.TargetWidth <= 0 || c.TargetHeight <= 0)
+        {
+            return subtitle;
+        }
+
+        if (sourceWidth == c.TargetWidth && sourceHeight == c.TargetHeight)
+        {
+            return subtitle;
+        }
+
+        AssaResamplerHelper.ApplyResampling(
+            subtitle,
+            sourceWidth,
+            sourceHeight,
+            c.TargetWidth,
+            c.TargetHeight,
+            c.ChangeMargins,
+            c.ChangeFontSize,
+            c.ChangeDrawing,
+            c.ChangePosition);
 
         return subtitle;
     }

@@ -55,6 +55,7 @@ public partial class BatchConvertFunction : ObservableObject
             MakeFunction(BatchConvertFunctionType.MergeLinesWithSameTimeCodes, Se.Language.General.MergeLinesWithSameTimeCodes, ViewMergeLinesWithSameTimeCodes.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.FixRightToLeft, Se.Language.General.FixRightToLeft, ViewFixRightToLeft.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.AutoTranslate, Se.Language.General.AutoTranslate, ViewAutoTranslate.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.AssaChangeResolution, Se.Language.Assa.ResolutionResamplerTitle, ViewAssaChangeResolution.Make(vm), activeFunctions),
         }.ToArray();
     }
 

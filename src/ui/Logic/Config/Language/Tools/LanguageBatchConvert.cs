@@ -34,6 +34,7 @@ public class LanguageBatchConvert
     public string RotateIn { get; set; }
     public string TiltBounce { get; set; }
     public string FontSizeBounceIn { get; set; }
+    public string AssaChangeResolutionOnlyAppliesToAssa { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -66,5 +67,6 @@ public class LanguageBatchConvert
         RotateIn = "Rotate in";
         TiltBounce = "Tilt bounce";
         FontSizeBounceIn = "Font size bounce in";
+        AssaChangeResolutionOnlyAppliesToAssa = "Only applies to Advanced Sub Station Alpha (ASSA) subtitles";
     }
 }

@@ -8,12 +8,14 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Nikse.SubtitleEdit.Features.Help.About;
 using Nikse.SubtitleEdit.Features.Main;
+using Nikse.SubtitleEdit.Features.Tools.BatchConvert;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Optris.Icons.Avalonia;
 using Optris.Icons.Avalonia.FontAwesome;
 using Optris.Icons.Avalonia.MaterialDesign;
 using System;
+using System.Linq;
 using System.Text;
 
 namespace Nikse.SubtitleEdit
@@ -81,8 +83,15 @@ namespace Nikse.SubtitleEdit
                 // Set current theme
                 UiTheme.SetCurrentTheme();
 
-                // Setup main window
-                SetupMainWindow(lifetime);
+                // Setup main window (Batch Convert standalone if requested via CLI)
+                if (HasBatchConvertUiArg(args))
+                {
+                    SetupBatchConvertOnlyWindow(lifetime);
+                }
+                else
+                {
+                    SetupMainWindow(lifetime);
+                }
 
 #if DEBUG
                 Application.Current?.AttachDeveloperTools();
@@ -234,6 +243,25 @@ namespace Nikse.SubtitleEdit
                     FileOpenedViaActivation = true;
                 }
             };
+        }
+
+        private static bool HasBatchConvertUiArg(string[] args)
+        {
+            return args.Any(a => a.Equals("--batchconvertui", StringComparison.OrdinalIgnoreCase)
+                              || a.Equals("/batchconvertui", StringComparison.OrdinalIgnoreCase));
+        }
+
+        private static void SetupBatchConvertOnlyWindow(ClassicDesktopStyleApplicationLifetime lifetime)
+        {
+            var vm = Locator.Services.GetRequiredService<BatchConvertViewModel>();
+            var window = new BatchConvertWindow(vm)
+            {
+                Icon = UiUtil.GetSeIcon(),
+            };
+
+            UiTheme.ApplyScaleToWindow(window);
+
+            lifetime.MainWindow = window;
         }
     }
 }

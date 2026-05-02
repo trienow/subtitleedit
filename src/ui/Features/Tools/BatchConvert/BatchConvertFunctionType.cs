@@ -21,4 +21,5 @@ public enum BatchConvertFunctionType
     ApplyMinGap,
     SplitBreakLongLines,
     RemoveLineBreaks,
+    AssaChangeResolution,
 }

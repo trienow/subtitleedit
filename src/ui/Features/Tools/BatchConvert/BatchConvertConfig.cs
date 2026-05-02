@@ -19,6 +19,8 @@ public class BatchConvertConfig
     public bool AssaUseSourceStylesIfPossible { get; set; }
     public string AssaHeader { get; set; }
     public string AssaFooter { get; set; }
+    public string EbuHeader { get; set; } = string.Empty;
+    public byte EbuJustificationCode { get; set; } = 2;
     public AddFormattingSettings AddFormatting { get; set; }
     public RemoveFormattingSettings RemoveFormatting { get; set; }
     public OffsetTimeCodesSettings OffsetTimeCodes { get; set; }
@@ -38,6 +40,7 @@ public class BatchConvertConfig
     public BridgeGapsSettings BridgeGaps { get; set; }
     public ApplyMinGapSettings ApplyMinGap { get; set; }
     public SplitBreakLongLinesSettings SplitBreakLongLines { get; set; }
+    public AssaChangeResolutionSettings AssaChangeResolution { get; set; }
 
     public BatchConvertConfig()
     {
@@ -68,6 +71,7 @@ public class BatchConvertConfig
         BridgeGaps = new BridgeGapsSettings();
         ApplyMinGap = new ApplyMinGapSettings();
         SplitBreakLongLines = new SplitBreakLongLinesSettings();
+        AssaChangeResolution = new AssaChangeResolutionSettings();
     }
 
     public bool IsTargetFormatImageBased =>
@@ -261,5 +265,26 @@ public class BatchConvertConfig
         public int SingleLineMaxLength { get; set; }
         public int MaxNumberOfLines { get; set; }
         public bool RebalanceLongLines { get; set; }
+    }
+
+    public class AssaChangeResolutionSettings
+    {
+        public bool IsActive { get; set; }
+        public int TargetWidth { get; set; }
+        public int TargetHeight { get; set; }
+        public bool ChangeMargins { get; set; }
+        public bool ChangeFontSize { get; set; }
+        public bool ChangePosition { get; set; }
+        public bool ChangeDrawing { get; set; }
+
+        public AssaChangeResolutionSettings()
+        {
+            TargetWidth = 1920;
+            TargetHeight = 1080;
+            ChangeMargins = true;
+            ChangeFontSize = true;
+            ChangePosition = true;
+            ChangeDrawing = true;
+        }
     }
 }
