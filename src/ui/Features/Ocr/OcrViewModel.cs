@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4.Boxes;
 using Nikse.SubtitleEdit.Core.ContainerFormats.TransportStream;
 using Nikse.SubtitleEdit.Core.Interfaces;
+using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.VobSub;
 using Nikse.SubtitleEdit.Core.VobSub.Ocr.Service;
 using Nikse.SubtitleEdit.Features.Files.ImportImages;
@@ -545,6 +546,162 @@ public partial class OcrViewModel : ObservableObject
         var items = OcrSubtitleItems.ToList();
         await _windowService.ShowDialogAsync<BinaryEditWindow, BinaryEditViewModel>(Window, vm => { vm.Initialize(items); });
         _isCtrlDown = false;
+    }
+
+    [RelayCommand]
+    private async Task ImportTextFromSubtitle()
+    {
+        if (Window == null || OcrSubtitleItems.Count == 0)
+        {
+            return;
+        }
+
+        var fileName = await _fileHelper.PickOpenSubtitleFile(Window, Se.Language.General.OpenSubtitleFileTitle);
+        _isCtrlDown = false;
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var subtitle = Subtitle.Parse(fileName);
+        if (subtitle == null)
+        {
+            foreach (var f in SubtitleFormat.GetBinaryFormats(false))
+            {
+                if (f.IsMine(null, fileName))
+                {
+                    subtitle = new Subtitle();
+                    f.LoadSubtitle(subtitle, null, fileName);
+                    subtitle.OriginalFormat = f;
+                    break;
+                }
+            }
+        }
+
+        if (subtitle == null || subtitle.Paragraphs.Count == 0)
+        {
+            await MessageBox.Show(Window, Se.Language.General.Error, Se.Language.General.UnknownSubtitleFormat);
+            return;
+        }
+
+        var hasExistingText = OcrSubtitleItems.Any(p => !string.IsNullOrEmpty(p.Text));
+        var overwrite = true;
+        if (hasExistingText)
+        {
+            var promptResult = await MessageBox.Show(
+                Window,
+                Se.Language.General.OverwriteQuestion,
+                Se.Language.Ocr.ImportTextFromSubtitleOverwritePrompt,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question);
+
+            if (promptResult != MessageBoxResult.Yes)
+            {
+                overwrite = false;
+            }
+        }
+
+        const double toleranceMs = 500.0;
+        var imported = 0;
+        foreach (var item in OcrSubtitleItems)
+        {
+            if (!overwrite && !string.IsNullOrEmpty(item.Text))
+            {
+                continue;
+            }
+
+            var itemStartMs = item.StartTime.TotalMilliseconds;
+            var itemEndMs = item.EndTime.TotalMilliseconds;
+            Paragraph? bestMatch = null;
+            var bestDelta = double.MaxValue;
+            foreach (var p in subtitle.Paragraphs)
+            {
+                var overlaps = p.StartTime.TotalMilliseconds <= itemEndMs && p.EndTime.TotalMilliseconds >= itemStartMs;
+                var delta = Math.Abs(p.StartTime.TotalMilliseconds - itemStartMs);
+                if ((overlaps || delta <= toleranceMs) && delta < bestDelta)
+                {
+                    bestDelta = delta;
+                    bestMatch = p;
+                }
+            }
+
+            if (bestMatch != null)
+            {
+                item.Text = bestMatch.Text;
+                imported++;
+            }
+        }
+
+        if (imported == 0)
+        {
+            await MessageBox.Show(
+                Window,
+                Se.Language.General.Information,
+                Se.Language.Ocr.ImportTextFromSubtitleNoMatchesFound,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        ProgressText = string.Format(Se.Language.Ocr.ImportTextFromSubtitleXLinesImported, imported);
+    }
+
+    [RelayCommand]
+    private async Task ExportTextAsSubtitle()
+    {
+        if (Window == null || OcrSubtitleItems.Count == 0)
+        {
+            return;
+        }
+
+        if (OcrSubtitleItems.All(p => string.IsNullOrWhiteSpace(p.Text)))
+        {
+            await MessageBox.Show(
+                Window,
+                Se.Language.General.Information,
+                Se.Language.Ocr.ExportTextAsSubtitleNoText,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        var format = new SubRip();
+        var saveAsResult = await _fileHelper.PickSaveSubtitleFileAs(
+            Window,
+            format,
+            "OcrText" + format.Extension,
+            Se.Language.Ocr.ExportTextAsSubtitleDotDotDot);
+
+        _isCtrlDown = false;
+        if (saveAsResult == null || string.IsNullOrEmpty(saveAsResult.FileName))
+        {
+            return;
+        }
+
+        var subtitle = new Subtitle();
+        foreach (var item in OcrSubtitleItems)
+        {
+            subtitle.Paragraphs.Add(new Paragraph(
+                item.Text ?? string.Empty,
+                item.StartTime.TotalMilliseconds,
+                item.EndTime.TotalMilliseconds));
+        }
+
+        try
+        {
+            var targetFormat = saveAsResult.SubtitleFormat ?? format;
+            var text = targetFormat.ToText(subtitle, Path.GetFileNameWithoutExtension(saveAsResult.FileName));
+            await File.WriteAllTextAsync(saveAsResult.FileName, text);
+        }
+        catch (Exception ex)
+        {
+            await MessageBox.Show(
+                Window,
+                Se.Language.General.Error,
+                ex.Message,
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+        }
     }
 
     [RelayCommand]

@@ -76,6 +76,12 @@ public class LanguageOcr
     public string SaveBlankTextTitle { get; set; }
     public string SaveBlankTextPrompt { get; set; }
     public string YesAndNeverAskAgain { get; set; }
+    public string ImportTextFromSubtitleDotDotDot { get; set; }
+    public string ImportTextFromSubtitleOverwritePrompt { get; set; }
+    public string ImportTextFromSubtitleNoMatchesFound { get; set; }
+    public string ImportTextFromSubtitleXLinesImported { get; set; }
+    public string ExportTextAsSubtitleDotDotDot { get; set; }
+    public string ExportTextAsSubtitleNoText { get; set; }
 
     public LanguageOcr()
     {
@@ -151,5 +157,11 @@ public class LanguageOcr
         SaveBlankTextTitle = "Save blank text?";
         SaveBlankTextPrompt = "Save blank text for image?";
         YesAndNeverAskAgain = "Yes and never ask again";
+        ImportTextFromSubtitleDotDotDot = "Import text from subtitle...";
+        ImportTextFromSubtitleOverwritePrompt = "Some lines already have OCR text. Overwrite existing text?";
+        ImportTextFromSubtitleNoMatchesFound = "No matching lines found in subtitle file.";
+        ImportTextFromSubtitleXLinesImported = "Imported text for {0} line(s).";
+        ExportTextAsSubtitleDotDotDot = "Export text as subtitle...";
+        ExportTextAsSubtitleNoText = "No OCR text to export. Run OCR first or import text.";
     }
 }
