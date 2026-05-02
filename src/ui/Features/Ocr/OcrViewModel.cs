@@ -2685,12 +2685,7 @@ public partial class OcrViewModel : ObservableObject
         {
             result.OcrFixLineResult = _ocrFixEngine.FixOcrErrors(i, item, DoTryToGuessUnknownWords);
             var alignment = GetAlignment(item);
-            if (!string.IsNullOrEmpty(alignment))
-            {
-                result.OcrFixLineResult.Words.Insert(0, new OcrFixLinePartResult { Word = alignment, IsSpellCheckedOk = null });
-            }
-
-            result.ResultText = result.OcrFixLineResult.GetText();
+            result.ResultText = alignment.AlignmentAdded ? alignment.Text : result.OcrFixLineResult.GetText();
 
             if (!string.IsNullOrEmpty(result.OcrFixLineResult.ReplacementUsed.From))
             {
@@ -2728,7 +2723,7 @@ public partial class OcrViewModel : ObservableObject
             SelectedDictionary.Name != GetDictionaryNameNone() &&
             _ocrFixEngine.IsLoaded() && DoFixOcrErrors)
         {
-            var text = alignment + resultTemp.ResultText;
+            var text = alignment.AlignmentAdded ? alignment.Text : resultTemp.ResultText;
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -2739,7 +2734,7 @@ public partial class OcrViewModel : ObservableObject
         }
         else
         {
-            var text = alignment + item.Text;
+            var text = alignment.Text;
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -2783,12 +2778,7 @@ public partial class OcrViewModel : ObservableObject
         {
             var result = _ocrFixEngine.FixOcrErrors(i, item, DoTryToGuessUnknownWords);
             var alignment = GetAlignment(item);
-            if (!string.IsNullOrEmpty(alignment))
-            {
-                result.Words.Insert(0, new OcrFixLinePartResult { Word = alignment, IsSpellCheckedOk = null });
-            }
-
-            var resultText = result.GetText();
+            var resultText = alignment.AlignmentAdded ? alignment.Text : result.GetText();
 
             Dispatcher.UIThread.Post(() =>
             {
@@ -2827,7 +2817,7 @@ public partial class OcrViewModel : ObservableObject
             var alignment = GetAlignment(item);
             Dispatcher.UIThread.Post(() =>
             {
-                item.Text = alignment + item.Text;
+                item.Text = alignment.Text;
                 CurrentText = item.Text;
                 item.FixResult = new OcrFixLineResult
                 {
@@ -3779,11 +3769,11 @@ public partial class OcrViewModel : ObservableObject
         }
     }
 
-    private string GetAlignment(OcrSubtitleItem item)
+    private (string Text, bool AlignmentAdded) GetAlignment(OcrSubtitleItem item)
     {
         if (!HasCaptureAlignment) // Repurposed for ASSA position capture
         {
-            return string.Empty;
+            return (item.Text, false);
         }
 
         try
@@ -3795,7 +3785,7 @@ public partial class OcrViewModel : ObservableObject
 
             if (bitmap == null || screenSize.Width == 0 || screenSize.Height == 0)
             {
-                return string.Empty;
+                return (item.Text, false);
             }
 
             // Check if image height is larger than approximately 1/3 of screen height
@@ -3815,7 +3805,7 @@ public partial class OcrViewModel : ObservableObject
                     if (lineImages.Count > 1 || lineImages2.Count > 1)
                     {
                         // Multiple lines detected - apply alignment to each line
-                        var result = new List<string>();
+                        var perLine = new List<string>();
                         var multiLineCenterX = position.X + bitmap.Width / 2.0;
                         var multiLineRelativeX = multiLineCenterX / screenSize.Width;
 
@@ -3830,12 +3820,10 @@ public partial class OcrViewModel : ObservableObject
                             var lineAlignment = GetAssaPositionFromScreen(multiLineRelativeX, lineRelativeY);
 
                             // Add alignment tag to the line text
-                            result.Add($"{{\\{lineAlignment}}}{lines[i].Trim()}");
+                            perLine.Add($"{{\\{lineAlignment}}}{lines[i].Trim()}");
                         }
 
-                        // Update the item text with per-line alignment
-                        item.Text = string.Join("\n", result);
-                        return string.Empty; // Return empty since we've modified the item.Text directly
+                        return (string.Join("\n", perLine), true);
                     }
                 }
             }
@@ -3850,11 +3838,11 @@ public partial class OcrViewModel : ObservableObject
 
             // Map to ASSA alignment positions (An1-An9)
             var assaPosition = GetAssaPositionFromScreen(relativeX, relativeY);
-            return $"{{\\{assaPosition}}}";
+            return ($"{{\\{assaPosition}}}{item.Text}", true);
         }
         catch
         {
-            return string.Empty;
+            return (item.Text, false);
         }
     }
 
