@@ -112,7 +112,7 @@ internal static class NOcrLineGenerator
     /// <see cref="NOcrChar.RemoveDuplicates"/> misses (e.g. two Hough peaks on the
     /// same thick stroke at slightly different rho/theta).
     /// </summary>
-    private static void RemoveSimilarLines(List<NOcrLine> lines, int width, int height)
+    internal static void RemoveSimilarLines(List<NOcrLine> lines, int width, int height)
     {
         if (lines.Count < 2)
         {

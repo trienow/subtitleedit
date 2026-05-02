@@ -13,10 +13,11 @@ public class NOcrDb
 
     private const string Version = "V2";
 
-    // An expanded match with too few lines matches almost anything of similar dimensions, so
-    // skip it. (Reject the trivial 0-lines case that would let any expanded char with the right
-    // dimensions win against a real single-letter match.)
+    // An expanded or single match with too few lines matches almost anything of similar
+    // dimensions, so skip it. (Reject the trivial 0-lines case that would let any entry with
+    // the right dimensions win against a properly-trained match.)
     private const int MinLinesForExpandedMatch = 1;
+    private const int MinLinesForSingleMatch = 1;
 
     public NOcrDb(string fileName)
     {
@@ -32,7 +33,7 @@ public class NOcrDb
         OcrCharactersExpanded = new List<NOcrChar>(db.OcrCharactersExpanded);
     }
 
-    public List<NOcrChar> OcrCharactersCombined => OcrCharacters.Concat(OcrCharactersExpanded).ToList();
+    public IEnumerable<NOcrChar> OcrCharactersCombined => OcrCharacters.Concat(OcrCharactersExpanded);
 
     private readonly Lock _lock = new();
 
@@ -462,6 +463,13 @@ public class NOcrDb
 
     public static bool IsMatch(NikseBitmap2 bitmap, NOcrChar oc, int errorsAllowed)
     {
+        // A zero-line entry would skip both foreach loops below and return true, matching any
+        // bitmap with the right dimensions. Reject that here.
+        if (oc.LinesForeground.Count + oc.LinesBackground.Count < MinLinesForSingleMatch)
+        {
+            return false;
+        }
+
         var errors = 0;
         var width = bitmap.Width;
         var height = bitmap.Height;

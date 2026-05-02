@@ -2091,7 +2091,11 @@ public partial class OcrViewModel : ObservableObject
                                     OcrSubtitleItems.IndexOf(item));
                                 IsInspectAdditionsVisible = true;
                                 _nOcrDb.Add(result.NOcrChar);
-                                _ = Task.Run(() => _nOcrDb.Save());
+                                var nOcrDbToSave = _nOcrDb;
+                                _ = Task.Run(() => nOcrDbToSave!.Save())
+                                    .ContinueWith(
+                                        t => Se.LogError(t.Exception!, $"Failed to save nOCR database '{nOcrDbToSave!.FileName}'"),
+                                        TaskContinuationOptions.OnlyOnFaulted);
                                 _ = Task.Run(() => RunNOcrLoop(selectedIndices.Where(p => p >= i).ToList(), cancellationToken));
                             }
                             else if (result.AbortPressed)

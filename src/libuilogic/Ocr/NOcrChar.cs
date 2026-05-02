@@ -357,6 +357,11 @@ public class NOcrChar
 
         RemoveDuplicates(nOcrChar.LinesForeground);
         RemoveDuplicates(nOcrChar.LinesBackground);
+        // The Random algorithm keeps emitting near-parallel diagonals on top of the same stroke;
+        // RemoveDuplicates above only catches axis-aligned subsets, so collapse the rest by
+        // angle/midpoint similarity (same helper the structured algorithms use).
+        NOcrLineGenerator.RemoveSimilarLines(nOcrChar.LinesForeground, nOcrChar.Width, nOcrChar.Height);
+        NOcrLineGenerator.RemoveSimilarLines(nOcrChar.LinesBackground, nOcrChar.Width, nOcrChar.Height);
     }
 
     private static void GenerateLines(
@@ -635,38 +640,34 @@ public class NOcrChar
 
     internal static void RemoveDuplicates(List<NOcrLine> lines)
     {
-        var indicesToDelete = new List<int>();
+        var indicesToDelete = new HashSet<int>();
         for (var index = 0; index < lines.Count; index++)
         {
-            var outerPoint = lines[index];
+            var outer = lines[index];
             for (var innerIndex = 0; innerIndex < lines.Count; innerIndex++)
             {
-                var innerPoint = lines[innerIndex];
-                if (innerPoint != outerPoint)
+                if (innerIndex == index || indicesToDelete.Contains(innerIndex))
                 {
-                    if (innerPoint.Start.X == innerPoint.End.X && outerPoint.Start.X == outerPoint.End.X && innerPoint.Start.X == outerPoint.Start.X)
+                    continue;
+                }
+
+                var inner = lines[innerIndex];
+                if (inner.Start.X == inner.End.X && outer.Start.X == outer.End.X && inner.Start.X == outer.Start.X)
+                {
+                    // both vertical at the same x — drop inner if its y-range is contained in outer's
+                    if (Math.Max(inner.Start.Y, inner.End.Y) <= Math.Max(outer.Start.Y, outer.End.Y) &&
+                        Math.Min(inner.Start.Y, inner.End.Y) >= Math.Min(outer.Start.Y, outer.End.Y))
                     {
-                        // same y
-                        if (Math.Max(innerPoint.Start.Y, innerPoint.End.Y) <= Math.Max(outerPoint.Start.Y, outerPoint.End.Y) &&
-                            Math.Min(innerPoint.Start.Y, innerPoint.End.Y) >= Math.Min(outerPoint.Start.Y, outerPoint.End.Y))
-                        {
-                            if (!indicesToDelete.Contains(innerIndex))
-                            {
-                                indicesToDelete.Add(innerIndex);
-                            }
-                        }
+                        indicesToDelete.Add(innerIndex);
                     }
-                    else if (innerPoint.Start.Y == innerPoint.End.Y && outerPoint.Start.Y == outerPoint.End.Y && innerPoint.Start.Y == outerPoint.Start.Y)
+                }
+                else if (inner.Start.Y == inner.End.Y && outer.Start.Y == outer.End.Y && inner.Start.Y == outer.Start.Y)
+                {
+                    // both horizontal at the same y — drop inner if its x-range is contained in outer's
+                    if (Math.Max(inner.Start.X, inner.End.X) <= Math.Max(outer.Start.X, outer.End.X) &&
+                        Math.Min(inner.Start.X, inner.End.X) >= Math.Min(outer.Start.X, outer.End.X))
                     {
-                        // same x
-                        if (Math.Max(innerPoint.Start.X, innerPoint.End.X) <= Math.Max(outerPoint.Start.X, outerPoint.End.X) &&
-                            Math.Min(innerPoint.Start.X, innerPoint.End.X) >= Math.Min(outerPoint.Start.X, outerPoint.End.X))
-                        {
-                            if (!indicesToDelete.Contains(innerIndex))
-                            {
-                                indicesToDelete.Add(innerIndex);
-                            }
-                        }
+                        indicesToDelete.Add(innerIndex);
                     }
                 }
             }

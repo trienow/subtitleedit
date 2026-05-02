@@ -296,7 +296,7 @@ public partial class NOcrInspectViewModel : ObservableObject
             var previewBitmap = addVm.PreviewBitmap ?? _letters[LetterIndex].NikseBitmap;
             _nOcrAddHistoryManager.Add(addVm.NOcrChar, previewBitmap, 0);
             _nOcrDb.Add(addVm.NOcrChar);
-            _ = Task.Run(_nOcrDb.Save);
+            SaveNOcrDbInBackground();
             ReloadMatches();
         }
         else if (addVm.InspectHistoryPressed)
@@ -351,6 +351,14 @@ public partial class NOcrInspectViewModel : ObservableObject
         {
             OnLetterClicked(LetterIndex, _matches[LetterIndex]);
         }
+    }
+
+    private void SaveNOcrDbInBackground()
+    {
+        _ = Task.Run(() => _nOcrDb.Save())
+            .ContinueWith(
+                t => Se.LogError(t.Exception!, $"Failed to save nOCR database '{_nOcrDb.FileName}'"),
+                TaskContinuationOptions.OnlyOnFaulted);
     }
 
     [RelayCommand]
