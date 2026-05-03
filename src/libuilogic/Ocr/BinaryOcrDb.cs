@@ -20,6 +20,17 @@ public class BinaryOcrDb
         }
     }
 
+    // Shallow copy: shares BinaryOcrBitmap references with `source` but gives the new instance
+    // its own list objects. Intended for read-only matching across threads, where each thread
+    // needs an independent CompareImages list (the matcher reorders it on hot hits).
+    // Do NOT use the copy for Add/Save — that would mutate state shared with `source`.
+    public BinaryOcrDb(BinaryOcrDb source)
+    {
+        FileName = source.FileName;
+        CompareImages = new List<BinaryOcrBitmap>(source.CompareImages);
+        CompareImagesExpanded = new List<BinaryOcrBitmap>(source.CompareImagesExpanded);
+    }
+
     public void Save()
     {
         if (File.Exists(FileName))

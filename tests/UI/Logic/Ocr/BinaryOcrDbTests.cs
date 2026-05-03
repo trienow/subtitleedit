@@ -224,6 +224,64 @@ public class BinaryOcrDbTests
     }
 
     [Fact]
+    public void CopyConstructor_PreservesFileNameAndContents()
+    {
+        var fileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".db");
+        var source = new BinaryOcrDb(fileName, loadCompareImages: false);
+        source.Add(new BinaryOcrBitmap(MakeBitmap(5, 8, (1, 1)), false, 0, "a", 0, 0));
+        source.Add(new BinaryOcrBitmap(MakeBitmap(6, 8, (2, 2)), false, 0, "b", 0, 0));
+        var expandedParent = new BinaryOcrBitmap(MakeBitmap(12, 8, (3, 3)), false, 2, "ll", 0, 0)
+        {
+            ExpandedList = new List<BinaryOcrBitmap> { new BinaryOcrBitmap(MakeBitmap(6, 8, (4, 4))) },
+        };
+        source.Add(expandedParent);
+
+        var copy = new BinaryOcrDb(source);
+
+        Assert.Equal(source.FileName, copy.FileName);
+        Assert.Equal(source.CompareImages.Count, copy.CompareImages.Count);
+        Assert.Equal(source.CompareImagesExpanded.Count, copy.CompareImagesExpanded.Count);
+    }
+
+    [Fact]
+    public void CopyConstructor_SharesElementReferences()
+    {
+        var fileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".db");
+        var source = new BinaryOcrDb(fileName, loadCompareImages: false);
+        source.Add(new BinaryOcrBitmap(MakeBitmap(5, 8, (1, 1)), false, 0, "a", 0, 0));
+        var expanded = new BinaryOcrBitmap(MakeBitmap(12, 8, (3, 3)), false, 2, "ll", 0, 0)
+        {
+            ExpandedList = new List<BinaryOcrBitmap> { new BinaryOcrBitmap(MakeBitmap(6, 8, (4, 4))) },
+        };
+        source.Add(expanded);
+
+        var copy = new BinaryOcrDb(source);
+
+        Assert.Same(source.CompareImages[0], copy.CompareImages[0]);
+        Assert.Same(source.CompareImagesExpanded[0], copy.CompareImagesExpanded[0]);
+    }
+
+    [Fact]
+    public void CopyConstructor_ListsAreIndependent()
+    {
+        var fileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".db");
+        var source = new BinaryOcrDb(fileName, loadCompareImages: false);
+        source.Add(new BinaryOcrBitmap(MakeBitmap(5, 8, (1, 1)), false, 0, "a", 0, 0));
+
+        var copy = new BinaryOcrDb(source);
+
+        Assert.NotSame(source.CompareImages, copy.CompareImages);
+        Assert.NotSame(source.CompareImagesExpanded, copy.CompareImagesExpanded);
+
+        // Mutate the copy's list (mimicking the BinaryOcrMatcher MRU reorder) — source is unaffected.
+        var first = copy.CompareImages[0];
+        copy.CompareImages.RemoveAt(0);
+        Assert.Empty(copy.CompareImages);
+        Assert.Single(source.CompareImages);
+        Assert.Same(first, source.CompareImages[0]);
+    }
+
+    [Fact]
     public void FindExactMatch_ReturnsIndexAfterRoundTrip()
     {
         var fileName = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName() + ".db");

@@ -845,7 +845,6 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             return;
         }
 
-        var binaryOcrDb = new BinaryOcrDb(fileName, true);
         _binaryOcrMatcher.IsLatinDb = dbName.Contains("Latin", StringComparison.OrdinalIgnoreCase);
         var maxErrorPercent = Se.Settings.Ocr.BinaryOcrMaxErrorPercent;
         var totalCount = imageSubtitles.Count;
@@ -870,25 +869,18 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
         }
 
         item.Subtitle = new Subtitle();
-        var results = new Paragraph[totalCount];
-        var processedCount = 0;
-        var lockObj = new object();
-
-        Parallel.For(0, totalCount, new ParallelOptions
-        {
-            CancellationToken = cancellationToken,
-            MaxDegreeOfParallelism = Environment.ProcessorCount
-        }, i =>
-        {
-            results[i] = OcrSingleBinaryImage(imageSubtitles, i, binaryOcrDb, pixelsAreSpace, maxErrorPercent);
-
-            lock (lockObj)
+        var sharedBinaryOcrDb = new BinaryOcrDb(fileName, true);
+        var results = RunBinaryOcrParallel(
+            imageSubtitles,
+            sharedBinaryOcrDb,
+            pixelsAreSpace,
+            maxErrorPercent,
+            processedCount =>
             {
-                processedCount++;
                 var pct = processedCount * 100 / totalCount;
                 item.Status = string.Format(Se.Language.General.OcrPercentX, pct);
-            }
-        });
+            },
+            cancellationToken);
 
         if (cancellationToken.IsCancellationRequested)
         {
@@ -916,6 +908,45 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
                 Language = detectedLanguage;
             }
         }
+    }
+
+    internal Paragraph[] RunBinaryOcrParallel(
+        IOcrSubtitle imageSubtitles,
+        BinaryOcrDb sharedBinaryOcrDb,
+        int pixelsAreSpace,
+        double maxErrorPercent,
+        Action<int>? onProgress,
+        CancellationToken cancellationToken)
+    {
+        var totalCount = imageSubtitles.Count;
+        var results = new Paragraph[totalCount];
+        var processedCount = 0;
+        var lockObj = new object();
+
+        Parallel.For(
+            0,
+            totalCount,
+            new ParallelOptions
+            {
+                CancellationToken = cancellationToken,
+                MaxDegreeOfParallelism = Environment.ProcessorCount
+            },
+            () => new BinaryOcrDb(sharedBinaryOcrDb),
+            (i, _, threadDb) =>
+            {
+                results[i] = OcrSingleBinaryImage(imageSubtitles, i, threadDb, pixelsAreSpace, maxErrorPercent);
+
+                lock (lockObj)
+                {
+                    processedCount++;
+                    onProgress?.Invoke(processedCount);
+                }
+
+                return threadDb;
+            },
+            _ => { });
+
+        return results;
     }
 
     private Paragraph OcrSingleBinaryImage(IOcrSubtitle imageSubtitles, int i, BinaryOcrDb binaryOcrDb, int pixelsAreSpace, double maxErrorPercent)

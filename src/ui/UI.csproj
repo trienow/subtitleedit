@@ -236,4 +236,10 @@
 	  <ProjectReference Include="..\libse\LibSE.csproj" />
 	  <ProjectReference Include="..\libuilogic\LibUiLogic.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+			<_Parameter1>UITests</_Parameter1>
+		</AssemblyAttribute>
+	</ItemGroup>
 </Project>
