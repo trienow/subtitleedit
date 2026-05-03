@@ -10,26 +10,48 @@ namespace Nikse.SubtitleEdit.Logic;
 
 public interface IColorService
 {
-    void RemoveColorTags(List<SubtitleLineViewModel> subtitles);
+    void RemoveColorTags(List<SubtitleLineViewModel> subtitles, Subtitle subtitle, SubtitleFormat subtitleFormat);
     void SetColor(List<SubtitleLineViewModel> subtitles, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat);
-    string SetColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle);
-    string RemoveColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle);
+    string SetColorTag(string input, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat);
+    string RemoveColorTag(string input, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat);
     bool ContainsColor(Color color, SubtitleLineViewModel subtitleLineViewModel, SubtitleFormat selectedSubtitleFormat);
     bool ContainsColor(Color color, string text, SubtitleFormat selectedSubtitleFormat);
 }
 
 public class ColorService : IColorService
 {
-    public void RemoveColorTags(List<SubtitleLineViewModel> subtitles)
+    public void RemoveColorTags(List<SubtitleLineViewModel> subtitles, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
         foreach (var p in subtitles)
         {
-            RemoveColorTags(p);
+            RemoveColorTags(p, subtitle, subtitleFormat);
         }
     }
 
-    private static void RemoveColorTags(SubtitleLineViewModel p)
+    private static void RemoveColorTags(SubtitleLineViewModel p, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
+        if (subtitleFormat is WebVTT)
+        {
+            var styles = WebVttHelper.GetStyles(subtitle.Header);
+            foreach (var style in styles)
+            {
+                if (style.Color.HasValue &&
+                    style.Bold == null &&
+                    style.Italic == null &&
+                    style.FontName == null &&
+                    style.FontSize == null &&
+                    style.ShadowColor == null &&
+                    style.BackgroundColor == null &&
+                    style.Underline == null &&
+                    style.StrikeThrough == null)
+                {
+                    p.Text = WebVttHelper.RemoveColorTag(p.Text, style.Color.Value, styles);
+                }
+            }
+
+            return;
+        }
+
         if (!p.Text.Contains("<font", StringComparison.OrdinalIgnoreCase))
         {
             if (p.Text.Contains("\\c") || p.Text.Contains("\\1c"))
@@ -43,17 +65,14 @@ public class ColorService : IColorService
 
     public void SetColor(List<SubtitleLineViewModel> subtitles, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
-        var isAssa = subtitleFormat is AdvancedSubStationAlpha;
-        var isWebVtt = subtitleFormat is WebVTT;
-
         foreach (var p in subtitles)
         {
-            RemoveColorTags(p);
-            p.Text = SetColorTag(p.Text, color, isAssa, isWebVtt, subtitle);
+            RemoveColorTags(p, subtitle, subtitleFormat);
+            p.Text = SetColorTag(p.Text, color, subtitle, subtitleFormat);
         }
     }
 
-    public string SetColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle)
+    public string SetColorTag(string input, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -61,7 +80,7 @@ public class ColorService : IColorService
         }
 
         var text = input;
-        if (isAssa)
+        if (subtitleFormat is AdvancedSubStationAlpha)
         {
             try
             {
@@ -76,7 +95,7 @@ public class ColorService : IColorService
             return text;
         }
 
-        if (isWebVtt)
+        if (subtitleFormat is WebVTT)
         {
             try
             {
@@ -144,7 +163,7 @@ public class ColorService : IColorService
         return $"{pre}<font color=\"{ToHex(color)}\">{text}</font>";
     }
 
-    public string RemoveColorTag(string input, Color color, bool isAssa, bool isWebVtt, Subtitle subtitle)
+    public string RemoveColorTag(string input, Color color, Subtitle subtitle, SubtitleFormat subtitleFormat)
     {
         if (string.IsNullOrWhiteSpace(input))
         {
@@ -152,7 +171,7 @@ public class ColorService : IColorService
         }
 
         var text = input;
-        if (isAssa)
+        if (subtitleFormat is AdvancedSubStationAlpha)
         {
             try
             {
@@ -166,7 +185,7 @@ public class ColorService : IColorService
             return text;
         }
 
-        if (isWebVtt)
+        if (subtitleFormat is WebVTT)
         {
             try
             {
@@ -215,10 +234,7 @@ public class ColorService : IColorService
 
     public bool ContainsColor(Color color, string text, SubtitleFormat subtitleFormat)
     {
-        var isAssa = subtitleFormat is AdvancedSubStationAlpha;
-        var isWebVtt = subtitleFormat is WebVTT;
-
-        var tag = SetColorTag("ø", color, isAssa, isWebVtt, new Subtitle());
+        var tag = SetColorTag("ø", color, new Subtitle(), subtitleFormat);
         var colorStart = tag.Substring(0, tag.IndexOf('ø', StringComparison.Ordinal));
         return text.Contains(colorStart, StringComparison.OrdinalIgnoreCase);
     }

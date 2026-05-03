@@ -7123,11 +7123,11 @@ public partial class MainViewModel :
 
         if (_colorService.ContainsColor(color, selectedItems.First(), SelectedSubtitleFormat))
         {
-            _colorService.RemoveColorTags(selectedItems);
+            _colorService.RemoveColorTags(selectedItems, GetUpdateSubtitle(), SelectedSubtitleFormat);
         }
         else
         {
-            _colorService.RemoveColorTags(selectedItems);
+            _colorService.RemoveColorTags(selectedItems, GetUpdateSubtitle(), SelectedSubtitleFormat);
             _colorService.SetColor(selectedItems, color, GetUpdateSubtitle(), SelectedSubtitleFormat);
         }
 
@@ -7203,7 +7203,7 @@ public partial class MainViewModel :
             return;
         }
 
-        _colorService.RemoveColorTags(selectedItems);
+        _colorService.RemoveColorTags(selectedItems, GetUpdateSubtitle(), SelectedSubtitleFormat);
     }
 
     private void SurroundWith(string surroundLeft, string surroundRight)
@@ -7347,7 +7347,7 @@ public partial class MainViewModel :
             return;
         }
 
-        _colorService.RemoveColorTags(selectedItems);
+        _colorService.RemoveColorTags(selectedItems, GetUpdateSubtitle(), SelectedSubtitleFormat);
 
         _shortcutManager.ClearKeys();
     }
@@ -8546,15 +8546,14 @@ public partial class MainViewModel :
         var selectionEnd = Math.Max(tb.SelectionStart, tb.SelectionEnd);
         var selectionLength = selectionEnd - selectionStart;
         var isAssa = SelectedSubtitleFormat is AdvancedSubStationAlpha;
-        var isWebVtt = SelectedSubtitleFormat is WebVTT;
         if (selectionLength == 0 || selectionLength == tb.Text.Length)
         {
-            tb.Text = _colorService.SetColorTag(tb.Text, color, isAssa, isWebVtt, GetUpdateSubtitle());
+            tb.Text = _colorService.SetColorTag(tb.Text, color, GetUpdateSubtitle(), SelectedSubtitleFormat);
         }
         else
         {
             var selectedText = tb.Text.Substring(selectionStart, selectionLength);
-            selectedText = _colorService.SetColorTag(selectedText, color, isAssa, isWebVtt, GetUpdateSubtitle());
+            selectedText = _colorService.SetColorTag(selectedText, color, GetUpdateSubtitle(), SelectedSubtitleFormat);
 
             if (isAssa) // close color tag (display normal style color)
             {
@@ -8564,7 +8563,7 @@ public partial class MainViewModel :
                 {
                     var style = AdvancedSubStationAlpha.GetSsaStyle(styleName, _subtitle.Header);
                     var endColor =
-                        _colorService.SetColorTag("x", style.Primary.ToAvaloniaColor(), true, false, _subtitle);
+                        _colorService.SetColorTag("x", style.Primary.ToAvaloniaColor(), _subtitle, SelectedSubtitleFormat);
                     closeTag = endColor.TrimEnd('x');
                 }
 
