@@ -25,9 +25,6 @@ internal static class HelpDisplay
         ShowParameter("--forcedonly", "Process forced subtitles only");
         ShowParameter("--fps:<frame rate>", "Frame rate for conversion");
         ShowParameter("--inputfolder:<folder name>", "Input folder path");
-        ShowParameter("--multiplereplace", "Use default replace rules (equivalent to --multiplereplace:.)");
-        ShowParameter("--multiplereplace:<file list>", "Comma separated file name list ('.' = default rules)");
-        ShowParameter("--ocrengine:<ocr engine>", "OCR engine (tesseract/nOCR)");
         ShowParameter("--offset:hh:mm:ss:ms", "Time offset");
         ShowParameter("--outputfilename:<file name>", "Output file name (for single file only)");
         ShowParameter("--outputfolder:<folder name>", "Output folder path");
