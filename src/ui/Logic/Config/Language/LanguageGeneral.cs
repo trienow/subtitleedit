@@ -32,11 +32,13 @@ public class LanguageGeneral
     public string Apply { get; set; }
     public string ApplyTo { get; set; }
     public string Ascending { get; set; }
+    public string Descending { get; set; }
     public string AttachDotDotDot { get; set; }
     public string AudioFiles { get; set; }
     public string AudioVisualizer { get; set; }
     public string Auto { get; set; }
     public string AutoBreak { get; set; }
+    public string AutoBalanceLines { get; set; }
     public string AutoContinue { get; set; }
     public string AutoTranslate { get; set; }
     public string Autodetect { get; set; }
@@ -692,11 +694,13 @@ public class LanguageGeneral
         Apply = "Apply";
         ApplyTo = "Apply to";
         Ascending = "Ascending";
+        Descending = "Descending";
         AttachDotDotDot = "Attach...";
         AudioFiles = "Audio files";
         AudioVisualizer = "Audio visualizer";
         Auto = "Auto";
         AutoBreak = "Auto-break text";
+        AutoBalanceLines = "Auto-balance lines";
         AutoContinue = "Auto-continue";
         AutoTranslate = "Auto-translate";
         Autodetect = "Autodetect";

@@ -1430,11 +1430,15 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = FixCommonErrors(s);
             s = MergeLinesWithSameText(s);
             s = MergeLinesWithSameTimeCodes(s, Language);
+            s = MergeShortLines(s);
             s = MultipleReplace(s);
             s = RemoveLineBreaks(s);
+            s = AutoBalanceLines(s, Language);
+            s = ApplyDurationLimits(s);
             s = RemoveTextForHearingImpaired(s, Language);
             s = FixRightToLeft(s);
             s = AssaChangeResolution(s);
+            s = SortBy(s);
         }
 
         return s;
@@ -1964,6 +1968,80 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             c.ChangeDrawing,
             c.ChangePosition);
 
+        return subtitle;
+    }
+
+    private Subtitle MergeShortLines(Subtitle subtitle)
+    {
+        if (!_config.MergeShortLines.IsActive)
+        {
+            return subtitle;
+        }
+
+        var c = _config.MergeShortLines;
+        return MergeShortLinesUtils.MergeShortLinesInSubtitle(subtitle, c.MaxMillisecondsBetweenLines, c.MaxCharacters, c.OnlyContinuationLines);
+    }
+
+    private Subtitle ApplyDurationLimits(Subtitle subtitle)
+    {
+        if (!_config.ApplyDurationLimits.IsActive)
+        {
+            return subtitle;
+        }
+
+        var c = _config.ApplyDurationLimits;
+        var minMs = c.FixMinDurationMs ? c.MinDurationMs : 0;
+        var maxMs = c.FixMaxDurationMs ? c.MaxDurationMs : int.MaxValue;
+        if (minMs >= maxMs)
+        {
+            return subtitle;
+        }
+
+        var fixer = new FixDurationLimits(minMs, maxMs, new List<double>());
+        return fixer.Fix(subtitle);
+    }
+
+    private Subtitle AutoBalanceLines(Subtitle subtitle, string language)
+    {
+        if (!_config.AutoBalanceLines.IsActive)
+        {
+            return subtitle;
+        }
+
+        foreach (var p in subtitle.Paragraphs)
+        {
+            p.Text = Utilities.AutoBreakLine(p.Text, language);
+        }
+
+        return subtitle;
+    }
+
+    private Subtitle SortBy(Subtitle subtitle)
+    {
+        if (!_config.SortBy.IsActive)
+        {
+            return subtitle;
+        }
+
+        var sortKey = _config.SortBy.SortBy;
+        var paragraphs = subtitle.Paragraphs;
+        IOrderedEnumerable<Paragraph> ordered = sortKey switch
+        {
+            "StartTime" => _config.SortBy.Descending
+                ? paragraphs.OrderByDescending(p => p.StartTime.TotalMilliseconds)
+                : paragraphs.OrderBy(p => p.StartTime.TotalMilliseconds),
+            "EndTime" => _config.SortBy.Descending
+                ? paragraphs.OrderByDescending(p => p.EndTime.TotalMilliseconds)
+                : paragraphs.OrderBy(p => p.EndTime.TotalMilliseconds),
+            _ => _config.SortBy.Descending
+                ? paragraphs.OrderByDescending(p => p.Number)
+                : paragraphs.OrderBy(p => p.Number),
+        };
+
+        var sorted = ordered.ToList();
+        subtitle.Paragraphs.Clear();
+        subtitle.Paragraphs.AddRange(sorted);
+        subtitle.Renumber();
         return subtitle;
     }
 

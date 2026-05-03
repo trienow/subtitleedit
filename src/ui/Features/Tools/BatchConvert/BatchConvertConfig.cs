@@ -41,6 +41,10 @@ public class BatchConvertConfig
     public ApplyMinGapSettings ApplyMinGap { get; set; }
     public SplitBreakLongLinesSettings SplitBreakLongLines { get; set; }
     public AssaChangeResolutionSettings AssaChangeResolution { get; set; }
+    public MergeShortLinesSettings MergeShortLines { get; set; }
+    public ApplyDurationLimitsSettings ApplyDurationLimits { get; set; }
+    public AutoBalanceLinesSettings AutoBalanceLines { get; set; }
+    public SortBySettings SortBy { get; set; }
 
     public BatchConvertConfig()
     {
@@ -72,6 +76,10 @@ public class BatchConvertConfig
         ApplyMinGap = new ApplyMinGapSettings();
         SplitBreakLongLines = new SplitBreakLongLinesSettings();
         AssaChangeResolution = new AssaChangeResolutionSettings();
+        MergeShortLines = new MergeShortLinesSettings();
+        ApplyDurationLimits = new ApplyDurationLimitsSettings();
+        AutoBalanceLines = new AutoBalanceLinesSettings();
+        SortBy = new SortBySettings();
     }
 
     public bool IsTargetFormatImageBased =>
@@ -285,6 +293,55 @@ public class BatchConvertConfig
             ChangeFontSize = true;
             ChangePosition = true;
             ChangeDrawing = true;
+        }
+    }
+
+    public class MergeShortLinesSettings
+    {
+        public bool IsActive { get; set; }
+        public int MaxCharacters { get; set; }
+        public int MaxMillisecondsBetweenLines { get; set; }
+        public bool OnlyContinuationLines { get; set; }
+
+        public MergeShortLinesSettings()
+        {
+            MaxCharacters = 55;
+            MaxMillisecondsBetweenLines = 250;
+            OnlyContinuationLines = true;
+        }
+    }
+
+    public class ApplyDurationLimitsSettings
+    {
+        public bool IsActive { get; set; }
+        public bool FixMinDurationMs { get; set; }
+        public int MinDurationMs { get; set; }
+        public bool FixMaxDurationMs { get; set; }
+        public int MaxDurationMs { get; set; }
+
+        public ApplyDurationLimitsSettings()
+        {
+            FixMinDurationMs = true;
+            MinDurationMs = 1000;
+            FixMaxDurationMs = true;
+            MaxDurationMs = 8000;
+        }
+    }
+
+    public class AutoBalanceLinesSettings
+    {
+        public bool IsActive { get; set; }
+    }
+
+    public class SortBySettings
+    {
+        public bool IsActive { get; set; }
+        public string SortBy { get; set; }
+        public bool Descending { get; set; }
+
+        public SortBySettings()
+        {
+            SortBy = "Number";
         }
     }
 }

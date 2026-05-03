@@ -56,6 +56,10 @@ public partial class BatchConvertFunction : ObservableObject
             MakeFunction(BatchConvertFunctionType.FixRightToLeft, Se.Language.General.FixRightToLeft, ViewFixRightToLeft.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.AutoTranslate, Se.Language.General.AutoTranslate, ViewAutoTranslate.Make(vm), activeFunctions),
             MakeFunction(BatchConvertFunctionType.AssaChangeResolution, Se.Language.Assa.ResolutionResamplerTitle, ViewAssaChangeResolution.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.MergeShortLines, Se.Language.Tools.MergeShortLines.Title, ViewMergeShortLines.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.ApplyDurationLimits, Se.Language.Tools.ApplyDurationLimits.Title, ViewApplyDurationLimits.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.AutoBalanceLines, Se.Language.General.AutoBalanceLines, ViewAutoBalanceLines.Make(vm), activeFunctions),
+            MakeFunction(BatchConvertFunctionType.SortBy, Se.Language.Tools.SortBy.Title, ViewSortBy.Make(vm), activeFunctions),
         }.ToArray();
     }
 

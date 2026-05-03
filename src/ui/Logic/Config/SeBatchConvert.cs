@@ -76,6 +76,18 @@ public class SeBatchConvert
     public string AssaHeader { get; set; }
     public string AssaFooter { get; set; }
 
+    public int MergeShortLinesMaxCharacters { get; set; }
+    public int MergeShortLinesMaxMillisecondsBetweenLines { get; set; }
+    public bool MergeShortLinesOnlyContinuationLines { get; set; }
+
+    public bool ApplyDurationLimitsFixMinDuration { get; set; }
+    public int ApplyDurationLimitsMinDurationMs { get; set; }
+    public bool ApplyDurationLimitsFixMaxDuration { get; set; }
+    public int ApplyDurationLimitsMaxDurationMs { get; set; }
+
+    public string SortBy { get; set; }
+    public bool SortByDescending { get; set; }
+
     public SeBatchConvert()
     {
         OutputFolder = string.Empty;
@@ -115,5 +127,17 @@ public class SeBatchConvert
         AssaUseSourceStylesIfPossible = true;
         AssaHeader = string.Empty;
         AssaFooter = string.Empty;
+
+        MergeShortLinesMaxCharacters = 55;
+        MergeShortLinesMaxMillisecondsBetweenLines = 250;
+        MergeShortLinesOnlyContinuationLines = true;
+
+        ApplyDurationLimitsFixMinDuration = true;
+        ApplyDurationLimitsMinDurationMs = 1000;
+        ApplyDurationLimitsFixMaxDuration = true;
+        ApplyDurationLimitsMaxDurationMs = 8000;
+
+        SortBy = "Number";
+        SortByDescending = false;
     }
 }

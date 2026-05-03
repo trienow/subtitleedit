@@ -190,6 +190,22 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _assaChangeResolutionChangePosition;
     [ObservableProperty] private bool _assaChangeResolutionChangeDrawing;
 
+    // Merge short lines
+    [ObservableProperty] private int _mergeShortLinesMaxCharacters;
+    [ObservableProperty] private int _mergeShortLinesMaxMillisecondsBetweenLines;
+    [ObservableProperty] private bool _mergeShortLinesOnlyContinuationLines;
+
+    // Apply duration limits
+    [ObservableProperty] private bool _applyDurationLimitsFixMin;
+    [ObservableProperty] private int _applyDurationLimitsMinDurationMs;
+    [ObservableProperty] private bool _applyDurationLimitsFixMax;
+    [ObservableProperty] private int _applyDurationLimitsMaxDurationMs;
+
+    // Sort by
+    [ObservableProperty] private ObservableCollection<SortByOption> _sortByOptions;
+    [ObservableProperty] private SortByOption? _selectedSortByOption;
+    [ObservableProperty] private bool _sortByDescending;
+
     public Window? Window { get; set; }
 
     public bool OkPressed { get; private set; }
@@ -329,6 +345,14 @@ public partial class BatchConvertViewModel : ObservableObject
         AssaChangeResolutionChangeFontSize = true;
         AssaChangeResolutionChangePosition = true;
         AssaChangeResolutionChangeDrawing = true;
+
+        SortByOptions = new ObservableCollection<SortByOption>
+        {
+            new("Number", Se.Language.Tools.SortBy.SortByNumber),
+            new("StartTime", Se.Language.Tools.SortBy.SortByStartTime),
+            new("EndTime", Se.Language.Tools.SortBy.SortByEndTime),
+        };
+        SelectedSortByOption = SortByOptions[0];
 
         FixCommonErrorsProfile = LoadDefaultProfile();
 
@@ -498,6 +522,21 @@ public partial class BatchConvertViewModel : ObservableObject
         Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeFontSize = AssaChangeResolutionChangeFontSize;
         Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangePosition = AssaChangeResolutionChangePosition;
         Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeDrawing = AssaChangeResolutionChangeDrawing;
+
+        // Merge short lines
+        Se.Settings.Tools.BatchConvert.MergeShortLinesMaxCharacters = MergeShortLinesMaxCharacters;
+        Se.Settings.Tools.BatchConvert.MergeShortLinesMaxMillisecondsBetweenLines = MergeShortLinesMaxMillisecondsBetweenLines;
+        Se.Settings.Tools.BatchConvert.MergeShortLinesOnlyContinuationLines = MergeShortLinesOnlyContinuationLines;
+
+        // Apply duration limits
+        Se.Settings.Tools.BatchConvert.ApplyDurationLimitsFixMinDuration = ApplyDurationLimitsFixMin;
+        Se.Settings.Tools.BatchConvert.ApplyDurationLimitsMinDurationMs = ApplyDurationLimitsMinDurationMs;
+        Se.Settings.Tools.BatchConvert.ApplyDurationLimitsFixMaxDuration = ApplyDurationLimitsFixMax;
+        Se.Settings.Tools.BatchConvert.ApplyDurationLimitsMaxDurationMs = ApplyDurationLimitsMaxDurationMs;
+
+        // Sort by
+        Se.Settings.Tools.BatchConvert.SortBy = SelectedSortByOption?.Key ?? "Number";
+        Se.Settings.Tools.BatchConvert.SortByDescending = SortByDescending;
 
         // Fix right-to-left
         if (RtlFixViaUniCode)
@@ -672,6 +711,25 @@ public partial class BatchConvertViewModel : ObservableObject
         AssaChangeResolutionChangeFontSize = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeFontSize;
         AssaChangeResolutionChangePosition = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangePosition;
         AssaChangeResolutionChangeDrawing = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeDrawing;
+
+        // Merge short lines
+        MergeShortLinesMaxCharacters = Se.Settings.Tools.BatchConvert.MergeShortLinesMaxCharacters;
+        MergeShortLinesMaxMillisecondsBetweenLines = Se.Settings.Tools.BatchConvert.MergeShortLinesMaxMillisecondsBetweenLines;
+        MergeShortLinesOnlyContinuationLines = Se.Settings.Tools.BatchConvert.MergeShortLinesOnlyContinuationLines;
+
+        // Apply duration limits
+        ApplyDurationLimitsFixMin = Se.Settings.Tools.BatchConvert.ApplyDurationLimitsFixMinDuration;
+        ApplyDurationLimitsMinDurationMs = Se.Settings.Tools.BatchConvert.ApplyDurationLimitsMinDurationMs;
+        ApplyDurationLimitsFixMax = Se.Settings.Tools.BatchConvert.ApplyDurationLimitsFixMaxDuration;
+        ApplyDurationLimitsMaxDurationMs = Se.Settings.Tools.BatchConvert.ApplyDurationLimitsMaxDurationMs;
+
+        // Sort by
+        var savedSortBy = SortByOptions.FirstOrDefault(p => p.Key == Se.Settings.Tools.BatchConvert.SortBy);
+        if (savedSortBy != null)
+        {
+            SelectedSortByOption = savedSortBy;
+        }
+        SortByDescending = Se.Settings.Tools.BatchConvert.SortByDescending;
     }
 
     private void UpdateOutputProperties()
@@ -1653,6 +1711,35 @@ public partial class BatchConvertViewModel : ObservableObject
                 ChangeFontSize = AssaChangeResolutionChangeFontSize,
                 ChangePosition = AssaChangeResolutionChangePosition,
                 ChangeDrawing = AssaChangeResolutionChangeDrawing,
+            },
+
+            MergeShortLines = new BatchConvertConfig.MergeShortLinesSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.MergeShortLines),
+                MaxCharacters = MergeShortLinesMaxCharacters,
+                MaxMillisecondsBetweenLines = MergeShortLinesMaxMillisecondsBetweenLines,
+                OnlyContinuationLines = MergeShortLinesOnlyContinuationLines,
+            },
+
+            ApplyDurationLimits = new BatchConvertConfig.ApplyDurationLimitsSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.ApplyDurationLimits),
+                FixMinDurationMs = ApplyDurationLimitsFixMin,
+                MinDurationMs = ApplyDurationLimitsMinDurationMs,
+                FixMaxDurationMs = ApplyDurationLimitsFixMax,
+                MaxDurationMs = ApplyDurationLimitsMaxDurationMs,
+            },
+
+            AutoBalanceLines = new BatchConvertConfig.AutoBalanceLinesSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.AutoBalanceLines),
+            },
+
+            SortBy = new BatchConvertConfig.SortBySettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.SortBy),
+                SortBy = SelectedSortByOption?.Key ?? "Number",
+                Descending = SortByDescending,
             },
         };
     }
