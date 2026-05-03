@@ -11920,17 +11920,27 @@ public partial class MainViewModel :
 
         var text = GetUpdateSubtitleOriginal(true).ToText(SelectedSubtitleFormat);
 
-        if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithBom)
+        try
         {
-            await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, new UTF8Encoding(true));
+            if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithBom)
+            {
+                await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, new UTF8Encoding(true));
+            }
+            else if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithoutBom)
+            {
+                await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, new UTF8Encoding(false));
+            }
+            else
+            {
+                await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, SelectedEncoding.Encoding);
+            }
         }
-        else if (SelectedEncoding.DisplayName == TextEncoding.Utf8WithoutBom)
+        catch (Exception ex)
         {
-            await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, new UTF8Encoding(false));
-        }
-        else
-        {
-            await File.WriteAllTextAsync(_subtitleFileNameOriginal, text, SelectedEncoding.Encoding);
+            var message = string.Format(Se.Language.General.CouldNotSaveFileXErrorY, _subtitleFileNameOriginal, ex.Message);
+            await MessageBox.Show(Window!, Se.Language.General.Error, message, MessageBoxButtons.OK,
+                MessageBoxIcon.Error);
+            return false;
         }
 
         _changeSubtitleHashOriginal = GetFastHashOriginal();
@@ -12129,13 +12139,24 @@ public partial class MainViewModel :
             return false;
         }
 
-        _subtitleFileNameOriginal = fileName;
+        var oldSubtitleFileNameOriginal = _subtitleFileNameOriginal;
+        var oldSubtitleOriginalFileName = _subtitleOriginal.FileName;
+        var oldLastOpenSaveFormat = _lastOpenSaveFormat;
 
+        _subtitleFileNameOriginal = fileName;
         _subtitleOriginal ??= new Subtitle();
         _subtitleOriginal.FileName = fileName;
 
         _lastOpenSaveFormat = SelectedSubtitleFormat;
-        await SaveSubtitleOriginal();
+        var result = await SaveSubtitleOriginal();
+        if (!result)
+        {
+            _subtitleFileNameOriginal = oldSubtitleFileNameOriginal;
+            _subtitleOriginal.FileName = oldSubtitleOriginalFileName;
+            _lastOpenSaveFormat = oldLastOpenSaveFormat;
+            return false;
+        }
+
         AddToRecentFiles(true);
         return true;
     }
