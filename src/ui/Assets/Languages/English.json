@@ -828,7 +828,7 @@
     "errorLoadBinaryZeroes": "Sorry, this file contains only binary zeroes!\n\nIf you have edited this file with Subtitle Edit you might be able to find a backup via the menu item File -&gt; Restore auto-backup...",
     "errorLoadGZip": "This file seems to be a compressed GZip file.\n\nSubtitle Edit cannot open compressed files.",
     "errorLoadLargeFile": "This file is too large to open as a subtitle file.",
-    "errorLoadVideoFilePrompt": "This file seems to be a video file.\n\nDo you want to open it as a video file?",
+    "errorLoadVideoFilePrompt": "This file seems to be a video file:\n{0}\n\nYou can open a video via \"Video -> Open video\" or by dragging and dropping a video onto the video player.\n\nDo you want to open it as a video file?",
     "errorLoadJpg": "This file seems to be a JPG image file.\n\nSubtitle Edit cannot open image files.",
     "errorLoadPng": "This file seems to be a PNG image file.\n\nSubtitle Edit cannot open image files.",
     "errorLoadRar": "This file seems to be a compressed 7-Zip file.\n\nSubtitle Edit cannot open compressed files.",
@@ -1436,7 +1436,8 @@
       "scrollDown": "Scroll down",
       "rotateIn": "Rotate in",
       "tiltBounce": "Tilt bounce",
-      "fontSizeBounceIn": "Font size bounce in"
+      "fontSizeBounceIn": "Font size bounce in",
+      "assaChangeResolutionOnlyAppliesToAssa": "Only applies to Advanced Sub Station Alpha (ASSA) subtitles"
     },
     "changeCasing": {
       "title": "Change casing",
@@ -1695,6 +1696,7 @@
       "inputLanguage": "Input language",
       "advancedWhisperSettings": "Advanced Whisper settings",
       "downloadingSpeechToTextEngine": "Downloading speech-to-text engine",
+      "unpackingSpeechToTextEngine": "Unpacking speech-to-text engine",
       "enableVad": "Enable VAD",
       "whisperXxlStandard": "Standard",
       "whisperXxlStandardAsia": "Standard Asia",
@@ -1704,6 +1706,8 @@
       "selectModel": "Select model",
       "viewWhisperLogFile": "View Whisper log file",
       "reDownloadX": "Re-download {0}",
+      "updateXTitle": "Update {0}?",
+      "updateXMessage": "A newer version of {0} is available.{1}{1}Download and install the update now?",
       "downloadingSpeechToTextModel": "Downloading speech-to-text model",
       "whisperPostProcessingTitle": "Whisper post-processing",
       "adjustTimings": "Adjust timings",
@@ -2521,7 +2525,16 @@
     "downloadingPaddleOcrEngineDotDotDot": "Downloading Paddle OCR engine...",
     "downloadingPaddleOcrModelsDotDotDot": "Downloading Paddle OCR models...",
     "paddleOcr": "Paddle OCR",
-    "binaryImageCompareInspectImageMatches": "\"Binary image compare\" - Inspect image matches"
+    "binaryImageCompareInspectImageMatches": "\"Binary image compare\" - Inspect image matches",
+    "saveBlankTextTitle": "Save blank text?",
+    "saveBlankTextPrompt": "Save blank text for image?",
+    "yesAndNeverAskAgain": "Yes and never ask again",
+    "importTextFromSubtitleDotDotDot": "Import text from subtitle...",
+    "importTextFromSubtitleOverwritePrompt": "Some lines already have OCR text. Overwrite existing text?",
+    "importTextFromSubtitleNoMatchesFound": "No matching lines found in subtitle file.",
+    "importTextFromSubtitleXLinesImported": "Imported text for {0} line(s).",
+    "exportTextAsSubtitleDotDotDot": "Export text as subtitle...",
+    "exportTextAsSubtitleNoText": "No OCR text to export. Run OCR first or import text."
   },
   "assa": {
     "assaDraw": "ASSA Draw",
