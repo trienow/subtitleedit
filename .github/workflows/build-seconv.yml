@@ -22,7 +22,7 @@ on:
         default: true
         type: boolean
       release_tag:
-        description: 'Release tag (e.g., v1.0.0-beta)'
+        description: 'Release tag (e.g., v5.0.0-beta21). "-seconv" is inserted automatically -> v5.0.0-seconv-beta21'
         required: false
         default: ''
         type: string
@@ -263,10 +263,27 @@ jobs:
         id: tag
         run: |
           if [ -n "${{ inputs.release_tag }}" ]; then
-            echo "tag=${{ inputs.release_tag }}" >> $GITHUB_OUTPUT
+            raw="$(echo '${{ inputs.release_tag }}' | xargs)"
+            case "$raw" in
+              *seconv*)
+                # Already namespaced — use as-is
+                tag="$raw"
+                ;;
+              *-*)
+                # Insert "-seconv" after the numeric version: v5.0.0-beta21 -> v5.0.0-seconv-beta21
+                base="${raw%%-*}"
+                suffix="${raw#*-}"
+                tag="${base}-seconv-${suffix}"
+                ;;
+              *)
+                # No suffix — just append: v5.0.0 -> v5.0.0-seconv
+                tag="${raw}-seconv"
+                ;;
+            esac
+            echo "tag=${tag}" >> $GITHUB_OUTPUT
           else
             timestamp=$(date +"%Y%m%d-%H%M%S")
-            echo "tag=pre-release-${timestamp}" >> $GITHUB_OUTPUT
+            echo "tag=seconv-pre-release-${timestamp}" >> $GITHUB_OUTPUT
           fi
 
       - name: Download all artifacts
