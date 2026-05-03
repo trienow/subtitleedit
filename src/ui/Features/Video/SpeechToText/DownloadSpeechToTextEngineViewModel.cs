@@ -179,6 +179,13 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
                                     _        => Engine.UnpackSkipFolder,
                                 }
                         : Engine.UnpackSkipFolder;
+
+                    if (Engine is ICrispAsrEngine)
+                    {
+                        WriteCrispAsrInstalledHash(folder);
+                    }
+
+                    TitleText = Se.Language.Video.AudioToText.UnpackingSpeechToTextEngine;
                     Unpack(folder, skipFolder);
 
                     if (Engine is not (ChatLlmCppEngine or Qwen3AsrCppEngine))
@@ -226,6 +233,28 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
             {
                 LinuxHelper.MakeExecutable(path);
             }
+        }
+    }
+
+    private void WriteCrispAsrInstalledHash(string folder)
+    {
+        try
+        {
+            var key = DownloadHashManager.ResolveCrispAsrKey(CrispAsrWindowsVariant);
+            if (string.IsNullOrEmpty(key) || _downloadStream.Length == 0)
+            {
+                return;
+            }
+
+            _downloadStream.Position = 0;
+            var hash = DownloadHashManager.ComputeSha256(_downloadStream);
+
+            var sidecar = Path.Combine(folder, ".installed.sha256");
+            File.WriteAllText(sidecar, key + Environment.NewLine + hash);
+        }
+        catch
+        {
+            // ignore — hash side-car is best-effort
         }
     }
 

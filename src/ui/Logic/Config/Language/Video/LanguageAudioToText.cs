@@ -10,6 +10,7 @@ public class LanguageAudioToText
     public string InputLanguage { get; set; }
     public string AdvancedWhisperSettings { get; set; }
     public string DownloadingSpeechToTextEngine { get; set; }
+    public string UnpackingSpeechToTextEngine { get; set; }
     public string EnableVad { get; set; }
     public string WhisperXxlStandard { get; set; }
     public string WhisperXxlStandardAsia { get; set; }
@@ -19,6 +20,8 @@ public class LanguageAudioToText
     public string SelectModel { get; set; }
     public string ViewWhisperLogFile { get; set; }
     public string ReDownloadX { get; set; }
+    public string UpdateXTitle { get; set; }
+    public string UpdateXMessage { get; set; }
     public string? DownloadingSpeechToTextModel { get; set; }
     public string WhisperPostProcessingTitle { get; set; }
     public string AdjustTimings { get; set; }
@@ -38,7 +41,8 @@ public class LanguageAudioToText
         TranscribingXOfY = "Transcribing {0} of {1}...";
         InputLanguage = "Input language";
         AdvancedWhisperSettings = "Advanced Whisper settings";
-        DownloadingSpeechToTextEngine = "Downloading speech-to-toxt engine";
+        DownloadingSpeechToTextEngine = "Downloading speech-to-text engine";
+        UnpackingSpeechToTextEngine = "Unpacking speech-to-text engine";
         EnableVad = "Enable VAD";
         WhisperXxlStandard = "Standard";
         WhisperXxlStandardAsia = "Standard Asia";
@@ -48,6 +52,8 @@ public class LanguageAudioToText
         SelectModel = "Select model";
         ViewWhisperLogFile = "View Whisper log file";
         ReDownloadX = "Re-download {0}";
+        UpdateXTitle = "Update {0}?";
+        UpdateXMessage = "A newer version of {0} is available.{1}{1}Download and install the update now?";
         DownloadingSpeechToTextModel = "Downloading speech-to-text model";
         WhisperPostProcessingTitle = "Whisper post-processing";
         AdjustTimings = "Adjust timings";

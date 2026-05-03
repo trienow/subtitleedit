@@ -1694,7 +1694,7 @@
       "transcribingXOfY": "Transcribing {0} of {1}...",
       "inputLanguage": "Input language",
       "advancedWhisperSettings": "Advanced Whisper settings",
-      "downloadingSpeechToTextEngine": "Downloading speech-to-toxt engine",
+      "downloadingSpeechToTextEngine": "Downloading speech-to-text engine",
       "enableVad": "Enable VAD",
       "whisperXxlStandard": "Standard",
       "whisperXxlStandardAsia": "Standard Asia",

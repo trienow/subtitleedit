@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Features.Shared.GetAudioClips;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Concurrent;
@@ -128,6 +129,7 @@ public partial class SpeechToTextViewModel : ObservableObject
     private readonly IFileHelper _fileHelper;
     private bool _isUpdatingWhisperCppBackend;
     private bool _isUpdatingCrispAsrBackend;
+    private static bool _crispAsrUpdatePromptShown;
 
     public SpeechToTextViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
@@ -2776,6 +2778,115 @@ public partial class SpeechToTextViewModel : ObservableObject
         Parameters = engine.CommandLineParameter;
 
         SaveSettings();
+
+        if (engine is ICrispAsrEngine && !_crispAsrUpdatePromptShown)
+        {
+            Dispatcher.UIThread.Post(async () => await CheckCrispAsrForUpdateAsync());
+        }
+    }
+
+    private async Task CheckCrispAsrForUpdateAsync()
+    {
+        if (_crispAsrUpdatePromptShown || Window == null)
+        {
+            return;
+        }
+
+        var engine = GetEffectiveSelectedEngine();
+        if (engine is not ICrispAsrEngine || !engine.IsEngineInstalled())
+        {
+            return;
+        }
+
+        var folder = engine.GetAndCreateWhisperFolder();
+        var lookup = TryReadSidecarHash(folder) ?? TryHashInstalledExecutable(engine, folder);
+        if (lookup is not var (key, hash))
+        {
+            return;
+        }
+
+        if (DownloadHashManager.GetStatus(key, hash) != DownloadHashManager.UpdateStatus.UpdateAvailable)
+        {
+            return;
+        }
+
+        _crispAsrUpdatePromptShown = true;
+
+        var answer = await MessageBox.Show(
+            Window!,
+            string.Format(Se.Language.Video.AudioToText.UpdateXTitle, engine.Name),
+            string.Format(Se.Language.Video.AudioToText.UpdateXMessage, engine.Name, Environment.NewLine),
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        var crispVariant = DownloadHashManager.GetCrispAsrWindowsVariant(key) ?? "vulkan";
+
+        await _windowService.ShowDialogAsync<DownloadSpeechToTextEngineWindow, DownloadSpeechToTextEngineViewModel>(
+            Window!, viewModel =>
+            {
+                viewModel.Engine = engine;
+                viewModel.CrispAsrWindowsVariant = crispVariant;
+                viewModel.StartDownload();
+            });
+    }
+
+    private static (string key, string hash)? TryReadSidecarHash(string folder)
+    {
+        var sidecar = Path.Combine(folder, ".installed.sha256");
+        if (!File.Exists(sidecar))
+        {
+            return null;
+        }
+
+        try
+        {
+            var lines = File.ReadAllLines(sidecar);
+            if (lines.Length < 2)
+            {
+                return null;
+            }
+
+            var key = lines[0].Trim();
+            var hash = lines[1].Trim();
+            if (key.Length == 0 || hash.Length == 0)
+            {
+                return null;
+            }
+
+            return (key, hash);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    private static (string key, string hash)? TryHashInstalledExecutable(ISpeechToTextEngine engine, string folder)
+    {
+        try
+        {
+            var variant = RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                ? DownloadHashManager.DetectCrispAsrWindowsVariant(folder)
+                : null;
+            var key = DownloadHashManager.ResolveCrispAsrExecutableKey(variant);
+            if (key == null)
+            {
+                return null;
+            }
+
+            var exePath = engine.GetExecutable();
+            var hash = DownloadHashManager.ComputeSha256(exePath);
+            return hash == null ? null : (key, hash);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static WhisperLanguage? PickDefaultLanguage(IEnumerable<WhisperLanguage> languages)
