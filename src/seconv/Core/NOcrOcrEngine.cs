@@ -5,7 +5,7 @@ namespace SeConv.Core;
 
 /// <summary>
 /// In-process OCR via Subtitle Edit's nOCR matcher. Requires a <c>.nocr</c> database file
-/// (typically shipped with SE under <c>%AppData%\Subtitle Edit\Ocr\</c>; pass the path
+/// (typically shipped with SE under <c>%AppData%\Subtitle Edit\OCR\</c>; pass the path
 /// via <c>--ocrdb</c>).
 /// </summary>
 internal sealed class NOcrOcrEngine : IOcrEngine
@@ -22,7 +22,7 @@ internal sealed class NOcrOcrEngine : IOcrEngine
         {
             throw new FileNotFoundException(
                 $"nOCR database not found: {nOcrDbPath}. Use --ocrdb to point to a .nocr file " +
-                "(typically %AppData%\\Subtitle Edit\\Ocr\\Latin.nocr or similar).", nOcrDbPath);
+                "(typically %AppData%\\Subtitle Edit\\OCR\\Latin.nocr or similar).", nOcrDbPath);
         }
         _db = new NOcrDb(nOcrDbPath);
         if (_db.TotalCharacterCount == 0)

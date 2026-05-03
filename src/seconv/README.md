@@ -103,9 +103,17 @@ seconv --help                 # show help
 |---|---|
 | `--ocrengine:<engine>` | `tesseract` (default) \| `nocr` \| `binaryocr` \| `ollama` \| `paddle` |
 | `--ocrlanguage:<lang>` | Tesseract: ISO 639-2 (`eng`, `deu`); Paddle: short (`en`); Ollama: human (`English`) |
-| `--ocrdb:<path.nocr>` | nOCR database file (required for `--ocrengine=nocr`) |
+| `--ocrdb:<path>` | OCR database file: `.nocr` for `nocr`, `.db` for `binaryocr` (required for both) |
 | `--ollama-url:<url>` | Default `http://localhost:11434/api/chat` |
 | `--ollama-model:<model>` | Default `llama3.2-vision` |
+
+> **OCR database files are not bundled with `seconv`.** The `nocr` and `binaryocr` engines
+> need a `.nocr` or `.db` file passed via `--ocrdb`. Sources:
+> - If you have the desktop UI installed: `%AppData%\Subtitle Edit\OCR\` (Windows) or
+>   `~/.config/Subtitle Edit/OCR/` (Linux/macOS).
+> - From the repo: [`Ocr/Latin.nocr`](https://github.com/SubtitleEdit/subtitleedit/raw/main/Ocr/Latin.nocr)
+>   and [`Ocr/Latin.db`](https://github.com/SubtitleEdit/subtitleedit/raw/main/Ocr/Latin.db).
+> - Other languages: download from the SE UI (Tools → "OCR with nOCR" / BinaryOCR → download).
 
 ### Templates / replacements
 | Option | Description |

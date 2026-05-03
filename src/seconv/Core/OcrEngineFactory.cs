@@ -29,7 +29,7 @@ internal static class OcrEngineFactory
             var displayExt = requiredExtension.TrimStart('.');
             throw new InvalidOperationException(
                 $"{engineName} engine requires --ocrdb=<path-to-Latin{requiredExtension}> (or another {requiredExtension} file). " +
-                $"Find them in `%AppData%\\Subtitle Edit\\Ocr\\` or download from the SE UI.");
+                $"Find them in `%AppData%\\Subtitle Edit\\OCR\\` or download from the SE UI.");
         }
         var path = options.OcrDb;
         if (!path.EndsWith(requiredExtension, StringComparison.OrdinalIgnoreCase))

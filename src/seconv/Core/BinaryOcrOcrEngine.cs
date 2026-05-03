@@ -5,7 +5,7 @@ namespace SeConv.Core;
 
 /// <summary>
 /// In-process OCR via Subtitle Edit's BinaryOCR matcher. Requires a <c>.db</c>
-/// database file (typically shipped with SE under <c>%AppData%\Subtitle Edit\Ocr\</c>;
+/// database file (typically shipped with SE under <c>%AppData%\Subtitle Edit\OCR\</c>;
 /// pass the path via <c>--ocrdb</c>). BinaryOCR uses fast bitmap-hash matching and
 /// is a useful alternative to nOCR — different accuracy profile, similar speed.
 /// </summary>
@@ -24,7 +24,7 @@ internal sealed class BinaryOcrOcrEngine : IOcrEngine
         {
             throw new FileNotFoundException(
                 $"BinaryOCR database not found: {dbPath}. Use --ocrdb to point to a .db file " +
-                "(typically %AppData%\\Subtitle Edit\\Ocr\\Latin.db or similar).", dbPath);
+                "(typically %AppData%\\Subtitle Edit\\OCR\\Latin.db or similar).", dbPath);
         }
         _db = new BinaryOcrDb(dbPath, loadCompareImages: true);
         if (_db.AllCompareImages.Count == 0)

@@ -88,11 +88,11 @@ internal static class ListHelpers
         table.AddRow(
             "[green]nocr[/]",
             "in-process",
-            "Pass --ocrdb=<path-to-Latin.nocr> (find under %AppData%\\\\Subtitle Edit\\\\Ocr\\\\)");
+            "Pass --ocrdb=<path-to-Latin.nocr> (find under %AppData%\\\\Subtitle Edit\\\\OCR\\\\)");
         table.AddRow(
             "[green]binaryocr[/]",
             "in-process",
-            "Pass --ocrdb=<path-to-Latin.db> (find under %AppData%\\\\Subtitle Edit\\\\Ocr\\\\)");
+            "Pass --ocrdb=<path-to-Latin.db> (find under %AppData%\\\\Subtitle Edit\\\\OCR\\\\)");
         table.AddRow(
             "[green]ollama[/]",
             "HTTP",
