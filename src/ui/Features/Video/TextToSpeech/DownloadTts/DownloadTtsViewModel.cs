@@ -26,6 +26,13 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.DownloadTts;
 
 public partial class DownloadTtsViewModel : ObservableObject
 {
+    internal static IReadOnlyList<(string SourceFilePattern, string LinkFileName)> PiperLinuxSymbolicLinks { get; } =
+        new[]
+        {
+            ("libpiper_phonemize.so.1.*", "libpiper_phonemize.so.1"),
+            ("libespeak-ng.so.1.*", "libespeak-ng.so.1"),
+        };
+
     public Window? Window { get; set; }
     public bool OkPressed { get; private set; }
 
@@ -457,7 +464,7 @@ public partial class DownloadTtsViewModel : ObservableObject
         }
     }
 
-    private void FixSymbolicLink(string path)
+    private static void FixSymbolicLink(string path)
     {
         var folder = Path.GetDirectoryName(path);
         if (string.IsNullOrEmpty(folder))
@@ -466,57 +473,73 @@ public partial class DownloadTtsViewModel : ObservableObject
             return;
         }
 
-        var sourcePath = Path.Combine(folder, "libpiper_phonemize.so.1.2.0");
-        var linkPath = Path.Combine(folder, "libpiper_phonemize.so.1");
+        foreach (var link in PiperLinuxSymbolicLinks)
+        {
+            var sourcePath = FindSymbolicLinkSource(folder, link.SourceFilePattern);
+            if (sourcePath == null)
+            {
+                Se.LogError("Source library file not found: " + Path.Combine(folder, link.SourceFilePattern));
+                continue;
+            }
 
+            var linkPath = Path.Combine(folder, link.LinkFileName);
+            CreateSymbolicLink(sourcePath, linkPath);
+        }
+    }
+
+    internal static string? FindSymbolicLinkSource(string folder, string sourceFilePattern)
+    {
+        return Directory
+            .GetFiles(folder, sourceFilePattern)
+            .OrderByDescending(Path.GetFileName, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault();
+    }
+
+    private static void CreateSymbolicLink(string sourcePath, string linkPath)
+    {
         try
         {
-            if (File.Exists(sourcePath))
+            var processStartInfo = CreateSymbolicLinkProcessStartInfo(sourcePath, linkPath);
+            using var process = Process.Start(processStartInfo);
+
+            if (process == null)
             {
-                // Check if the link exists and remove it if necessary
-                if (File.Exists(linkPath) || Directory.Exists(linkPath))
-                {
-                    File.Delete(linkPath); // Delete the existing link or file
-                }
-
-                // Create the symbolic link
-                var processStartInfo = new ProcessStartInfo
-                {
-                    FileName = "/bin/bash", // Use bash shell for command execution
-                    Arguments = $"-c \"ln -sf \\\"{sourcePath}\\\" \\\"{linkPath}\\\"\"",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                var process = Process.Start(processStartInfo);
-
-                if (process != null)
-                {
-                    process.WaitForExit();
-
-                    // Check if the process completed successfully
-                    if (process.ExitCode != 0)
-                    {
-                        var error = process.StandardError.ReadToEnd();
-                        Se.LogError($"Error creating symlink: {error}");
-                    }
-                    else
-                    {
-                        Se.LogError("Symbolic link created successfully.");
-                    }
-                }
+                Se.LogError("Error creating symlink: Could not start /bin/bash");
+                return;
             }
-            else
+
+            var error = process.StandardError.ReadToEnd();
+            process.WaitForExit();
+
+            if (process.ExitCode != 0)
             {
-                Se.LogError("Source library file not found!");
+                Se.LogError($"Error creating symlink: {error}");
             }
         }
         catch (Exception ex)
         {
             Se.LogError(ex);
         }
+    }
+
+    internal static ProcessStartInfo CreateSymbolicLinkProcessStartInfo(string sourcePath, string linkPath)
+    {
+        var processStartInfo = new ProcessStartInfo
+        {
+            FileName = "/bin/bash",
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+        };
+
+        processStartInfo.ArgumentList.Add("-c");
+        processStartInfo.ArgumentList.Add($"ln -sfn -- {QuoteForBash(sourcePath)} {QuoteForBash(linkPath)}");
+        return processStartInfo;
+    }
+
+    private static string QuoteForBash(string value)
+    {
+        return "'" + value.Replace("'", "'\"'\"'") + "'";
     }
 
     private void Close()
