@@ -111,8 +111,8 @@ internal sealed class TesseractOcrEngine : IOcrEngine
         var prepped = new SKBitmap(new SKImageInfo(w, h, SKColorType.Rgba8888, SKAlphaType.Opaque));
         using var canvas = new SKCanvas(prepped);
         canvas.Clear(SKColors.White);
-        var paint = new SKPaint { FilterQuality = SKFilterQuality.High };
-        canvas.DrawBitmap(source, new SKRect(0, 0, w, h), paint);
+        using var image = SKImage.FromBitmap(source);
+        canvas.DrawImage(image, new SKRect(0, 0, w, h), new SKSamplingOptions(SKCubicResampler.Mitchell));
         canvas.Flush();
         return prepped;
     }

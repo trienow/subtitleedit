@@ -35,7 +35,7 @@ public class FrameRateConversionTest : IDisposable
     {
         // 25 -> 23.976 should scale times by 25/23.976 ≈ 1.04270
         var input = Path.Combine(_tempRoot, "in.srt");
-        await File.WriteAllTextAsync(input, SrtContent);
+        await File.WriteAllTextAsync(input, SrtContent, TestContext.Current.CancellationToken);
         var outDir = Path.Combine(_tempRoot, "out");
         Directory.CreateDirectory(outDir);
 
@@ -54,7 +54,7 @@ public class FrameRateConversionTest : IDisposable
 
         var outFile = Path.Combine(outDir, "in.srt");
         Assert.True(File.Exists(outFile));
-        var outText = await File.ReadAllTextAsync(outFile);
+        var outText = await File.ReadAllTextAsync(outFile, TestContext.Current.CancellationToken);
 
         // 1.000s * (25/23.976) ≈ 1.04270s -> "00:00:01,042"
         Assert.Contains("00:00:01,042", outText);

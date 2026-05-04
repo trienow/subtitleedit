@@ -42,7 +42,7 @@ public class ContainerLoaderTest : IDisposable
         Assert.Single(outputs);
         // language suffix injected before extension
         Assert.Contains(".und.", Path.GetFileName(outputs[0]));
-        var content = await File.ReadAllTextAsync(outputs[0]);
+        var content = await File.ReadAllTextAsync(outputs[0], TestContext.Current.CancellationToken);
         Assert.Contains("Line 1", content);
         Assert.Contains("Line 2", content);
     }
@@ -91,7 +91,7 @@ public class ContainerLoaderTest : IDisposable
         Assert.Equal(1, result.SuccessfulFiles);
         var outputs = Directory.GetFiles(outputFolder, "*.srt");
         Assert.Single(outputs);
-        var content = await File.ReadAllTextAsync(outputs[0]);
+        var content = await File.ReadAllTextAsync(outputs[0], TestContext.Current.CancellationToken);
         var normalized = content.Replace("\r", "").TrimStart('﻿');
         // Paragraphs should be properly numbered (1, 2, ...) not all 0
         Assert.StartsWith("1\n", normalized);

@@ -40,7 +40,7 @@ public class BinaryFormatRoundTripTest : IDisposable
     public async Task ConvertAsync_SrtToBinary_ProducesNonEmptyFile(string format, string ext, int minBytes)
     {
         var input = Path.Combine(_tempRoot, "in.srt");
-        await File.WriteAllTextAsync(input, SrtContent);
+        await File.WriteAllTextAsync(input, SrtContent, TestContext.Current.CancellationToken);
 
         var converter = new SubtitleConverter();
         var result = await converter.ConvertAsync(new ConversionOptions
@@ -62,7 +62,7 @@ public class BinaryFormatRoundTripTest : IDisposable
     public async Task ConvertAsync_PacWithCodePage_RespectsCodePage()
     {
         var input = Path.Combine(_tempRoot, "in.srt");
-        await File.WriteAllTextAsync(input, SrtContent);
+        await File.WriteAllTextAsync(input, SrtContent, TestContext.Current.CancellationToken);
 
         var converter = new SubtitleConverter();
         var result = await converter.ConvertAsync(new ConversionOptions
@@ -82,7 +82,7 @@ public class BinaryFormatRoundTripTest : IDisposable
     public async Task ConvertAsync_WebVttOutput_HasUtf8Bom()
     {
         var input = Path.Combine(_tempRoot, "in.srt");
-        await File.WriteAllTextAsync(input, SrtContent);
+        await File.WriteAllTextAsync(input, SrtContent, TestContext.Current.CancellationToken);
 
         var converter = new SubtitleConverter();
         var result = await converter.ConvertAsync(new ConversionOptions
@@ -94,7 +94,7 @@ public class BinaryFormatRoundTripTest : IDisposable
         });
 
         Assert.True(result.Success, string.Join("; ", result.Errors));
-        var bytes = await File.ReadAllBytesAsync(Path.Combine(_tempRoot, "in.vtt"));
+        var bytes = await File.ReadAllBytesAsync(Path.Combine(_tempRoot, "in.vtt"), TestContext.Current.CancellationToken);
         Assert.True(bytes.Length >= 3);
         Assert.Equal(0xEF, bytes[0]);
         Assert.Equal(0xBB, bytes[1]);

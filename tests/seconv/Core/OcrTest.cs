@@ -73,7 +73,7 @@ public class OcrTest : IDisposable
         Assert.Contains(outputs, p => Path.GetFileName(p).Contains("teletext_"));
 
         // Verify the content is real subtitle text, not OCR garbage
-        var content = await File.ReadAllTextAsync(outputs[0]);
+        var content = await File.ReadAllTextAsync(outputs[0], TestContext.Current.CancellationToken);
         Assert.Contains("-->", content);
     }
 

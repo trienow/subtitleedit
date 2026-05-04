@@ -201,7 +201,7 @@ public partial class ExportCustomTextFormatViewModel : ObservableObject
 
     private void GenerateText(CustomFormatItem customFormatItem)
     {
-        PreviewText = CustomTextFormatter.GenerateCustomText(customFormatItem.ToTemplate(), _subtitles.Select(s => s.Paragraph).ToList(), _title, _videoFileName ?? string.Empty);
+        PreviewText = CustomTextFormatter.GenerateCustomText(customFormatItem.ToTemplate(), _subtitles.Where(s => s.Paragraph != null).Select(s => s.Paragraph!).ToList(), _title, _videoFileName ?? string.Empty);
     }
 
     internal async Task GridKeyDown(KeyEventArgs e)

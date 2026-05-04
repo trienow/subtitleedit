@@ -21,7 +21,7 @@ internal sealed class OllamaOcrEngine : IOcrEngine
     private readonly string _model;
     private readonly string _language;
 
-    public OllamaOcrEngine(string url, string model, string language)
+    public OllamaOcrEngine(string? url, string? model, string? language)
     {
         _url = string.IsNullOrWhiteSpace(url) ? "http://localhost:11434/api/chat" : url;
         _model = string.IsNullOrWhiteSpace(model) ? "llama3.2-vision" : model;

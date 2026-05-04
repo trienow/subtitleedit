@@ -56,7 +56,7 @@ public class Phase7OutputTest : IDisposable
         Assert.True(result.Success, string.Join("; ", result.Errors));
         var outFile = Path.Combine(outFolder, "in.txt");
         Assert.True(File.Exists(outFile));
-        var text = await File.ReadAllTextAsync(outFile);
+        var text = await File.ReadAllTextAsync(outFile, TestContext.Current.CancellationToken);
         Assert.Contains("Hello, World!", text);
         Assert.Contains("This is a test subtitle.", text);
         Assert.DoesNotContain("<i>", text);
@@ -93,7 +93,7 @@ public class Phase7OutputTest : IDisposable
                 </Rules>
               </Group>
             </MultipleSearchAndReplaceGroups>
-            """);
+            """, TestContext.Current.CancellationToken);
 
         var converter = new SubtitleConverter();
         var result = await converter.ConvertAsync(new ConversionOptions
@@ -106,7 +106,7 @@ public class Phase7OutputTest : IDisposable
         });
 
         Assert.True(result.Success, string.Join("; ", result.Errors));
-        var output = await File.ReadAllTextAsync(Path.Combine(outFolder, "in.srt"));
+        var output = await File.ReadAllTextAsync(Path.Combine(outFolder, "in.srt"), TestContext.Current.CancellationToken);
         Assert.Contains("HOLA", output);            // case-sensitive replacement (Hello → HOLA, surrounded by <i>...</i>)
         Assert.DoesNotContain("Hello", output);     // original text gone
         Assert.Contains("This is a TEST subtitle.", output); // case-insensitive replacement
@@ -132,7 +132,7 @@ public class Phase7OutputTest : IDisposable
               <FormatFooter>=== End ===</FormatFooter>
               <FormatTimeCode>hh:mm:ss</FormatTimeCode>
             </CustomFormatItem>
-            """);
+            """, TestContext.Current.CancellationToken);
 
         var converter = new SubtitleConverter();
         var result = await converter.ConvertAsync(new ConversionOptions
@@ -145,7 +145,7 @@ public class Phase7OutputTest : IDisposable
         });
 
         Assert.True(result.Success, string.Join("; ", result.Errors));
-        var rendered = await File.ReadAllTextAsync(Path.Combine(outFolder, "in.txt"));
+        var rendered = await File.ReadAllTextAsync(Path.Combine(outFolder, "in.txt"), TestContext.Current.CancellationToken);
         Assert.Contains("=== 2 entries ===", rendered);
         Assert.Contains("=== End ===", rendered);
         Assert.Contains("1: 00:00:01 -> 00:00:04", rendered);

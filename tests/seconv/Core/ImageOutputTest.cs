@@ -82,7 +82,7 @@ public class ImageOutputTest : IDisposable
 
         var indexes = Directory.GetFiles(Path.Combine(_tempRoot, "bdn"), "index.xml", SearchOption.AllDirectories);
         Assert.Single(indexes);
-        var index = await File.ReadAllTextAsync(indexes[0]);
+        var index = await File.ReadAllTextAsync(indexes[0], TestContext.Current.CancellationToken);
         Assert.Contains("<BDN", index);
         Assert.Contains("<Event", index);
         Assert.Contains("0001.png", index);

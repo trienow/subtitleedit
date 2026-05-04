@@ -66,13 +66,13 @@ public class SubtitleConverterTest : IDisposable
         var plainFolder = Path.Combine(_tempRoot, "normal");
         Directory.CreateDirectory(plainFolder);
         var file1 = Path.Combine(plainFolder, "input1.srt");
-        await File.WriteAllTextAsync(file1, SrtContent);
+        await File.WriteAllTextAsync(file1, SrtContent, TestContext.Current.CancellationToken);
 
         // Second input file: folder name contains a comma
         var commaFolder = Path.Combine(_tempRoot, "testing, testing");
         Directory.CreateDirectory(commaFolder);
         var file2 = Path.Combine(commaFolder, "input2.srt");
-        await File.WriteAllTextAsync(file2, SrtContent);
+        await File.WriteAllTextAsync(file2, SrtContent, TestContext.Current.CancellationToken);
 
         var outputFolder = Path.Combine(_tempRoot, "output");
         Directory.CreateDirectory(outputFolder);
