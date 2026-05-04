@@ -1496,6 +1496,58 @@ public partial class MainViewModel :
     }
 
     [RelayCommand]
+    private async Task FileCloseTranslation()
+    {
+        if (!ShowColumnOriginalText)
+        {
+            return;
+        }
+
+        if (_changeSubtitleHash != GetFastHash() && !IsEmpty)
+        {
+            var name = string.IsNullOrEmpty(_subtitleFileName) ? Se.Language.General.Untitled : _subtitleFileName;
+            var promptText = string.Format(Se.Language.General.SaveChangesToX, name);
+            var dr = await MessageBox.Show(Window!, Se.Language.General.SaveChangesTitle, promptText,
+                MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
+            if (dr == MessageBoxResult.Cancel)
+            {
+                return;
+            }
+
+            if (dr == MessageBoxResult.Yes)
+            {
+                if (string.IsNullOrEmpty(_subtitleFileName))
+                {
+                    var saved = await SaveSubtitleAs();
+                    if (!saved)
+                    {
+                        return;
+                    }
+                }
+                else
+                {
+                    await SaveSubtitle();
+                }
+            }
+        }
+
+        foreach (var subtitle in Subtitles)
+        {
+            subtitle.Text = subtitle.OriginalText;
+            subtitle.OriginalText = string.Empty;
+        }
+
+        _subtitleFileName = _subtitleFileNameOriginal;
+        _subtitleFileNameOriginal = string.Empty;
+        _subtitleOriginal = new Subtitle();
+        _changeSubtitleHash = GetFastHash();
+        _changeSubtitleHashOriginal = GetFastHashOriginal();
+        ShowColumnOriginalText = false;
+        AutoFitColumns();
+        _shortcutManager.ClearKeys();
+    }
+
+    [RelayCommand]
     private async Task CommandFileOpen()
     {
         var doContinue = await HasChangesContinue();

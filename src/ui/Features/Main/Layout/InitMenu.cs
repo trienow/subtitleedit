@@ -73,6 +73,12 @@ public static class InitMenu
                     Command = vm.FileCloseOriginalCommand,
                     [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnOriginalText))
                 },
+                new MenuItem
+                {
+                    Header = l.CloseTranslation,
+                    Command = vm.FileCloseTranslationCommand,
+                    [!MenuItem.IsVisibleProperty] = new Binding(nameof(vm.ShowColumnOriginalText))
+                },
                 vm.MenuReopen,
                 new MenuItem
                 {

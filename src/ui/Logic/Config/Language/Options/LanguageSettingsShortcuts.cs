@@ -156,6 +156,7 @@ public class LanguageSettingsShortcuts
     public string CommandFileNewKeepVideo { get; set; }
     public string FileOpenOriginal { get; set; }
     public string FileCloseOriginal { get; set; }
+    public string FileCloseTranslation { get; set; }
     public string RestoreAutoBackup { get; set; }
     public string OpenContainingFolder { get; set; }
     public string ImportTimeCodes { get; set; }
@@ -423,6 +424,7 @@ public class LanguageSettingsShortcuts
         CommandFileNewKeepVideo = "New (keep video)";
         FileOpenOriginal = "Open original";
         FileCloseOriginal = "Close original";
+        FileCloseTranslation = "Close translation";
         RestoreAutoBackup = "Restore auto-backup";
         OpenContainingFolder = "Open containing folder";
         ImportTimeCodes = "Import time codes";

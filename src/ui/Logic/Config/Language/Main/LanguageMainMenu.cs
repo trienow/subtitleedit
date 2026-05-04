@@ -11,6 +11,7 @@ public class LanguageMainMenu
     public string OpenKeepVideo { get; set; }
     public string OpenOriginal { get; set; }
     public string CloseOriginal { get; set; }
+    public string CloseTranslation { get; set; }
     public string Reopen { get; set; }
     public string ClearRecentFiles { get; set; }
     public string RestoreAutoBackup { get; set; }
@@ -137,6 +138,7 @@ public class LanguageMainMenu
         OpenKeepVideo = "Open (_keep video)...";
         OpenOriginal = "Open ori_ginal...";
         CloseOriginal = "_Close original";
+        CloseTranslation = "Close _translation";
         Reopen = "_Reopen...";
         ClearRecentFiles = "_Clear recent files";
         RestoreAutoBackup = "Restore auto-_backup...";
