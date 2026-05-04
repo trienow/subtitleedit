@@ -60,7 +60,19 @@ seconv list-encodings         # list text encodings
 seconv list-pac-codepages     # list PAC code pages
 seconv list-ocr-engines       # list OCR engines + installation status
 seconv list-fce-rules         # list FixCommonErrors rule IDs
+seconv info <file>            # print format/encoding/duration/language for a file
+seconv lint <pattern>         # validate subtitle(s); exit 1 if issues found
 seconv --help                 # show help
+```
+
+### Inspect & validate
+
+```bash
+seconv info movie.srt                       # human-readable table
+seconv info movie.srt --json                # machine-parseable
+
+seconv lint *.srt                           # check overlaps, line lengths, tags, ...
+seconv lint *.srt --json                    # CI-friendly: exit 1 on any issue
 ```
 
 ## Command Line Options
@@ -129,6 +141,7 @@ seconv --help                 # show help
 |---|---|
 | `--quiet` / `-q` | Suppress per-file progress; only print the final summary |
 | `--verbose` / `-v` | Print extra diagnostic information |
+| `--json` | Emit per-file results as JSON to stdout (suppresses Spectre output) |
 
 ## Operations (boolean flags)
 

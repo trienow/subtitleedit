@@ -26,6 +26,10 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Print extra diagnostic information")]
         public bool Verbose { get; init; }
 
+        [CommandOption("--json")]
+        [Description("Emit per-file results as JSON to stdout (suppresses table/progress output)")]
+        public bool Json { get; init; }
+
         [CommandOption("--adjustduration")]
         [Description("Adjust duration in milliseconds")]
         public int? AdjustDuration { get; init; }
@@ -220,7 +224,11 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
     {
         try
         {
-            if (!settings.Quiet)
+            // --json implies the same per-file silence as --quiet, but adds a final
+            // JSON document. Header + parameter table are suppressed in both modes.
+            var silent = settings.Quiet || settings.Json;
+
+            if (!silent)
             {
                 AnsiConsole.MarkupLine("[bold cyan]Subtitle Edit - Batch Converter[/]");
                 AnsiConsole.WriteLine();
@@ -386,7 +394,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 OllamaModel = settings.OllamaModel,
                 TeletextOnly = settings.TeletextOnly,
                 TeletextOnlyPage = settings.TeletextOnlyPage,
-                Quiet = settings.Quiet,
+                Quiet = silent,
                 Verbose = settings.Verbose,
             };
 
@@ -428,7 +436,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             if (!string.IsNullOrEmpty(settings.DeleteContains))
                 table.AddRow("Delete Contains", settings.DeleteContains);
 
-            if (!settings.Quiet)
+            if (!silent)
             {
                 AnsiConsole.Write(table);
                 AnsiConsole.WriteLine();
@@ -441,6 +449,12 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             stopwatch.Stop();
 
             var elapsed = FormatElapsed(stopwatch.Elapsed);
+
+            if (settings.Json)
+            {
+                EmitJsonResult(result, stopwatch.Elapsed);
+                return result.Success ? 0 : 1;
+            }
 
             // Display results
             AnsiConsole.WriteLine();
@@ -480,13 +494,48 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         }
         catch (Exception ex)
         {
-            AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
-            if (ex.InnerException != null)
+            if (settings.Json)
             {
-                AnsiConsole.MarkupLine($"[dim]{ex.InnerException.Message}[/]");
+                Console.Error.WriteLine(System.Text.Json.JsonSerializer.Serialize(new { error = ex.Message }));
+            }
+            else
+            {
+                AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
+                if (ex.InnerException != null)
+                {
+                    AnsiConsole.MarkupLine($"[dim]{ex.InnerException.Message}[/]");
+                }
             }
             return 1;
         }
+    }
+
+    private static readonly System.Text.Json.JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase,
+        WriteIndented = true,
+        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
+
+    private static void EmitJsonResult(ConversionResult result, TimeSpan elapsed)
+    {
+        var payload = new
+        {
+            success = result.Success,
+            totalFiles = result.TotalFiles,
+            successfulFiles = result.SuccessfulFiles,
+            failedFiles = result.FailedFiles,
+            elapsedMs = (long)elapsed.TotalMilliseconds,
+            files = result.Files.Select(f => new
+            {
+                input = f.Input,
+                output = f.Output,
+                success = f.Success,
+                error = f.Error,
+            }),
+            errors = result.Errors,
+        };
+        Console.WriteLine(System.Text.Json.JsonSerializer.Serialize(payload, JsonOptions));
     }
 
     private static List<int> ParseTrackNumbers(string? csv)

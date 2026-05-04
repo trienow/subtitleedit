@@ -47,6 +47,7 @@ internal static class HelpDisplay
         ShowParameter("--settings:<path.json>", "JSON settings file overriding libse defaults");
         ShowParameter("--quiet", "Suppress per-file progress; only print the final summary");
         ShowParameter("--verbose", "Print extra diagnostic information");
+        ShowParameter("--json", "Emit per-file results as JSON (suppresses Spectre output)");
         
         AnsiConsole.WriteLine();
         AnsiConsole.MarkupLine("[bold cyan]Operations:[/]");
@@ -81,6 +82,8 @@ internal static class HelpDisplay
         ShowParameter("list-pac-codepages", "List PAC code pages (--pac-codepage values)");
         ShowParameter("list-ocr-engines", "List OCR engines + installation status");
         ShowParameter("list-fce-rules", "List FixCommonErrors rule IDs");
+        ShowParameter("info <file>", "Print format / encoding / duration / language info");
+        ShowParameter("lint <pattern>", "Validate subtitle(s); exit 1 if any issues found");
 
         AnsiConsole.WriteLine();
         ShowSection("Examples", null);

@@ -45,6 +45,7 @@ internal class SubtitleConverter
                         }
                         await ConvertFileAsync(inputFile, outputFile, options);
                         result.SuccessfulFiles++;
+                        result.Files.Add(new FileConversionResult(inputFile, outputFile, true, null));
                         if (!options.Quiet)
                         {
                             AnsiConsole.MarkupLine(" [green]done.[/]");
@@ -70,6 +71,7 @@ internal class SubtitleConverter
                             }
                             await ConvertTrackAsync(track, outputFile, options);
                             result.SuccessfulFiles++;
+                            result.Files.Add(new FileConversionResult(inputFile, outputFile, true, null));
                             if (!options.Quiet)
                             {
                                 AnsiConsole.MarkupLine(" [green]done.[/]");
@@ -81,6 +83,7 @@ internal class SubtitleConverter
                 {
                     result.FailedFiles++;
                     result.Errors.Add($"{Path.GetFileName(inputFile)}: {ex.Message}");
+                    result.Files.Add(new FileConversionResult(inputFile, null, false, ex.Message));
 
                     if (!options.Quiet)
                     {
@@ -378,5 +381,8 @@ internal class ConversionResult
     public int SuccessfulFiles { get; set; }
     public int FailedFiles { get; set; }
     public List<string> Errors { get; set; } = new();
+    public List<FileConversionResult> Files { get; set; } = new();
     public bool Success => FailedFiles == 0 && Errors.Count == 0;
 }
+
+internal sealed record FileConversionResult(string Input, string? Output, bool Success, string? Error);
