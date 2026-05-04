@@ -125,11 +125,17 @@ internal static class HelpDisplay
         AnsiConsole.WriteLine();
     }
 
+    private const int ParamColumnWidth = 42;
+
     private static void ShowParameter(string param, string description)
     {
+        // Pad based on the visible length (param.Length) rather than the markup-escaped
+        // length: Spectre.Console renders "[[" / "]]" as single chars, so columns drift
+        // if we let the formatter pad against the escaped string.
         var escapedParam = param.Replace("<", "[[").Replace(">", "]]");
         var escapedDescription = description.Replace("<", "[[").Replace(">", "]]");
-        AnsiConsole.MarkupLine($"  [yellow]{escapedParam,-40}[/] [dim]{escapedDescription}[/]");
+        var pad = Math.Max(1, ParamColumnWidth - param.Length);
+        AnsiConsole.MarkupLine($"  [yellow]{escapedParam}[/]{new string(' ', pad)}[dim]{escapedDescription}[/]");
     }
 
     private static void ShowExample(string command, string description)
