@@ -102,6 +102,7 @@ public partial class AutoTranslateViewModel : ObservableObject
             new LaraTranslate(),
             new PerplexityTranslate(),
             new GeminiTranslate(),
+            new NvidiaTranslate(),
             new PapagoTranslate(),
             new NoLanguageLeftBehindServe(),
             new NoLanguageLeftBehindApi(),
@@ -170,6 +171,11 @@ public partial class AutoTranslateViewModel : ObservableObject
         Configuration.Settings.Tools.DeepSeekUrl = Se.Settings.AutoTranslate.DeepSeekUrl;
         Configuration.Settings.Tools.DeepSeekModel = Se.Settings.AutoTranslate.DeepSeekModel;
         Configuration.Settings.Tools.DeepSeekPrompt = Se.Settings.AutoTranslate.DeepSeekPrompt;
+
+        Configuration.Settings.Tools.NvidiaApiKey = Se.Settings.AutoTranslate.NvidiaApiKey;
+        Configuration.Settings.Tools.NvidiaUrl = Se.Settings.AutoTranslate.NvidiaUrl;
+        Configuration.Settings.Tools.NvidiaModel = Se.Settings.AutoTranslate.NvidiaModel;
+        Configuration.Settings.Tools.NvidiaPrompt = Se.Settings.AutoTranslate.NvidiaPrompt;
 
         Configuration.Settings.Tools.AvalAiApiKey = Se.Settings.AutoTranslate.AvalAiApiKey;
         Configuration.Settings.Tools.AvalAiUrl = Se.Settings.AutoTranslate.AvalAiUrl;
@@ -318,6 +324,12 @@ public partial class AutoTranslateViewModel : ObservableObject
             Configuration.Settings.Tools.GeminiModel = apiModel.Trim();
         }
 
+        if (engineType == typeof(NvidiaTranslate))
+        {
+            Configuration.Settings.Tools.NvidiaApiKey = apiKey.Trim();
+            Configuration.Settings.Tools.NvidiaModel = apiModel.Trim();
+        }
+
         if (engineType == typeof(PapagoTranslate))
         {
             Configuration.Settings.Tools.AutoTranslatePapagoApiKeyId = apiUrl.Trim();
@@ -377,6 +389,11 @@ public partial class AutoTranslateViewModel : ObservableObject
         Se.Settings.AutoTranslate.DeepSeekUrl = Configuration.Settings.Tools.DeepSeekUrl;
         Se.Settings.AutoTranslate.DeepSeekModel = Configuration.Settings.Tools.DeepSeekModel;
         Se.Settings.AutoTranslate.DeepSeekPrompt = Configuration.Settings.Tools.DeepSeekPrompt;
+
+        Se.Settings.AutoTranslate.NvidiaApiKey = Configuration.Settings.Tools.NvidiaApiKey;
+        Se.Settings.AutoTranslate.NvidiaUrl = Configuration.Settings.Tools.NvidiaUrl;
+        Se.Settings.AutoTranslate.NvidiaModel = Configuration.Settings.Tools.NvidiaModel;
+        Se.Settings.AutoTranslate.NvidiaPrompt = Configuration.Settings.Tools.NvidiaPrompt;
 
         Se.Settings.AutoTranslate.AvalAiApiKey = Configuration.Settings.Tools.AvalAiApiKey;
         Se.Settings.AutoTranslate.AvalAiUrl = Configuration.Settings.Tools.AvalAiUrl;
@@ -1194,6 +1211,24 @@ public partial class AutoTranslateViewModel : ObservableObject
             ModelIsVisible = true;
             ButtonModelIsVisible = true;
             ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.GeminiModel) ? _apiModels[0] : Configuration.Settings.Tools.GeminiModel;
+
+            return;
+        }
+
+        if (engineType == typeof(NvidiaTranslate))
+        {
+            FillUrls(new List<string>
+            {
+                Configuration.Settings.Tools.NvidiaUrl,
+            });
+
+            ApiKeyText = Configuration.Settings.Tools.NvidiaApiKey;
+            ApiKeyIsVisible = true;
+
+            _apiModels = NvidiaTranslate.Models.ToList();
+            ModelIsVisible = true;
+            ButtonModelIsVisible = true;
+            ModelText = string.IsNullOrEmpty(Configuration.Settings.Tools.NvidiaModel) ? _apiModels[0] : Configuration.Settings.Tools.NvidiaModel;
 
             return;
         }

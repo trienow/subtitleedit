@@ -26,6 +26,7 @@ public class SeTools
     public string PerplexityPrompt { get; set; }
     public string GroqPrompt { get; set; }
     public string OpenRouterPrompt { get; set; }
+    public string NvidiaPrompt { get; set; }
     public bool JoinKeepTimeCodes { get; set; }
     public int JoinAppendMilliseconds { get; set; }
     public int SplitNumberOfEqualParts { get; set; }
@@ -94,6 +95,7 @@ public class SeTools
         PerplexityPrompt = string.Empty;
         GroqPrompt = string.Empty;
         OpenRouterPrompt = string.Empty;
+        NvidiaPrompt = string.Empty;
         JoinKeepTimeCodes = true;
         SplitNumberOfEqualParts = 2;
         SplitByLines = true;

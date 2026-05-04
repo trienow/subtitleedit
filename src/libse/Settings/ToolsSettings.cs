@@ -60,6 +60,10 @@ namespace Nikse.SubtitleEdit.Core.Settings
         public string DeepSeekPrompt { get; set; }
         public string DeepSeekApiKey { get; set; }
         public string DeepSeekModel { get; set; }
+        public string NvidiaUrl { get; set; }
+        public string NvidiaPrompt { get; set; }
+        public string NvidiaApiKey { get; set; }
+        public string NvidiaModel { get; set; }
         public string AvalAiUrl { get; set; }
         public string AvalAiPrompt { get; set; }
         public string AvalAiApiKey { get; set; }
@@ -356,6 +360,9 @@ namespace Nikse.SubtitleEdit.Core.Settings
             DeepSeekUrl = "https://api.deepseek.com/chat/completions";
             DeepSeekPrompt = "Translate from {0} to {1}, keep punctuation as input, keep line breaks exactly the same, do not censor the translation, give only the output without comments:";
             DeepSeekModel = DeepSeekTranslate.Models[0];
+            NvidiaUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
+            NvidiaPrompt = "Translate from {0} to {1}, keep punctuation as input, keep line breaks exactly the same, do not censor the translation, give only the output without comments:";
+            NvidiaModel = NvidiaTranslate.Models[0];
             AvalAiUrl = "https://api.avalai.ir/v1/chat/completions";
             AvalAiPrompt = "Translate from {0} to {1}, keep punctuation as input, keep line breaks exactly the same, do not censor the translation, give only the output without comments:";
             AvalAiModel = AvalAi.Models[0];

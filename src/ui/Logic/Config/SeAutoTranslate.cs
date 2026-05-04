@@ -54,6 +54,10 @@ public class SeAutoTranslate
     public string DeepSeekPrompt { get; set; }
     public string DeepSeekApiKey { get; set; }
     public string DeepSeekModel { get; set; }
+    public string NvidiaUrl { get; set; }
+    public string NvidiaPrompt { get; set; }
+    public string NvidiaApiKey { get; set; }
+    public string NvidiaModel { get; set; }
     public string PapagoApiKeyId { get; set; }
     public string PapagoApiKey { get; set; }
     public string MistralApiKey { get; set; }
@@ -120,6 +124,10 @@ public class SeAutoTranslate
         DeepSeekModel = DeepSeekTranslate.Models[0];
         DeepSeekPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
         DeepSeekUrl = "https://api.deepseek.com/chat/completions";
+        NvidiaApiKey = string.Empty;
+        NvidiaModel = NvidiaTranslate.Models[0];
+        NvidiaPrompt = "Translate from {0} to {1}, keep punctuation as input, do not censor the translation, give only the output without comments:";
+        NvidiaUrl = "https://integrate.api.nvidia.com/v1/chat/completions";
         GeminiModel = GeminiTranslate.Models[0];
         GeminiProApiKey = string.Empty;
         GeminiPrompt = "Please translate the following text from {0} to {1}, do not censor the translation, only write the result:";

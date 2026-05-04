@@ -52,10 +52,11 @@ public partial class TranslateSettingsViewModel : ObservableObject
         if (engineType == typeof(ChatGptTranslate) ||
             engineType == typeof(OllamaTranslate) ||
             engineType == typeof(LmStudioTranslate) ||
-            engineType == typeof(AnthropicTranslate) ||  
-            engineType == typeof(PerplexityTranslate) ||  
+            engineType == typeof(AnthropicTranslate) ||
+            engineType == typeof(PerplexityTranslate) ||
             engineType == typeof(GroqTranslate) ||
             engineType == typeof(OpenRouterTranslate) ||
+            engineType == typeof(NvidiaTranslate) ||
             engineType == typeof(LlamaCppTranslate))
         {
             if (!PromptText.Contains("{0}") || !PromptText.Contains("{1}"))
@@ -123,6 +124,10 @@ public partial class TranslateSettingsViewModel : ObservableObject
             else if (engineType == typeof(OpenRouterTranslate))
             {
                 Se.Settings.Tools.OpenRouterPrompt = PromptText;
+            }
+            else if (engineType == typeof(NvidiaTranslate))
+            {
+                Se.Settings.Tools.NvidiaPrompt = PromptText;
             }
             else if (engineType == typeof(LlamaCppTranslate))
             {
@@ -208,6 +213,14 @@ public partial class TranslateSettingsViewModel : ObservableObject
             if (string.IsNullOrWhiteSpace(PromptText))
             {
                 PromptText = new SeAutoTranslate().OpenRouterPrompt;
+            }
+        }
+        else if (engineType == typeof(NvidiaTranslate))
+        {
+            PromptText = Se.Settings.Tools.NvidiaPrompt;
+            if (string.IsNullOrWhiteSpace(PromptText))
+            {
+                PromptText = new SeAutoTranslate().NvidiaPrompt;
             }
         }
         else if (engineType == typeof(LlamaCppTranslate))
