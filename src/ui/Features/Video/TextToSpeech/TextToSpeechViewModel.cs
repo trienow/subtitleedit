@@ -128,6 +128,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             new GoogleSpeech(ttsDownloadService),
             new Qwen3TtsCpp(),
             new KokoroTtsCpp(),
+            new ChatterboxTtsCpp(),
         ];
 
         if (!OperatingSystem.IsMacOS())
@@ -757,6 +758,22 @@ public partial class TextToSpeechViewModel : ObservableObject
 
                 var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window!, vm => vm.StartDownloadKokoroTtsModels());
                 return dlResult.OkPressed && KokoroTtsCpp.AreModelsInstalled();
+            }
+
+            return true;
+        }
+
+        if (engine is ChatterboxTtsCpp)
+        {
+            if (!await engine.IsInstalled(SelectedRegion))
+            {
+                await MessageBox.Show(
+                    Window,
+                    "CrispASR required",
+                    $"{Environment.NewLine}\"Chatterbox TTS\" runs through the CrispASR runtime, which is not installed.{Environment.NewLine}{Environment.NewLine}Install CrispASR via \"Video → Audio to text\" first, then return here.",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return false;
             }
 
             return true;
