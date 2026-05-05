@@ -238,10 +238,16 @@ public class ChatterboxTtsCpp : ITtsEngine
             }
             Se.LogError(ex, $"Chatterbox TTS request failed - Voice: {chatterboxVoice}, Text: {text}, "
                 + $"ServerExited: {died}, ServerLog: {serverLog}");
+
+            var prefix = LooksLikeUpstreamChatterboxCrash(serverLog)
+                ? "Chatterbox TTS hit a CrispASR runtime bug during synthesis (ggml tensor read out of bounds). "
+                  + "This is an upstream issue — please file it at https://github.com/CrispStrobe/CrispASR/issues with the server log below. "
+                  + "Switching to the Vulkan or CUDA CrispASR build (re-download via Audio to text) may avoid the CPU-only code path that triggers it."
+                : "Chatterbox TTS request failed — "
+                  + (died ? "the crispasr server crashed during synthesis." : "the connection to the crispasr server was dropped.");
+
             throw new InvalidOperationException(
-                "Chatterbox TTS request failed — "
-                + (died ? "the crispasr server crashed during synthesis." : "the connection to the crispasr server was dropped.")
-                + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"),
+                prefix + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"),
                 ex);
         }
 
@@ -400,6 +406,17 @@ public class ChatterboxTtsCpp : ITtsEngine
         // backend (e.g. ASR-only build) prints `unknown backend 'chatterbox'`.
         return output.Contains("unknown argument", StringComparison.Ordinal)
             || output.Contains("unknown backend", StringComparison.Ordinal);
+    }
+
+    private static bool LooksLikeUpstreamChatterboxCrash(string output)
+    {
+        // Known CrispASR v0.6.0 chatterbox synth crash on the CPU build:
+        //   ggml-backend.cpp:349: GGML_ASSERT(offset + size <= ggml_nbytes(tensor)
+        //                         && "tensor read out of bounds") failed
+        // Hits during the first AR step after KV-cache allocation. Upstream fix
+        // pending. Distinct from the static-init duplicate ggml assert at
+        // ggml.cpp:22 (caught by LooksLikeStaleModelCache via a different match).
+        return output.Contains("tensor read out of bounds", StringComparison.Ordinal);
     }
 
     private static bool LooksLikeStaleModelCache(string output)
