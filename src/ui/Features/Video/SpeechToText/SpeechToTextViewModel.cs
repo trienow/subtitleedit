@@ -68,6 +68,9 @@ public partial class SpeechToTextViewModel : ObservableObject
     [ObservableProperty] private bool _isCrispAsrSelected;
     [ObservableProperty] private ObservableCollection<CrispAsrEngineBase> _crispAsrBackends;
     [ObservableProperty] private CrispAsrEngineBase? _selectedCrispAsrBackend;
+    [ObservableProperty] private bool _isForcedAlignerVisible;
+    [ObservableProperty] private ObservableCollection<ForcedAlignerOption> _forcedAligners;
+    [ObservableProperty] private ForcedAlignerOption? _selectedForcedAligner;
     [ObservableProperty] private double _progressOpacity;
 
     [ObservableProperty] private double _progressValue;
@@ -174,6 +177,7 @@ public partial class SpeechToTextViewModel : ObservableObject
         BatchItems = new ObservableCollection<SpeechToTextJobItem>();
         WhisperCppBackends = new ObservableCollection<ISpeechToTextEngine>();
         CrispAsrBackends = new ObservableCollection<CrispAsrEngineBase>();
+        ForcedAligners = new ObservableCollection<ForcedAlignerOption>();
 
         ResultAudioClips = new List<AudioClip>();
 
@@ -243,6 +247,7 @@ public partial class SpeechToTextViewModel : ObservableObject
         Se.Settings.Tools.AudioToText.WhisperChoice = engine.Choice;
         Se.Settings.Tools.AudioToText.WhisperModel = SelectedModel?.Model.Name ?? string.Empty;
         Se.Settings.Tools.AudioToText.WhisperLanguageCode = SelectedLanguage?.Code ?? string.Empty;
+        Se.Settings.Tools.AudioToText.CrispAsrForcedAligner = SelectedForcedAligner?.Choice ?? ForcedAlignerOption.BuiltInChoice;
 
         Se.SaveSettings();
     }
@@ -266,7 +271,51 @@ public partial class SpeechToTextViewModel : ObservableObject
     {
         UpdateWhisperCppBackendUi();
         UpdateCrispAsrBackendUi();
+        UpdateForcedAlignerUi();
         IsBackendSelectionVisible = IsWhisperCppSelected || IsCrispAsrSelected;
+        IsForcedAlignerVisible = IsCrispAsrSelected;
+    }
+
+    private void UpdateForcedAlignerUi()
+    {
+        var engine = GetEffectiveSelectedEngine();
+        var crispEngine = engine as ICrispAsrEngine;
+        var hasNative = crispEngine?.HasNativeTimestamps == true;
+
+        var newOptions = new List<ForcedAlignerOption>();
+        if (hasNative)
+        {
+            newOptions.Add(ForcedAlignerOption.BuiltIn());
+        }
+        newOptions.Add(ForcedAlignerOption.CanaryCtc());
+        newOptions.Add(ForcedAlignerOption.Qwen3());
+
+        var sameList = ForcedAligners.Count == newOptions.Count
+                       && ForcedAligners.Zip(newOptions, (a, b) => a.Choice == b.Choice).All(eq => eq);
+        if (!sameList)
+        {
+            ForcedAligners.Clear();
+            foreach (var opt in newOptions)
+            {
+                ForcedAligners.Add(opt);
+            }
+        }
+
+        if (crispEngine == null)
+        {
+            return;
+        }
+
+        var preferredChoice = hasNative
+            ? ForcedAlignerOption.BuiltInChoice
+            : (crispEngine is CrispAsrQwen3 ? ForcedAlignerOption.Qwen3Choice : ForcedAlignerOption.CanaryCtcChoice);
+
+        var match = ForcedAligners.FirstOrDefault(p => p.Choice == preferredChoice)
+                    ?? ForcedAligners.FirstOrDefault();
+        if (!ReferenceEquals(SelectedForcedAligner, match))
+        {
+            SelectedForcedAligner = match;
+        }
     }
 
     private void UpdateWhisperCppBackendUi()
@@ -277,13 +326,20 @@ public partial class SpeechToTextViewModel : ObservableObject
             _isUpdatingWhisperCppBackend = true;
             try
             {
-                WhisperCppBackends.Clear();
-                foreach (var backend in whisperCppEngine.Backends)
+                if (WhisperCppBackends.Count != whisperCppEngine.Backends.Count)
                 {
-                    WhisperCppBackends.Add(backend);
+                    WhisperCppBackends.Clear();
+                    foreach (var backend in whisperCppEngine.Backends)
+                    {
+                        WhisperCppBackends.Add(backend);
+                    }
                 }
 
-                SelectedWhisperCppBackend = WhisperCppBackends.FirstOrDefault(p => p.Choice == whisperCppEngine.SelectedBackend.Choice);
+                var match = WhisperCppBackends.FirstOrDefault(p => p.Choice == whisperCppEngine.SelectedBackend.Choice);
+                if (!ReferenceEquals(SelectedWhisperCppBackend, match))
+                {
+                    SelectedWhisperCppBackend = match;
+                }
             }
             finally
             {
@@ -313,13 +369,20 @@ public partial class SpeechToTextViewModel : ObservableObject
             _isUpdatingCrispAsrBackend = true;
             try
             {
-                CrispAsrBackends.Clear();
-                foreach (var backend in crispAsrEngine.Backends)
+                if (CrispAsrBackends.Count != crispAsrEngine.Backends.Count)
                 {
-                    CrispAsrBackends.Add(backend);
+                    CrispAsrBackends.Clear();
+                    foreach (var backend in crispAsrEngine.Backends)
+                    {
+                        CrispAsrBackends.Add(backend);
+                    }
                 }
 
-                SelectedCrispAsrBackend = CrispAsrBackends.FirstOrDefault(p => p.Choice == crispAsrEngine.SelectedBackend.Choice);
+                var match = CrispAsrBackends.FirstOrDefault(p => p.Choice == crispAsrEngine.SelectedBackend.Choice);
+                if (!ReferenceEquals(SelectedCrispAsrBackend, match))
+                {
+                    SelectedCrispAsrBackend = match;
+                }
             }
             finally
             {
@@ -1640,6 +1703,66 @@ public partial class SpeechToTextViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task DownloadForcedAligner()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var engine = GetEffectiveSelectedEngine();
+        if (engine is not ICrispAsrEngine)
+        {
+            return;
+        }
+
+        var displays = new ObservableCollection<SpeechToTextModelDisplay>();
+        foreach (var aligner in ForcedAlignerOption.All())
+        {
+            if (aligner.IsBuiltIn)
+            {
+                continue;
+            }
+
+            displays.Add(new SpeechToTextModelDisplay
+            {
+                Model = aligner.ToWhisperModel(),
+                Display = aligner.Display + " (" + aligner.FileName + ")",
+                Engine = engine,
+            });
+        }
+
+        if (displays.Count == 0)
+        {
+            return;
+        }
+
+        SpeechToTextModelDisplay? preSelected = null;
+        if (SelectedForcedAligner != null && !SelectedForcedAligner.IsBuiltIn)
+        {
+            preSelected = displays.FirstOrDefault(d => d.Model.Name == SelectedForcedAligner.FileName);
+        }
+
+        preSelected ??= displays[0];
+
+        await _windowService.ShowDialogAsync<DownloadSpeechToTextModelsWindow, DownloadSpeechToTextModelsViewModel>(
+            Window, viewModel =>
+            {
+                viewModel.SetModels(displays, engine, preSelected);
+            });
+    }
+
+    private static string GetForcedAlignerPath(ICrispAsrEngine crispEngine, ForcedAlignerOption aligner)
+    {
+        if (aligner.IsBuiltIn || string.IsNullOrEmpty(aligner.FileName) || crispEngine is not CrispAsrEngineBase baseEngine)
+        {
+            return string.Empty;
+        }
+
+        return baseEngine.GetModelForCmdLine(aligner.FileName);
+    }
+
+    [RelayCommand]
     private async Task Transcribe()
     {
         if (IsBatchMode && BatchItems.Count == 0)
@@ -1875,7 +1998,8 @@ public partial class SpeechToTextViewModel : ObservableObject
             }
         }
 
-        if (engine is CrispAsrQwen3 crispQwen3Engine)
+        if (engine is CrispAsrQwen3 crispQwen3Engine
+            && (SelectedForcedAligner == null || SelectedForcedAligner.IsBuiltIn))
         {
             var modelAligner = crispQwen3Engine.ForcedAlignerModel;
             var displayModelAligner = new SpeechToTextModelDisplay
@@ -1906,6 +2030,46 @@ public partial class SpeechToTextViewModel : ObservableObject
                     Window!, viewModel =>
                     {
                         viewModel.SetModels(models, engine, displayModelAligner);
+                        viewModel.StartDownload();
+                    });
+
+                if (!vm.OkPressed)
+                {
+                    return;
+                }
+            }
+        }
+
+        if (engine is ICrispAsrEngine crispAsrEngineForAligner
+            && SelectedForcedAligner != null && !SelectedForcedAligner.IsBuiltIn)
+        {
+            var alignerPath = GetForcedAlignerPath(crispAsrEngineForAligner, SelectedForcedAligner);
+            if (string.IsNullOrEmpty(alignerPath) || !File.Exists(alignerPath))
+            {
+                var alignerWhisperModel = SelectedForcedAligner.ToWhisperModel();
+                var displayAligner = new SpeechToTextModelDisplay
+                {
+                    Model = alignerWhisperModel,
+                    Display = SelectedForcedAligner.Display + " (" + SelectedForcedAligner.FileName + ")",
+                    Engine = engine,
+                };
+                var answer = await MessageBox.Show(
+                                Window!,
+                                $"Download {SelectedForcedAligner.Display}?",
+                                $"'{SelectedForcedAligner.Display}' is selected but not installed.\nDownload and use {SelectedForcedAligner.FileName}?",
+                                MessageBoxButtons.YesNoCancel,
+                                MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+
+                var alignerModels = new ObservableCollection<SpeechToTextModelDisplay> { displayAligner };
+                var vm = await _windowService.ShowDialogAsync<DownloadSpeechToTextModelsWindow, DownloadSpeechToTextModelsViewModel>(
+                    Window!, viewModel =>
+                    {
+                        viewModel.SetModels(alignerModels, engine, displayAligner);
                         viewModel.StartDownload();
                     });
 
@@ -2235,7 +2399,16 @@ public partial class SpeechToTextViewModel : ObservableObject
                 ? $"-l {langCode} "
                 : string.Empty;
             var alignerPart = string.Empty;
-            if (crispAsrEngine is CrispAsrQwen3 crispQwen3)
+            var selectedAligner = SelectedForcedAligner ?? ForcedAlignerOption.BuiltIn();
+            if (!selectedAligner.IsBuiltIn)
+            {
+                var explicitAlignerPath = GetForcedAlignerPath(crispAsrEngine, selectedAligner);
+                if (!string.IsNullOrEmpty(explicitAlignerPath) && File.Exists(explicitAlignerPath))
+                {
+                    alignerPart = $" -am \"{explicitAlignerPath}\"";
+                }
+            }
+            else if (crispAsrEngine is CrispAsrQwen3 crispQwen3)
             {
                 var alignerPath = crispQwen3.GetModelForCmdLine(crispQwen3.ForcedAlignerModel.Name);
                 if (File.Exists(alignerPath))
