@@ -220,22 +220,46 @@ public class ChatterboxTtsCpp : ITtsEngine
 
         var body = JsonSerializer.Serialize(payload);
         using var content = new StringContent(body, Encoding.UTF8, "application/json");
-        using var response = await HttpClient.PostAsync($"{ServerBaseUrl}/v1/audio/speech", content, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        HttpResponseMessage response;
+        try
         {
-            var errorBody = await SafeReadErrorAsync(response, cancellationToken);
+            response = await HttpClient.PostAsync($"{ServerBaseUrl}/v1/audio/speech", content, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            // Connection dropped before a response — typically the server crashed
+            // during synth (ggml fault, OOM, etc.). Attach what the server printed
+            // so the user/we can see the underlying reason.
             var serverLog = SnapshotServerLog();
-            Se.LogError($"Chatterbox TTS server error {(int)response.StatusCode} {response.StatusCode} - "
-                + $"Voice: {chatterboxVoice}, Text: {text}, Body: {errorBody}, ServerLog: {serverLog}");
+            var died = _serverProcess?.HasExited == true;
+            if (died)
+            {
+                StopServerInternal();
+            }
+            Se.LogError(ex, $"Chatterbox TTS request failed - Voice: {chatterboxVoice}, Text: {text}, "
+                + $"ServerExited: {died}, ServerLog: {serverLog}");
             throw new InvalidOperationException(
-                $"Chatterbox TTS synthesis failed ({(int)response.StatusCode}): {errorBody}"
-                + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"));
+                "Chatterbox TTS request failed — "
+                + (died ? "the crispasr server crashed during synthesis." : "the connection to the crispasr server was dropped.")
+                + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"),
+                ex);
         }
 
-        await using (var fileStream = File.Create(outputFileName))
-        await using (var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken))
+        using (response)
         {
+            if (!response.IsSuccessStatusCode)
+            {
+                var errorBody = await SafeReadErrorAsync(response, cancellationToken);
+                var serverLog = SnapshotServerLog();
+                Se.LogError($"Chatterbox TTS server error {(int)response.StatusCode} {response.StatusCode} - "
+                    + $"Voice: {chatterboxVoice}, Text: {text}, Body: {errorBody}, ServerLog: {serverLog}");
+                throw new InvalidOperationException(
+                    $"Chatterbox TTS synthesis failed ({(int)response.StatusCode}): {errorBody}"
+                    + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"));
+            }
+
+            await using var fileStream = File.Create(outputFileName);
+            await using var contentStream = await response.Content.ReadAsStreamAsync(cancellationToken);
             await contentStream.CopyToAsync(fileStream, cancellationToken);
         }
 
