@@ -2,6 +2,7 @@ using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Features.Video.SpeechToText.Engines;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Voices;
 using Nikse.SubtitleEdit.Logic.Config;
+using Nikse.SubtitleEdit.Logic.Download;
 using Nikse.SubtitleEdit.Logic.Media;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -62,6 +64,43 @@ public class ChatterboxTtsCpp : ITtsEngine
     public static string GetCrispAsrExecutable()
     {
         return new CrispAsrCohere().GetExecutable();
+    }
+
+    /// <summary>
+    /// Returns true when the installed crispasr executable matches a known
+    /// chatterbox-capable release (currently v0.6.0+ — earlier builds neither
+    /// recognise --backend chatterbox nor expose the /v1/audio/speech endpoint).
+    /// Returns true when the hash is unknown so we don't false-positive on
+    /// custom local builds.
+    /// </summary>
+    public static bool IsCrispAsrChatterboxCapable()
+    {
+        var exe = GetCrispAsrExecutable();
+        if (!File.Exists(exe))
+        {
+            return false;
+        }
+
+        var folder = Path.GetDirectoryName(exe);
+        var variant = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && folder != null
+            ? DownloadHashManager.DetectCrispAsrWindowsVariant(folder)
+            : null;
+        var key = DownloadHashManager.ResolveCrispAsrExecutableKey(variant);
+        if (key == null)
+        {
+            return true;
+        }
+
+        var hash = DownloadHashManager.ComputeSha256(exe);
+        if (hash == null)
+        {
+            return true;
+        }
+
+        // UpdateAvailable means the installed hash is a known *older* release —
+        // demote those to "not chatterbox-capable" so the user is prompted to
+        // re-download. UpToDate and Unknown both pass through.
+        return DownloadHashManager.GetStatus(key, hash) != DownloadHashManager.UpdateStatus.UpdateAvailable;
     }
 
     public static string GetSetFolder()

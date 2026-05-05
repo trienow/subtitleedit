@@ -776,6 +776,17 @@ public partial class TextToSpeechViewModel : ObservableObject
                 return false;
             }
 
+            if (!ChatterboxTtsCpp.IsCrispAsrChatterboxCapable())
+            {
+                await MessageBox.Show(
+                    Window,
+                    "CrispASR update required",
+                    $"{Environment.NewLine}\"Chatterbox TTS\" needs CrispASR v0.6.0 or newer.{Environment.NewLine}{Environment.NewLine}Re-download CrispASR via \"Video → Audio to text → Engine settings → Re-download\", then return here.",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information);
+                return false;
+            }
+
             return true;
         }
 
