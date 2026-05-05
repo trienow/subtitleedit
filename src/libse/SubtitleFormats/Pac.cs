@@ -1692,7 +1692,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
             const int endDelimiter = 0x00;
             var alignment = buffer[feIndex + 1];
             var isSecondaryCodePage = (alignment & 0x08) != 0;
-            alignment &= 0x07;
+            alignment &= 0x03; // bits 0-1 hold alignment (0=right, 1=left, 2=center); bit 2 (0x04) is the italic flag
             var p = new Paragraph();
             var timeStartIndex = feIndex - 15;
             if (buffer[timeStartIndex] == 0x60)
@@ -1799,7 +1799,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                         {
                             alignment = buffer[index + 1];
                             isSecondaryCodePage = (alignment & 0x08) != 0;
-                            alignment &= 0x07;
+                            alignment &= 0x03; // bits 0-1 hold alignment (0=right, 1=left, 2=center); bit 2 (0x04) is the italic flag
                             sb.AppendLine();
                             w16 = buffer[index + 3] == 0x1f && Encoding.ASCII.GetString(buffer, index + 4, 3) == "W16";
                             if (w16)
@@ -1842,7 +1842,7 @@ namespace Nikse.SubtitleEdit.Core.SubtitleFormats
                     {
                         alignment = buffer[index + 1];
                         isSecondaryCodePage = (alignment & 0x08) != 0;
-                        alignment &= 0x07;
+                        alignment &= 0x03; // bits 0-1 hold alignment (0=right, 1=left, 2=center); bit 2 (0x04) is the italic flag
                         sb.AppendLine();
                         index += 2;
                     }
