@@ -171,6 +171,6 @@ public class Phase7OutputTest : IDisposable
 
         Assert.False(result.Success);
         Assert.Single(result.Errors);
-        Assert.Contains("--customformat", result.Errors[0]);
+        Assert.Contains("--custom-format", result.Errors[0]);
     }
 }

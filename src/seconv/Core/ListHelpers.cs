@@ -91,7 +91,7 @@ internal static class ListHelpers
 
     public static void PrintOcrEngines()
     {
-        AnsiConsole.MarkupLine("[bold cyan]OCR engines (pass via --ocrengine)[/]");
+        AnsiConsole.MarkupLine("[bold cyan]OCR engines (pass via --ocr-engine)[/]");
         AnsiConsole.WriteLine();
         var table = new Table().Border(TableBorder.Rounded);
         table.AddColumn("[yellow]Name[/]");
@@ -108,11 +108,11 @@ internal static class ListHelpers
         table.AddRow(
             "[green]nocr[/]",
             "in-process",
-            "Pass --ocrdb=<path-to-Latin.nocr> (find under %AppData%\\\\Subtitle Edit\\\\OCR\\\\)");
+            "Pass --ocr-db=<path-to-Latin.nocr> (find under %AppData%\\\\Subtitle Edit\\\\OCR\\\\)");
         table.AddRow(
             "[green]binaryocr[/]",
             "in-process",
-            "Pass --ocrdb=<path-to-Latin.db> (find under %AppData%\\\\Subtitle Edit\\\\OCR\\\\)");
+            "Pass --ocr-db=<path-to-Latin.db> (find under %AppData%\\\\Subtitle Edit\\\\OCR\\\\)");
         table.AddRow(
             "[green]ollama[/]",
             "HTTP",
@@ -123,6 +123,6 @@ internal static class ListHelpers
             $"`paddleocr` binary on PATH ({paddle}) — `pip install paddleocr`");
 
         AnsiConsole.Write(table);
-        AnsiConsole.MarkupLine("\n[dim]Pass language via --ocrlanguage (Tesseract: ISO 639-2; Paddle: en/de/fr/...; Ollama: human name).[/]");
+        AnsiConsole.MarkupLine("\n[dim]Pass language via --ocr-language (Tesseract: ISO 639-2; Paddle: en/de/fr/...; Ollama: human name).[/]");
     }
 }

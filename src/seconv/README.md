@@ -35,19 +35,19 @@ seconv <pattern> --format <name> [options]   # alternative syntax
 ```bash
 seconv *.srt sami                                              # SRT → SAMI
 seconv movie.srt subrip --encoding:windows-1252                # encoding override
-seconv *.sub subrip --fps:25 --outputfolder ./out              # frame-based → time-based
+seconv *.sub subrip --fps:25 --output-folder ./out             # frame-based → time-based
 
 seconv movie.mkv subrip --track-number:3                       # extract MKV text track #3
-seconv movie.sup subrip --ocrengine:tesseract --ocrlanguage:eng  # OCR a Blu-Ray .sup
-seconv movie.sup subrip --ocrengine:nocr --ocrdb:Latin.nocr    # OCR via nOCR
-seconv movie.sup subrip --ocrengine:binaryocr --ocrdb:Latin.db # OCR via BinaryOCR
-seconv movie.sup subrip --ocrengine:ollama --ollama-model:llama3.2-vision
+seconv movie.sup subrip --ocr-engine:tesseract --ocr-language:eng  # OCR a Blu-Ray .sup
+seconv movie.sup subrip --ocr-engine:nocr --ocr-db:Latin.nocr  # OCR via nOCR
+seconv movie.sup subrip --ocr-engine:binaryocr --ocr-db:Latin.db # OCR via BinaryOCR
+seconv movie.sup subrip --ocr-engine:ollama --ollama-model:llama3.2-vision
 
 seconv subs.srt bluraysup --resolution:1920x1080               # render text → Blu-Ray sup
 seconv subs.srt bdnxml --resolution:1920x1080                  # render text → BDN-XML
 
-seconv subs.srt customtext --customformat:my-template.xml      # custom template
-seconv *.srt subrip --multiplereplace:rules.xml                # search-and-replace pass
+seconv subs.srt customtext --custom-format:my-template.xml     # custom template
+seconv *.srt subrip --multiple-replace:rules.xml               # search-and-replace pass
 
 seconv subs.srt subrip --offset:-2000 --renumber:1 --overwrite  # offset 2s back, renumber from 1
 ```
@@ -80,9 +80,9 @@ seconv lint *.srt --json                    # CI-friendly: exit 1 on any issue
 ### File / I/O
 | Option | Description |
 |---|---|
-| `--inputfolder:<path>` | Input folder; relative patterns resolve against it |
-| `--outputfolder:<path>` | Output folder (default: input file's directory) |
-| `--outputfilename:<name>` | Output file name (single input only) |
+| `--input-folder:<path>` | Input folder; relative patterns resolve against it |
+| `--output-folder:<path>` | Output folder (default: input file's directory) |
+| `--output-filename:<name>` | Output file name (single input only) |
 | `--overwrite` | Overwrite existing files (default: rotate to `name_2.ext`, `_3.ext`, ...) |
 | `--encoding:<name>` | Encoding name or codepage (defaults: auto-detect on input, UTF-8 BOM on output) |
 
@@ -91,8 +91,9 @@ seconv lint *.srt --json                    # CI-friendly: exit 1 on any issue
 |---|---|
 | `--offset:hh:mm:ss:ms` | Shift all timecodes (also accepts plain ms) |
 | `--fps:<rate>` | Source frame rate |
-| `--targetfps:<rate>` | Target frame rate (with `--fps`) |
-| `--adjustduration:<ms>` | Add/subtract milliseconds to each duration |
+| `--target-fps:<rate>` | Target frame rate (with `--fps`) |
+| `--adjust-duration:<ms>` | Add/subtract milliseconds to each duration |
+| `--change-speed:<percent>` | Scale all times by 100/percent (e.g. `125` = 1.25x faster) |
 | `--renumber:<n>` | Renumber paragraphs starting at `n` |
 
 ### Format-specific
@@ -101,27 +102,27 @@ seconv lint *.srt --json                    # CI-friendly: exit 1 on any issue
 | `--resolution:<WxH>` | Video resolution for ASSA / image-based outputs (default 1920x1080) |
 | `--assa-style-file:<file>` | Apply `[V4+ Styles]` from another ASSA file |
 | `--pac-codepage:<page>` | PAC code page (name or 0-12) |
-| `--ebuheaderfile:<file>` | Use header from an existing STL file when writing EBU |
+| `--ebu-header-file:<file>` | Use header from an existing STL file when writing EBU |
 
 ### Containers / Tracks
 | Option | Description |
 |---|---|
 | `--track-number:<list>` | Comma-separated track numbers to keep |
-| `--forcedonly` | MKV: keep only forced tracks |
-| `--teletextonly` | TS: skip DVB-sub OCR (teletext only) |
-| `--teletextonlypage:<n>` | TS: extract only this teletext page |
+| `--forced-only` | MKV: keep only forced tracks |
+| `--teletext-only` | TS: skip DVB-sub OCR (teletext only) |
+| `--teletext-only-page:<n>` | TS: extract only this teletext page |
 
 ### OCR
 | Option | Description |
 |---|---|
-| `--ocrengine:<engine>` | `tesseract` (default) \| `nocr` \| `binaryocr` \| `ollama` \| `paddle` |
-| `--ocrlanguage:<lang>` | Tesseract: ISO 639-2 (`eng`, `deu`); Paddle: short (`en`); Ollama: human (`English`) |
-| `--ocrdb:<path>` | OCR database file: `.nocr` for `nocr`, `.db` for `binaryocr` (required for both) |
+| `--ocr-engine:<engine>` | `tesseract` (default) \| `nocr` \| `binaryocr` \| `ollama` \| `paddle` |
+| `--ocr-language:<lang>` | Tesseract: ISO 639-2 (`eng`, `deu`); Paddle: short (`en`); Ollama: human (`English`) |
+| `--ocr-db:<path>` | OCR database file: `.nocr` for `nocr`, `.db` for `binaryocr` (required for both) |
 | `--ollama-url:<url>` | Default `http://localhost:11434/api/chat` |
 | `--ollama-model:<model>` | Default `llama3.2-vision` |
 
 > **OCR database files are not bundled with `seconv`.** The `nocr` and `binaryocr` engines
-> need a `.nocr` or `.db` file passed via `--ocrdb`. Sources:
+> need a `.nocr` or `.db` file passed via `--ocr-db`. Sources:
 > - If you have the desktop UI installed: `%AppData%\Subtitle Edit\OCR\` (Windows) or
 >   `~/.config/Subtitle Edit/OCR/` (Linux/macOS).
 > - From the repo: [`Ocr/Latin.nocr`](https://github.com/SubtitleEdit/subtitleedit/raw/main/Ocr/Latin.nocr)
@@ -131,8 +132,8 @@ seconv lint *.srt --json                    # CI-friendly: exit 1 on any issue
 ### Templates / replacements
 | Option | Description |
 |---|---|
-| `--multiplereplace:<path.xml>` | SE MultipleSearchAndReplaceGroups XML |
-| `--customformat:<path.xml>` | SE CustomFormatItem XML (with `--format customtext`) |
+| `--multiple-replace:<path.xml>` | SE MultipleSearchAndReplaceGroups XML |
+| `--custom-format:<path.xml>` | SE CustomFormatItem XML (with `--format customtext`) |
 | `--settings:<path.json>` | JSON settings file overriding libse defaults |
 | `--profile:<name>` | Named overlay from settings file's `profiles` map |
 

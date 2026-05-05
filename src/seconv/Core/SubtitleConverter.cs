@@ -22,10 +22,10 @@ internal class SubtitleConverter
                 return result;
             }
 
-            // --outputfilename only makes sense for a single input file (matches old SE)
+            // --output-filename only makes sense for a single input file (matches old SE)
             if (inputFiles.Count > 1 && !string.IsNullOrEmpty(options.OutputFilename))
             {
-                result.Errors.Add($"--outputfilename can only be used with a single input file (got {inputFiles.Count} matches).");
+                result.Errors.Add($"--output-filename can only be used with a single input file (got {inputFiles.Count} matches).");
                 return result;
             }
 
@@ -57,7 +57,7 @@ internal class SubtitleConverter
                         if (tracks.Count > 1 && !string.IsNullOrEmpty(options.OutputFilename))
                         {
                             throw new InvalidOperationException(
-                                "--outputfilename can only target a single track. Use --track-number to select one.");
+                                "--output-filename can only target a single track. Use --track-number to select one.");
                         }
 
                         foreach (var track in tracks)
@@ -211,6 +211,17 @@ internal class SubtitleConverter
             subtitle.ChangeFrameRate(options.Fps.Value, options.TargetFps.Value);
         }
 
+        // Scale all times by 100/percent (matches Sync > Change Speed in the UI)
+        if (options.ChangeSpeedPercent.HasValue && Math.Abs(options.ChangeSpeedPercent.Value - 100.0) > 0.0001)
+        {
+            var factor = 100.0 / options.ChangeSpeedPercent.Value;
+            foreach (var p in subtitle.Paragraphs)
+            {
+                p.StartTime.TotalMilliseconds *= factor;
+                p.EndTime.TotalMilliseconds *= factor;
+            }
+        }
+
         if (options.Renumber.HasValue)
         {
             subtitle.Renumber(options.Renumber.Value);
@@ -257,7 +268,7 @@ internal class SubtitleConverter
     }
 
     /// <summary>
-    /// Resolves the output file name. Honors --outputfilename / --outputfolder. When
+    /// Resolves the output file name. Honors --output-filename / --output-folder. When
     /// <paramref name="languageSuffix"/> is non-empty (container tracks), inserts it
     /// between the stem and extension (<c>movie.eng.srt</c>). On collision: tries
     /// <c>movie.#&lt;track&gt;.eng.srt</c> first when a track number is given, then
@@ -343,6 +354,9 @@ internal class ConversionOptions
     public TimeSpan? Offset { get; init; }
     public int? Renumber { get; init; }
     public int? AdjustDurationMs { get; init; }
+
+    /// <summary>Speed change as a percent: 125 = 1.25x faster (times scaled by 100/125), 80 = slower.</summary>
+    public double? ChangeSpeedPercent { get; init; }
     public (int Width, int Height)? Resolution { get; init; }
     public string? AssaStyleFile { get; init; }
     public int? PacCodePage { get; init; }

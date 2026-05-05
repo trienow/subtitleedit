@@ -30,15 +30,19 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Emit per-file results as JSON to stdout (suppresses table/progress output)")]
         public bool Json { get; init; }
 
-        [CommandOption("--adjustduration")]
+        [CommandOption("--adjust-duration|--adjustduration")]
         [Description("Adjust duration in milliseconds")]
         public int? AdjustDuration { get; init; }
+
+        [CommandOption("--change-speed")]
+        [Description("Change speed by percent (e.g. 125 = 1.25x faster, 80 = 0.8x slower)")]
+        public double? ChangeSpeed { get; init; }
 
         [CommandOption("--assa-style-file")]
         [Description("ASSA style file name")]
         public string? AssaStyleFile { get; init; }
 
-        [CommandOption("--ebuheaderfile")]
+        [CommandOption("--ebu-header-file|--ebuheaderfile")]
         [Description("EBU header file name")]
         public string? EbuHeaderFile { get; init; }
 
@@ -46,7 +50,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Encoding name")]
         public string? Encoding { get; init; }
 
-        [CommandOption("--forcedonly")]
+        [CommandOption("--forced-only|--forcedonly")]
         [Description("Forced subtitles only")]
         public bool ForcedOnly { get; init; }
 
@@ -54,28 +58,28 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Frame rate")]
         public double? Fps { get; init; }
 
-        [CommandOption("--inputfolder")]
+        [CommandOption("--input-folder|--inputfolder")]
         [Description("Input folder name")]
         public string? InputFolder { get; init; }
 
-        [CommandOption("--multiplereplace")]
+        [CommandOption("--multiple-replace|--multiplereplace")]
         [Description("Path to a Subtitle Edit MultipleSearchAndReplaceGroups XML file applied per-paragraph before save")]
         public string? MultipleReplace { get; init; }
 
-        [CommandOption("--customformat")]
+        [CommandOption("--custom-format|--customformat")]
         [Description("Path to a Subtitle Edit custom-format XML file (used with --format customtext)")]
         public string? CustomFormat { get; init; }
 
-        [CommandOption("--ocrengine")]
+        [CommandOption("--ocr-engine|--ocrengine")]
         [Description("OCR engine: tesseract | nocr | binaryocr | ollama | paddle (default: tesseract)")]
         public string? OcrEngine { get; init; }
 
-        [CommandOption("--ocrlanguage")]
+        [CommandOption("--ocr-language|--ocrlanguage")]
         [Description("Language for OCR (Tesseract: ISO 639-2 like eng/deu; Paddle: en/de; Ollama: human name like English)")]
         public string? OcrLanguage { get; init; }
 
-        [CommandOption("--ocrdb")]
-        [Description("Path to a .nocr file (--ocrengine=nocr) or .db file (--ocrengine=binaryocr)")]
+        [CommandOption("--ocr-db|--ocrdb")]
+        [Description("Path to a .nocr file (--ocr-engine=nocr) or .db file (--ocr-engine=binaryocr)")]
         public string? OcrDb { get; init; }
 
         [CommandOption("--ollama-url")]
@@ -90,11 +94,11 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Offset time (hh:mm:ss:ms)")]
         public string? Offset { get; init; }
 
-        [CommandOption("--outputfilename")]
+        [CommandOption("--output-filename|--outputfilename")]
         [Description("Output file name (for single file only)")]
         public string? OutputFilename { get; init; }
 
-        [CommandOption("--outputfolder")]
+        [CommandOption("--output-folder|--outputfolder")]
         [Description("Output folder name")]
         public string? OutputFolder { get; init; }
 
@@ -122,15 +126,15 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Resolution (widthxheight)")]
         public string? Resolution { get; init; }
 
-        [CommandOption("--targetfps")]
+        [CommandOption("--target-fps|--targetfps")]
         [Description("Target frame rate")]
         public double? TargetFps { get; init; }
 
-        [CommandOption("--teletextonly")]
+        [CommandOption("--teletext-only|--teletextonly")]
         [Description("Teletext only")]
         public bool TeletextOnly { get; init; }
 
-        [CommandOption("--teletextonlypage")]
+        [CommandOption("--teletext-only-page|--teletextonlypage")]
         [Description("Teletext page number")]
         public int? TeletextOnlyPage { get; init; }
 
@@ -139,83 +143,85 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         public string? TrackNumber { get; init; }
 
         // Operations
-        [CommandOption("--ApplyDurationLimits")]
+        // Each option exposes the canonical lowercase-hyphenated form first; the
+        // PascalCase alias is kept for backward compatibility with older scripts.
+        [CommandOption("--apply-duration-limits|--ApplyDurationLimits")]
         [Description("Apply duration limits")]
         public bool ApplyDurationLimits { get; init; }
 
-        [CommandOption("--BalanceLines")]
+        [CommandOption("--balance-lines|--BalanceLines")]
         [Description("Balance lines")]
         public bool BalanceLines { get; init; }
 
-        [CommandOption("--BeautifyTimeCodes")]
+        [CommandOption("--beautify-time-codes|--BeautifyTimeCodes")]
         [Description("Beautify time codes")]
         public bool BeautifyTimeCodes { get; init; }
 
-        [CommandOption("--ConvertColorsToDialog")]
+        [CommandOption("--convert-colors-to-dialog|--ConvertColorsToDialog")]
         [Description("Convert colors to dialog")]
         public bool ConvertColorsToDialog { get; init; }
 
-        [CommandOption("--DeleteFirst")]
+        [CommandOption("--delete-first|--DeleteFirst")]
         [Description("Delete first N entries")]
         public int? DeleteFirst { get; init; }
 
-        [CommandOption("--DeleteLast")]
+        [CommandOption("--delete-last|--DeleteLast")]
         [Description("Delete last N entries")]
         public int? DeleteLast { get; init; }
 
-        [CommandOption("--DeleteContains")]
+        [CommandOption("--delete-contains|--DeleteContains")]
         [Description("Delete entries containing this word")]
         public string? DeleteContains { get; init; }
 
-        [CommandOption("--FixCommonErrors")]
+        [CommandOption("--fix-common-errors|--FixCommonErrors")]
         [Description("Fix common errors")]
         public bool FixCommonErrors { get; init; }
 
-        [CommandOption("--FixCommonErrorsRules")]
+        [CommandOption("--fix-common-errors-rules|--FixCommonErrorsRules")]
         [Description("Comma-separated FCE rule IDs (or 'all,-RuleId' to subtract). See: seconv list-fce-rules")]
         public string? FixCommonErrorsRules { get; init; }
 
-        [CommandOption("--FixRtlViaUnicodeChars")]
+        [CommandOption("--fix-rtl-via-unicode-chars|--FixRtlViaUnicodeChars")]
         [Description("Fix RTL via Unicode characters")]
         public bool FixRtlViaUnicodeChars { get; init; }
 
-        [CommandOption("--MergeSameTexts")]
+        [CommandOption("--merge-same-texts|--MergeSameTexts")]
         [Description("Merge same texts")]
         public bool MergeSameTexts { get; init; }
 
-        [CommandOption("--MergeSameTimeCodes")]
+        [CommandOption("--merge-same-time-codes|--MergeSameTimeCodes")]
         [Description("Merge same time codes")]
         public bool MergeSameTimeCodes { get; init; }
 
-        [CommandOption("--MergeShortLines")]
+        [CommandOption("--merge-short-lines|--MergeShortLines")]
         [Description("Merge short lines")]
         public bool MergeShortLines { get; init; }
 
-        [CommandOption("--RedoCasing")]
+        [CommandOption("--redo-casing|--RedoCasing")]
         [Description("Redo casing")]
         public bool RedoCasing { get; init; }
 
-        [CommandOption("--RemoveFormatting")]
+        [CommandOption("--remove-formatting|--RemoveFormatting")]
         [Description("Remove formatting")]
         public bool RemoveFormatting { get; init; }
 
-        [CommandOption("--RemoveLineBreaks")]
+        [CommandOption("--remove-line-breaks|--RemoveLineBreaks")]
         [Description("Remove line breaks")]
         public bool RemoveLineBreaks { get; init; }
 
-        [CommandOption("--RemoveTextForHI")]
+        [CommandOption("--remove-text-for-hi|--RemoveTextForHI")]
         [Description("Remove text for hearing impaired")]
         public bool RemoveTextForHI { get; init; }
 
-        [CommandOption("--RemoveUnicodeControlChars")]
+        [CommandOption("--remove-unicode-control-chars|--RemoveUnicodeControlChars")]
         [Description("Remove Unicode control characters")]
         public bool RemoveUnicodeControlChars { get; init; }
 
-        [CommandOption("--ReverseRtlStartEnd")]
+        [CommandOption("--reverse-rtl-start-end|--ReverseRtlStartEnd")]
         [Description("Reverse RTL start/end")]
         public bool ReverseRtlStartEnd { get; init; }
 
-        [CommandOption("--SplitLongLines")]
+        [CommandOption("--split-long-lines|--SplitLongLines")]
         [Description("Split long lines")]
         public bool SplitLongLines { get; init; }
     }
@@ -247,13 +253,13 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 return 1;
             }
 
-            // Validate --ocrengine: tesseract | nocr | binaryocr | ollama | paddle
+            // Validate --ocr-engine: tesseract | nocr | binaryocr | ollama | paddle
             var supportedEngines = new[] { "tesseract", "nocr", "binaryocr", "binary", "ollama", "paddle", "paddleocr" };
             if (!string.IsNullOrWhiteSpace(settings.OcrEngine) &&
                 !supportedEngines.Contains(settings.OcrEngine, StringComparer.OrdinalIgnoreCase))
             {
                 AnsiConsole.MarkupLine(
-                    $"[red]Error: OCR engine '{settings.OcrEngine.EscapeMarkup()}' is not supported. " +
+                    $"[red]Error: OCR engine '{settings.OcrEngine.EscapeMarkup()}' is not supported (pass via --ocr-engine). " +
                     $"Use one of: {string.Join(", ", supportedEngines)}.[/]");
                 return 1;
             }
@@ -313,6 +319,13 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
             if (settings.RemoveUnicodeControlChars) operations.Add("RemoveUnicodeControlChars");
             if (settings.ReverseRtlStartEnd) operations.Add("ReverseRtlStartEnd");
             if (settings.SplitLongLines) operations.Add("SplitLongLines");
+
+            // Validate --change-speed (must be > 0; 100 means no change)
+            if (settings.ChangeSpeed.HasValue && settings.ChangeSpeed.Value <= 0)
+            {
+                AnsiConsole.MarkupLine($"[red]Error: --change-speed must be greater than 0 (got {settings.ChangeSpeed.Value}).[/]");
+                return 1;
+            }
 
             // Parse offset if supplied
             TimeSpan? offset = null;
@@ -379,6 +392,7 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 Offset = offset,
                 Renumber = settings.Renumber,
                 AdjustDurationMs = settings.AdjustDuration,
+                ChangeSpeedPercent = settings.ChangeSpeed,
                 Resolution = resolution,
                 AssaStyleFile = settings.AssaStyleFile,
                 PacCodePage = pacCodePage,

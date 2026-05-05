@@ -153,7 +153,7 @@ internal static class LibSEIntegration
         {
             if (options is null || string.IsNullOrWhiteSpace(options.CustomFormatFile))
             {
-                throw new InvalidOperationException("Custom text output requires --customformat=<path-to-template.xml>.");
+                throw new InvalidOperationException("Custom text output requires --custom-format=<path-to-template.xml>.");
             }
             var template = CustomFormatTemplateLoader.Load(options.CustomFormatFile);
             var rendered = Nikse.SubtitleEdit.UiLogic.Export.CustomTextFormatter.GenerateCustomText(

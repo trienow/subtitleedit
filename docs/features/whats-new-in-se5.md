@@ -79,6 +79,16 @@ See [OCR](ocr.md), [Batch Convert](batch-convert.md), and [Command Line (seconv)
 
 - Added **IMSC-Rosetta Timed Text** subtitle format support.
 
+## Command Line (seconv)
+
+The `seconv` headless converter now lives in the main Subtitle Edit repository — it builds, ships, and updates in lockstep with the desktop app. No more drift between a separately maintained tool and the libraries it depends on.
+
+- **Polished terminal UI** — colored output with progress per file, summary tables, and a `--json` mode for CI pipelines and scripting.
+- **Cross-platform** — runs on Windows, Linux, and macOS with only the .NET runtime; no display or GUI required, suitable for servers and Docker.
+- **Broader feature set** — additional time and cleanup operations, OCR engine selection (Tesseract / nOCR / Binary OCR / Ollama / PaddleOCR), container input from `.mkv` / `.mp4` / `.mcc`, `info` and `lint` subcommands for inspection, custom output templates, and POSIX-style flag names (legacy SE 4.x flags still work).
+
+See [seconv](seconv.md) for usage and examples.
+
 ## Where to Look Next
 
 - [Main Window](main-window.md) - updated application layout.

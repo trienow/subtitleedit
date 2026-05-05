@@ -142,37 +142,40 @@ internal class Program
 
     // Options that take a value as the next argument. Used to know which positional
     // tokens are file patterns vs. option-values when injecting a positional format.
+    // Canonical lowercase-hyphenated names; legacy smashed/PascalCase aliases included for
+    // backward compatibility with older scripts.
     private static readonly HashSet<string> ValueOptions = new(StringComparer.OrdinalIgnoreCase)
     {
         "--format", "-f",
-        "--adjustduration",
+        "--adjust-duration", "--adjustduration",
         "--assa-style-file",
-        "--ebuheaderfile",
+        "--change-speed",
+        "--custom-format", "--customformat",
+        "--ebu-header-file", "--ebuheaderfile",
         "--encoding",
         "--fps",
-        "--inputfolder",
-        "--multiplereplace",
-        "--ocrengine",
+        "--input-folder", "--inputfolder",
+        "--multiple-replace", "--multiplereplace",
+        "--ocr-engine", "--ocrengine",
+        "--ocr-language", "--ocrlanguage",
+        "--ocr-db", "--ocrdb",
         "--offset",
-        "--outputfilename",
-        "--outputfolder",
+        "--output-filename", "--outputfilename",
+        "--output-folder", "--outputfolder",
         "--pac-codepage",
         "--profile",
         "--renumber",
         "--resolution",
-        "--targetfps",
-        "--teletextonlypage",
-        "--track-number",
-        "--DeleteFirst",
-        "--DeleteLast",
-        "--DeleteContains",
-        "--FixCommonErrorsRules",
         "--settings",
-        "--ocrlanguage",
-        "--ocrdb",
+        "--target-fps", "--targetfps",
+        "--teletext-only-page", "--teletextonlypage",
+        "--track-number",
         "--ollama-url",
         "--ollama-model",
-        "--customformat",
+        "--delete-first", "--DeleteFirst",
+        "--delete-last", "--DeleteLast",
+        "--delete-contains", "--DeleteContains",
+        "--fix-common-errors-rules", "--FixCommonErrorsRules",
     };
 
     private static bool HasFormatOption(string[] args)

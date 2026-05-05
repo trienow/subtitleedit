@@ -32,7 +32,7 @@ public class OcrEnginesTest : IDisposable
     public void Factory_NOcrWithoutOcrDb_Throws()
     {
         var ex = Assert.Throws<InvalidOperationException>(() => OcrEngineFactory.Create(Opts("nocr")));
-        Assert.Contains("--ocrdb", ex.Message);
+        Assert.Contains("--ocr-db", ex.Message);
     }
 
     [Fact]
@@ -46,7 +46,7 @@ public class OcrEnginesTest : IDisposable
     [Fact]
     public void Factory_NOcrAutoAppendsExtension()
     {
-        // When --ocrdb is "Latin" (no extension), factory appends ".nocr" before checking
+        // When --ocr-db is "Latin" (no extension), factory appends ".nocr" before checking
         var ex = Assert.Throws<FileNotFoundException>(() =>
             OcrEngineFactory.Create(Opts("nocr", Path.Combine(_tempRoot, "Latin"))));
         Assert.Contains("Latin.nocr", ex.Message);
@@ -56,7 +56,7 @@ public class OcrEnginesTest : IDisposable
     public void Factory_BinaryOcrWithoutOcrDb_Throws()
     {
         var ex = Assert.Throws<InvalidOperationException>(() => OcrEngineFactory.Create(Opts("binaryocr")));
-        Assert.Contains("--ocrdb", ex.Message);
+        Assert.Contains("--ocr-db", ex.Message);
         Assert.Contains(".db", ex.Message);
     }
 

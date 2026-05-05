@@ -18,33 +18,33 @@ internal static class HelpDisplay
         ShowSection("Pattern", "One or more file name patterns separated by commas\nRelative patterns are relative to /inputfolder if specified");
 
         ShowSection("Optional Parameters", null);
-        ShowParameter("--adjustduration:<ms>", "Adjust duration in milliseconds");
+        ShowParameter("--adjust-duration:<ms>", "Adjust duration in milliseconds");
         ShowParameter("--assa-style-file:<file name>", "ASSA style file");
-        ShowParameter("--ChangeSpeed:<percent>", "Change speed by percent (e.g. 125 = 1.25x faster)");
-        ShowParameter("--ebuheaderfile:<file name>", "EBU header file");
+        ShowParameter("--change-speed:<percent>", "Change speed by percent (e.g. 125 = 1.25x faster)");
+        ShowParameter("--ebu-header-file:<file name>", "EBU header file");
         ShowParameter("--encoding:<encoding name>", "Character encoding (e.g., utf-8, windows-1252)");
-        ShowParameter("--forcedonly", "Process forced subtitles only");
+        ShowParameter("--forced-only", "Process forced subtitles only");
         ShowParameter("--fps:<frame rate>", "Frame rate for conversion");
-        ShowParameter("--inputfolder:<folder name>", "Input folder path");
+        ShowParameter("--input-folder:<folder name>", "Input folder path");
         ShowParameter("--offset:hh:mm:ss:ms", "Time offset");
-        ShowParameter("--outputfilename:<file name>", "Output file name (for single file only)");
-        ShowParameter("--outputfolder:<folder name>", "Output folder path");
+        ShowParameter("--output-filename:<file name>", "Output file name (for single file only)");
+        ShowParameter("--output-folder:<folder name>", "Output folder path");
         ShowParameter("--overwrite", "Overwrite existing files");
         ShowParameter("--pac-codepage:<code page>", "PAC code page");
         ShowParameter("--profile:<profile name>", "Profile name");
         ShowParameter("--renumber:<starting number>", "Renumber subtitles from this number");
         ShowParameter("--resolution:<width>x<height>", "Video resolution (e.g., 1920x1080)");
-        ShowParameter("--targetfps:<frame rate>", "Target frame rate");
-        ShowParameter("--teletextonly", "Process teletext only");
-        ShowParameter("--teletextonlypage:<page number>", "Teletext page number");
+        ShowParameter("--target-fps:<frame rate>", "Target frame rate");
+        ShowParameter("--teletext-only", "Process teletext only");
+        ShowParameter("--teletext-only-page:<page number>", "Teletext page number");
         ShowParameter("--track-number:<track list>", "Comma separated track number list");
-        ShowParameter("--ocrengine:<engine>", "OCR engine: tesseract | nocr | binaryocr | ollama | paddle");
-        ShowParameter("--ocrlanguage:<lang>", "Language for OCR (e.g. eng, deu, spa)");
-        ShowParameter("--ocrdb:<path>", ".nocr (--ocrengine=nocr) or .db (--ocrengine=binaryocr)");
+        ShowParameter("--ocr-engine:<engine>", "OCR engine: tesseract | nocr | binaryocr | ollama | paddle");
+        ShowParameter("--ocr-language:<lang>", "Language for OCR (e.g. eng, deu, spa)");
+        ShowParameter("--ocr-db:<path>", ".nocr (--ocr-engine=nocr) or .db (--ocr-engine=binaryocr)");
         ShowParameter("--ollama-url:<url>", "Ollama API endpoint (default: http://localhost:11434/api/chat)");
         ShowParameter("--ollama-model:<model>", "Ollama vision model (default: llama3.2-vision)");
-        ShowParameter("--multiplereplace:<path.xml>", "SE MultipleSearchAndReplaceGroups XML applied per paragraph");
-        ShowParameter("--customformat:<path.xml>", "SE CustomFormatItem XML (use with --format customtext)");
+        ShowParameter("--multiple-replace:<path.xml>", "SE MultipleSearchAndReplaceGroups XML applied per paragraph");
+        ShowParameter("--custom-format:<path.xml>", "SE CustomFormatItem XML (use with --format customtext)");
         ShowParameter("--settings:<path.json>", "JSON settings file overriding libse defaults");
         ShowParameter("--quiet", "Suppress per-file progress; only print the final summary");
         ShowParameter("--verbose", "Print extra diagnostic information");
@@ -55,26 +55,26 @@ internal static class HelpDisplay
         AnsiConsole.MarkupLine("  [dim]Operations are applied in a fixed, sensible order regardless of CLI order.[/]");
         AnsiConsole.WriteLine();
         
-        ShowParameter("--ApplyDurationLimits", "Apply duration limits");
-        ShowParameter("--BalanceLines", "Balance line lengths");
-        ShowParameter("--BeautifyTimeCodes", "Beautify time codes");
-        ShowParameter("--ConvertColorsToDialog", "Convert colors to dialog");
-        ShowParameter("--DeleteFirst:<count>", "Delete first N entries");
-        ShowParameter("--DeleteLast:<count>", "Delete last N entries");
-        ShowParameter("--DeleteContains:<word>", "Delete entries containing specified word");
-        ShowParameter("--FixCommonErrors", "Fix common subtitle errors (all rules)");
-        ShowParameter("--FixCommonErrorsRules:<list>", "FCE rule IDs (csv); supports 'all,-RuleId'. List: seconv list-fce-rules");
-        ShowParameter("--FixRtlViaUnicodeChars", "Fix RTL via Unicode characters");
-        ShowParameter("--MergeSameTexts", "Merge entries with same text");
-        ShowParameter("--MergeSameTimeCodes", "Merge entries with same time codes");
-        ShowParameter("--MergeShortLines", "Merge short lines");
-        ShowParameter("--RedoCasing", "Redo text casing");
-        ShowParameter("--RemoveFormatting", "Remove formatting tags");
-        ShowParameter("--RemoveLineBreaks", "Remove line breaks");
-        ShowParameter("--RemoveTextForHI", "Remove text for hearing impaired");
-        ShowParameter("--RemoveUnicodeControlChars", "Remove Unicode control characters");
-        ShowParameter("--ReverseRtlStartEnd", "Reverse RTL start/end");
-        ShowParameter("--SplitLongLines", "Split long lines");
+        ShowParameter("--apply-duration-limits", "Apply duration limits");
+        ShowParameter("--balance-lines", "Balance line lengths");
+        ShowParameter("--beautify-time-codes", "Beautify time codes");
+        ShowParameter("--convert-colors-to-dialog", "Convert colors to dialog");
+        ShowParameter("--delete-first:<count>", "Delete first N entries");
+        ShowParameter("--delete-last:<count>", "Delete last N entries");
+        ShowParameter("--delete-contains:<word>", "Delete entries containing specified word");
+        ShowParameter("--fix-common-errors", "Fix common subtitle errors (all rules)");
+        ShowParameter("--fix-common-errors-rules:<list>", "FCE rule IDs (csv); supports 'all,-RuleId'. List: seconv list-fce-rules");
+        ShowParameter("--fix-rtl-via-unicode-chars", "Fix RTL via Unicode characters");
+        ShowParameter("--merge-same-texts", "Merge entries with same text");
+        ShowParameter("--merge-same-time-codes", "Merge entries with same time codes");
+        ShowParameter("--merge-short-lines", "Merge short lines");
+        ShowParameter("--redo-casing", "Redo text casing");
+        ShowParameter("--remove-formatting", "Remove formatting tags");
+        ShowParameter("--remove-line-breaks", "Remove line breaks");
+        ShowParameter("--remove-text-for-hi", "Remove text for hearing impaired");
+        ShowParameter("--remove-unicode-control-chars", "Remove Unicode control characters");
+        ShowParameter("--reverse-rtl-start-end", "Reverse RTL start/end");
+        ShowParameter("--split-long-lines", "Split long lines");
 
         AnsiConsole.WriteLine();
         ShowSection("Subcommands", null);
@@ -95,16 +95,16 @@ internal static class HelpDisplay
             "seconv sub1.srt subrip --encoding:windows-1252",
             "Convert with specific encoding");
         ShowExample(
-            "seconv *.sub subrip --fps:25 --outputfolder:C:\\Temp",
+            "seconv *.sub subrip --fps:25 --output-folder:C:\\Temp",
             "Convert frame-based to time-based with FPS");
         ShowExample(
             "seconv movie.mkv subrip --track-number:3",
             "Extract MKV subtitle track #3 to SRT");
         ShowExample(
-            "seconv movie.sup subrip --ocrengine:nocr --ocrdb:Latin.nocr",
+            "seconv movie.sup subrip --ocr-engine:nocr --ocr-db:Latin.nocr",
             "OCR a Blu-Ray .sup using nOCR");
         ShowExample(
-            "seconv subs.srt customtext --customformat:my-template.xml",
+            "seconv subs.srt customtext --custom-format:my-template.xml",
             "Render via a custom text format template");
         ShowExample(
             "seconv formats",
