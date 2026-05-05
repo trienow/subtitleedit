@@ -307,6 +307,14 @@ public class ChatterboxTtsCpp : ITtsEngine
                             "Chatterbox requires CrispASR v0.6.0 or newer. Re-download CrispASR via "
                             + "Video → Audio to text → Engine settings → Re-download, then try again.");
                     }
+                    if (LooksLikeStaleModelCache(tail))
+                    {
+                        throw new InvalidOperationException(
+                            "Chatterbox failed to load its model — the cached GGUF files in "
+                            + GetCrispAsrCacheDir() + " are likely stale or partially downloaded. "
+                            + "Delete chatterbox-*.gguf in that folder and try again. Original output: "
+                            + tail);
+                    }
                     throw new InvalidOperationException(
                         $"crispasr (chatterbox) exited during startup (code {process.ExitCode}). Output: {tail}");
                 }
@@ -335,6 +343,26 @@ public class ChatterboxTtsCpp : ITtsEngine
         // backend (e.g. ASR-only build) prints `unknown backend 'chatterbox'`.
         return output.Contains("unknown argument", StringComparison.Ordinal)
             || output.Contains("unknown backend", StringComparison.Ordinal);
+    }
+
+    private static bool LooksLikeStaleModelCache(string output)
+    {
+        // Stale or partially-downloaded GGUFs in ~/.cache/crispasr/ surface as either
+        // a clean "tensor not found" / "failed to bind" message or — when the format
+        // mismatch trips a C++ exception during ggml init — the `GGML_ASSERT(prev !=
+        // ggml_uncaught_exception)` abort with a Windows STATUS_STACK_BUFFER_OVERRUN
+        // exit code (-1073740791 / 0xC0000409).
+        return output.Contains("required tensor", StringComparison.Ordinal)
+            || output.Contains("failed to bind", StringComparison.Ordinal)
+            || output.Contains("ggml_uncaught_exception", StringComparison.Ordinal);
+    }
+
+    private static string GetCrispAsrCacheDir()
+    {
+        // Mirrors crispasr's platform-default cache location: ~/.cache/crispasr on
+        // POSIX, %USERPROFILE%\.cache\crispasr on Windows.
+        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+        return Path.Combine(home, ".cache", "crispasr");
     }
 
     private static string SnapshotStderr(StringBuilder buffer)
