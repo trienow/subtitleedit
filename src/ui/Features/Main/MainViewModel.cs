@@ -10506,6 +10506,20 @@ public partial class MainViewModel :
                 return;
             }
 
+            if (ext == ".idx")
+            { 
+                var subFile = Path.ChangeExtension(fileName, ".sub");
+                if (File.Exists(subFile) && FileUtil.IsVobSub(subFile))
+                {
+                    var ok = await ImportSubtitleFromVobSubFile(subFile, videoFileName);
+                    if (ok)
+                    {
+                        SelectAndScrollToRow(0);
+                    }
+
+                    return;
+                }
+            }
 
             if (ext == ".ismt" || ext == ".mp4" || ext == ".m4v" || ext == ".mov" || ext == ".3gp" || ext == ".cmaf" || ext == ".m4s" || ext == ".m4a" || ext == ".m4b")
             {
@@ -10742,7 +10756,7 @@ public partial class MainViewModel :
 
             ResetSubtitle();
 
-            SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == subtitle.OriginalFormat.Name) ??
+            SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == subtitle?.OriginalFormat?.Name) ??
                               SelectedSubtitleFormat);
 
             if (fileEncoding.WebName.StartsWith("utf-8", StringComparison.OrdinalIgnoreCase))
