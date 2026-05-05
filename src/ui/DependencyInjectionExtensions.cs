@@ -220,6 +220,7 @@ public static class DependencyInjectionExtensions
         collection.AddHttpClient<IQwen3AsrCppDownloadService, Qwen3AsrCppDownloadService>();
         collection.AddHttpClient<IQwen3TtsCppDownloadService, Qwen3TtsCppDownloadService>();
         collection.AddHttpClient<IKokoroTtsCppDownloadService, KokoroTtsCppDownloadService>();
+        collection.AddHttpClient<IChatterboxTtsCppDownloadService, ChatterboxTtsCppDownloadService>();
 
         // Window view models
         collection.AddTransient<AdvancedTtsSettingsViewModel>();

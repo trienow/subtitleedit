@@ -21,8 +21,11 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 
 /// <summary>
 /// Chatterbox TTS via the existing CrispASR install (shared with the speech-to-text feature).
-/// Spawns `crispasr --server --backend chatterbox -m auto` and POSTs to the OpenAI-compatible
-/// /v1/audio/speech endpoint. Requires CrispASR v0.6.0 or newer.
+/// Spawns `crispasr --server --backend chatterbox -m &lt;t3&gt; --codec-model &lt;s3gen&gt;` and POSTs
+/// to the OpenAI-compatible /v1/audio/speech endpoint. Requires CrispASR v0.6.0 or newer.
+/// The T3 + S3Gen GGUFs are downloaded explicitly into TextToSpeech/Chatterbox/models/ —
+/// `-m auto` is avoided because its codec auto-discovery only finds *-s3gen-f16.gguf
+/// while it actually downloads the q8_0 variants.
 /// Chatterbox has one baked default voice; "voices" listed beyond Default come from
 /// WAVs imported via <see cref="ImportVoice"/>. The full reference-WAV path is sent per-request
 /// as the `voice` field — runtime WAV cloning is wired upstream in CrispASR's chatterbox backend.
@@ -133,6 +136,26 @@ public class ChatterboxTtsCpp : ITtsEngine
 
         return voicesFolder;
     }
+
+    public static string GetSetModelsFolder()
+    {
+        var modelsFolder = Path.Combine(GetSetFolder(), "models");
+        if (!Directory.Exists(modelsFolder))
+        {
+            Directory.CreateDirectory(modelsFolder);
+        }
+
+        return modelsFolder;
+    }
+
+    public static string GetT3ModelPath() =>
+        Path.Combine(GetSetModelsFolder(), ChatterboxTtsCppDownloadService.T3ModelFileName);
+
+    public static string GetS3GenModelPath() =>
+        Path.Combine(GetSetModelsFolder(), ChatterboxTtsCppDownloadService.S3GenModelFileName);
+
+    public static bool AreModelsInstalled() =>
+        File.Exists(GetT3ModelPath()) && File.Exists(GetS3GenModelPath());
 
     public Task<Voice[]> GetVoices(string language)
     {
@@ -272,7 +295,12 @@ public class ChatterboxTtsCpp : ITtsEngine
             psi.ArgumentList.Add("--backend");
             psi.ArgumentList.Add(BackendName);
             psi.ArgumentList.Add("-m");
-            psi.ArgumentList.Add("auto");
+            psi.ArgumentList.Add(GetT3ModelPath());
+            // Pass S3Gen explicitly. The chatterbox backend's auto-discovery only finds
+            // *-s3gen-f16.gguf, so without this flag the q8_0 codec we ship is ignored
+            // and synth returns empty audio.
+            psi.ArgumentList.Add("--codec-model");
+            psi.ArgumentList.Add(GetS3GenModelPath());
             psi.ArgumentList.Add("--host");
             psi.ArgumentList.Add("127.0.0.1");
             psi.ArgumentList.Add("--port");
@@ -316,10 +344,9 @@ public class ChatterboxTtsCpp : ITtsEngine
                     if (LooksLikeStaleModelCache(tail))
                     {
                         throw new InvalidOperationException(
-                            "Chatterbox failed to load its model — the cached GGUF files in "
-                            + GetCrispAsrCacheDir() + " are likely stale or partially downloaded. "
-                            + "Delete chatterbox-*.gguf in that folder and try again. Original output: "
-                            + tail);
+                            "Chatterbox failed to load its model — the GGUFs in "
+                            + GetSetModelsFolder() + " are likely stale or partially downloaded. "
+                            + "Delete them and try again so they re-download. Original output: " + tail);
                     }
                     throw new InvalidOperationException(
                         $"crispasr (chatterbox) exited during startup (code {process.ExitCode}). Output: {tail}");
@@ -353,22 +380,14 @@ public class ChatterboxTtsCpp : ITtsEngine
 
     private static bool LooksLikeStaleModelCache(string output)
     {
-        // Stale or partially-downloaded GGUFs in ~/.cache/crispasr/ surface as either
-        // a clean "tensor not found" / "failed to bind" message or — when the format
-        // mismatch trips a C++ exception during ggml init — the `GGML_ASSERT(prev !=
-        // ggml_uncaught_exception)` abort with a Windows STATUS_STACK_BUFFER_OVERRUN
-        // exit code (-1073740791 / 0xC0000409).
+        // A truncated/format-mismatched GGUF surfaces as either a clean "tensor not
+        // found" / "failed to bind" message or — when the format mismatch trips a C++
+        // exception during ggml init — the `GGML_ASSERT(prev != ggml_uncaught_exception)`
+        // abort with a Windows STATUS_STACK_BUFFER_OVERRUN exit code
+        // (-1073740791 / 0xC0000409).
         return output.Contains("required tensor", StringComparison.Ordinal)
             || output.Contains("failed to bind", StringComparison.Ordinal)
             || output.Contains("ggml_uncaught_exception", StringComparison.Ordinal);
-    }
-
-    private static string GetCrispAsrCacheDir()
-    {
-        // Mirrors crispasr's platform-default cache location: ~/.cache/crispasr on
-        // POSIX, %USERPROFILE%\.cache\crispasr on Windows.
-        var home = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-        return Path.Combine(home, ".cache", "crispasr");
     }
 
     private static string SnapshotServerLog()

@@ -767,7 +767,30 @@ public partial class TextToSpeechViewModel : ObservableObject
 
         if (engine is ChatterboxTtsCpp)
         {
-            return await EnsureCrispAsrForChatterbox(engine);
+            if (!await EnsureCrispAsrForChatterbox(engine))
+            {
+                return false;
+            }
+
+            if (!ChatterboxTtsCpp.AreModelsInstalled())
+            {
+                var answer = await MessageBox.Show(
+                    Window,
+                    "Download Chatterbox TTS models?",
+                    $"{Environment.NewLine}\"Chatterbox TTS\" requires models (~880 MB).{Environment.NewLine}{Environment.NewLine}Download models?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return false;
+                }
+
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window!, vm => vm.StartDownloadChatterboxModels());
+                return dlResult.OkPressed && ChatterboxTtsCpp.AreModelsInstalled();
+            }
+
+            return true;
         }
 
         if (await engine.IsInstalled(SelectedRegion) || Window == null)
