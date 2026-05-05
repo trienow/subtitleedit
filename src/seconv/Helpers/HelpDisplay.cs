@@ -20,6 +20,7 @@ internal static class HelpDisplay
         ShowSection("Optional Parameters", null);
         ShowParameter("--adjustduration:<ms>", "Adjust duration in milliseconds");
         ShowParameter("--assa-style-file:<file name>", "ASSA style file");
+        ShowParameter("--ChangeSpeed:<percent>", "Change speed by percent (e.g. 125 = 1.25x faster)");
         ShowParameter("--ebuheaderfile:<file name>", "EBU header file");
         ShowParameter("--encoding:<encoding name>", "Character encoding (e.g., utf-8, windows-1252)");
         ShowParameter("--forcedonly", "Process forced subtitles only");
