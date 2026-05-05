@@ -2,7 +2,7 @@
 Subtitle Edit Changelog
 
 
-v5.0.0-beta22 (xth May 2026)
+v5.0.0-beta22 (5th May 2026)
 
 * Update Italian translation - thx bovirus
 * Update CrispASR to v0.5.7
@@ -16,6 +16,7 @@ v5.0.0-beta22 (xth May 2026)
 * Update Polish translation - thx potplayer-fanpack
 * Fix crash for binary ocr in batch-convert 
 * Fix download/unpack title - thx sam12345 
+* Fix change-speed - thx JelmdtcSings
 
 -----------------------------------------------------------------------------------------------------
 
