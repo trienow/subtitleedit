@@ -47,6 +47,10 @@ public class ChatterboxTtsCpp : ITtsEngine
     private static Process? _serverProcess;
     private static int _serverPort;
     private static bool _processExitHooked;
+    // Rolling buffer of the server's stdout+stderr — used to attach context to
+    // /v1/audio/speech failures (the response body alone says "synthesis failed"
+    // without the actual reason; the backend prints the reason to stderr).
+    private static readonly StringBuilder _serverLog = new();
 
     private static string ServerBaseUrl => $"http://127.0.0.1:{_serverPort}";
 
@@ -198,10 +202,12 @@ public class ChatterboxTtsCpp : ITtsEngine
         if (!response.IsSuccessStatusCode)
         {
             var errorBody = await SafeReadErrorAsync(response, cancellationToken);
+            var serverLog = SnapshotServerLog();
             Se.LogError($"Chatterbox TTS server error {(int)response.StatusCode} {response.StatusCode} - "
-                + $"Voice: {chatterboxVoice}, Text: {text}, Body: {errorBody}");
+                + $"Voice: {chatterboxVoice}, Text: {text}, Body: {errorBody}, ServerLog: {serverLog}");
             throw new InvalidOperationException(
-                $"Chatterbox TTS synthesis failed ({(int)response.StatusCode}): {errorBody}");
+                $"Chatterbox TTS synthesis failed ({(int)response.StatusCode}): {errorBody}"
+                + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"));
         }
 
         await using (var fileStream = File.Create(outputFileName))
@@ -275,14 +281,14 @@ public class ChatterboxTtsCpp : ITtsEngine
             var process = Process.Start(psi)
                 ?? throw new InvalidOperationException("Failed to start crispasr (chatterbox)");
 
-            var stderrBuffer = new StringBuilder();
+            lock (_serverLog) _serverLog.Clear();
             process.ErrorDataReceived += (_, e) =>
             {
-                if (e.Data != null) lock (stderrBuffer) stderrBuffer.AppendLine(e.Data);
+                if (e.Data != null) lock (_serverLog) _serverLog.AppendLine(e.Data);
             };
             process.OutputDataReceived += (_, e) =>
             {
-                if (e.Data != null) lock (stderrBuffer) stderrBuffer.AppendLine(e.Data);
+                if (e.Data != null) lock (_serverLog) _serverLog.AppendLine(e.Data);
             };
             process.BeginErrorReadLine();
             process.BeginOutputReadLine();
@@ -298,7 +304,7 @@ public class ChatterboxTtsCpp : ITtsEngine
                 ct.ThrowIfCancellationRequested();
                 if (process.HasExited)
                 {
-                    var tail = SnapshotStderr(stderrBuffer);
+                    var tail = SnapshotServerLog();
                     _serverProcess = null;
                     _serverPort = 0;
                     if (LooksLikeOutdatedCrispAsr(tail))
@@ -325,7 +331,7 @@ public class ChatterboxTtsCpp : ITtsEngine
                 await Task.Delay(TimeSpan.FromSeconds(1), ct);
             }
 
-            var lastOutput = SnapshotStderr(stderrBuffer);
+            var lastOutput = SnapshotServerLog();
             StopServerInternal();
             throw new TimeoutException(
                 $"crispasr (chatterbox) did not report healthy within 15 minutes. Last output: {lastOutput}");
@@ -365,11 +371,11 @@ public class ChatterboxTtsCpp : ITtsEngine
         return Path.Combine(home, ".cache", "crispasr");
     }
 
-    private static string SnapshotStderr(StringBuilder buffer)
+    private static string SnapshotServerLog()
     {
-        lock (buffer)
+        lock (_serverLog)
         {
-            var s = buffer.ToString().TrimEnd();
+            var s = _serverLog.ToString().TrimEnd();
             return s.Length > 2000 ? s[^2000..] : s;
         }
     }
