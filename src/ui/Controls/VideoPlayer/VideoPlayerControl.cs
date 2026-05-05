@@ -143,6 +143,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             get => _isFullScreen;
             set
             {
+                if (_isFullScreen == value)
+                {
+                    return;
+                }
+
                 _buttonFullScreenCollapse.IsVisible = value;
                 _buttonFullScreen.IsVisible = !value;
                 _isFullScreen = value;
@@ -662,22 +667,30 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             // Show controls initially when entering full screen
             ShowControls();
 
-            // Timer to hide controls after 3 seconds of inactivity
-            _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
-            _autoHideTimer.Tick += (s, e) =>
+            // Single one-shot timer reset on each user activity. Stops itself on tick so
+            // Stop()+Start() reliably reschedules a fresh 3-second wait from "now" — a
+            // free-running periodic timer can drift out of phase with _lastActivityTime
+            // and fail to hide after the user re-shows controls during playback.
+            if (_autoHideTimer == null)
             {
-                if (IsFullScreen && (DateTime.UtcNow - _lastActivityTime).TotalSeconds >= 3)
+                _autoHideTimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(3) };
+                _autoHideTimer.Tick += (s, e) =>
                 {
-                    HideControls();
-                }
-            };
+                    _autoHideTimer?.Stop();
+                    if (IsFullScreen)
+                    {
+                        HideControls();
+                    }
+                };
+            }
+
+            _autoHideTimer.Stop();
             _autoHideTimer.Start();
         }
 
         private void StopAutoHideControls()
         {
             _autoHideTimer?.Stop();
-            _autoHideTimer = null;
         }
 
         private void OnUserActivity()
@@ -686,7 +699,11 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             if (IsFullScreen)
             {
                 ShowControls();
-                _autoHideTimer?.Start();
+                if (_autoHideTimer != null)
+                {
+                    _autoHideTimer.Stop();
+                    _autoHideTimer.Start();
+                }
             }
         }
 
