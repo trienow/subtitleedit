@@ -183,6 +183,7 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
                     if (Engine is ICrispAsrEngine)
                     {
                         WriteCrispAsrInstalledHash(folder);
+                        RemoveStaleCrispAsrBinaries(folder);
                     }
 
                     TitleText = Se.Language.Video.AudioToText.UnpackingSpeechToTextEngine;
@@ -233,6 +234,55 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
             {
                 LinuxHelper.MakeExecutable(path);
             }
+        }
+    }
+
+    /// <summary>
+    /// Removes leftover binaries from a previous CrispASR install before extracting
+    /// the new zip. Switching variants (e.g. Vulkan → CPU-legacy) leaves orphan DLLs
+    /// in place because the CPU-legacy zip ships only EXEs — Windows then loads the
+    /// stale ggml*.dll alongside the new statically-linked EXE, which trips
+    /// `GGML_ASSERT(prev != ggml_uncaught_exception)` (a duplicate static-init).
+    ///
+    /// Only top-level executables and shared libraries are removed. Subfolders
+    /// (models/, vibevoice/), the Silero VAD .bin, downloaded GGUFs and the
+    /// .installed.sha256 sidecar are left in place.
+    /// </summary>
+    private static void RemoveStaleCrispAsrBinaries(string folder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        try
+        {
+            foreach (var file in Directory.GetFiles(folder, "*", SearchOption.TopDirectoryOnly))
+            {
+                var ext = Path.GetExtension(file).ToLowerInvariant();
+                var name = Path.GetFileName(file);
+                var isBinary = ext is ".exe" or ".dll" or ".so" or ".dylib"
+                    || (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        && (name == "crispasr" || name == "crispasr-quantize"));
+                if (!isBinary)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                    // best-effort — a locked file (e.g. an in-flight server) will
+                    // be overwritten by the unpack step that follows.
+                }
+            }
+        }
+        catch
+        {
+            // ignore — cleanup is best-effort
         }
     }
 
