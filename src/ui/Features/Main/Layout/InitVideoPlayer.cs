@@ -22,6 +22,11 @@ public static class InitVideoPlayer
 
     public static Grid MakeLayoutVideoPlayer(MainViewModel vm, out VideoPlayerControl videoPlayerControl)
     {
+        return MakeLayoutVideoPlayer(vm, new Thickness(0, 0, 8, 0), out videoPlayerControl);
+    }
+
+    public static Grid MakeLayoutVideoPlayer(MainViewModel vm, Thickness nonFullScreenMargin, out VideoPlayerControl videoPlayerControl)
+    {
         var mediaFile = string.Empty;
         double position = 0;
         if (vm.VideoPlayerControl != null)
@@ -33,7 +38,6 @@ public static class InitVideoPlayer
             vm.VideoPlayerControl = null;
         }
 
-        var nonFullScreenMargin = new Thickness(0, 0, 8, 0);
         var mainGrid = new Grid
         {
             RowDefinitions = new RowDefinitions("*"),
