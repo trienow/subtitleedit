@@ -10,7 +10,8 @@ public class ForcedAlignerOption
     public const string CanaryCtcChoice = "canary-ctc";
     public const string Qwen3Choice = "qwen3-forced";
 
-    public string Display { get; }
+    public string BaseDisplay { get; }
+    public string Display { get; set; }
     public string Choice { get; }
     public string FileName { get; }
     public string Url { get; }
@@ -20,6 +21,7 @@ public class ForcedAlignerOption
 
     public ForcedAlignerOption(string display, string choice, string fileName, string url, string size)
     {
+        BaseDisplay = display;
         Display = display;
         Choice = choice;
         FileName = fileName;

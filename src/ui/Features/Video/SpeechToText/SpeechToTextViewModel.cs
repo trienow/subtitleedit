@@ -290,15 +290,15 @@ public partial class SpeechToTextViewModel : ObservableObject
         newOptions.Add(ForcedAlignerOption.CanaryCtc());
         newOptions.Add(ForcedAlignerOption.Qwen3());
 
-        var sameList = ForcedAligners.Count == newOptions.Count
-                       && ForcedAligners.Zip(newOptions, (a, b) => a.Choice == b.Choice).All(eq => eq);
-        if (!sameList)
+        foreach (var opt in newOptions)
         {
-            ForcedAligners.Clear();
-            foreach (var opt in newOptions)
-            {
-                ForcedAligners.Add(opt);
-            }
+            opt.Display = BuildAlignerDisplay(opt, crispEngine);
+        }
+
+        ForcedAligners.Clear();
+        foreach (var opt in newOptions)
+        {
+            ForcedAligners.Add(opt);
         }
 
         if (crispEngine == null)
@@ -316,6 +316,40 @@ public partial class SpeechToTextViewModel : ObservableObject
         {
             SelectedForcedAligner = match;
         }
+    }
+
+    private static string BuildAlignerDisplay(ForcedAlignerOption option, ICrispAsrEngine? crispEngine)
+    {
+        if (option.IsBuiltIn || string.IsNullOrEmpty(option.FileName))
+        {
+            return option.BaseDisplay;
+        }
+
+        var installed = false;
+        if (crispEngine is CrispAsrEngineBase baseEngine)
+        {
+            var path = baseEngine.GetModelForCmdLine(option.FileName);
+            if (File.Exists(path) && new FileInfo(path).Length > 10_000_000)
+            {
+                installed = true;
+            }
+        }
+
+        var size = string.IsNullOrEmpty(option.Size) ? string.Empty : option.Size;
+        if (installed && !string.IsNullOrEmpty(size))
+        {
+            return $"{option.BaseDisplay} ({size})";
+        }
+        if (installed)
+        {
+            return option.BaseDisplay;
+        }
+        if (!string.IsNullOrEmpty(size))
+        {
+            return $"{option.BaseDisplay} ({size}, not installed)";
+        }
+
+        return $"{option.BaseDisplay} (not installed)";
     }
 
     private void UpdateWhisperCppBackendUi()
@@ -1727,7 +1761,6 @@ public partial class SpeechToTextViewModel : ObservableObject
             displays.Add(new SpeechToTextModelDisplay
             {
                 Model = aligner.ToWhisperModel(),
-                Display = aligner.Display + " (" + aligner.FileName + ")",
                 Engine = engine,
             });
         }
@@ -1750,6 +1783,8 @@ public partial class SpeechToTextViewModel : ObservableObject
             {
                 viewModel.SetModels(displays, engine, preSelected);
             });
+
+        UpdateForcedAlignerUi();
     }
 
     private static string GetForcedAlignerPath(ICrispAsrEngine crispEngine, ForcedAlignerOption aligner)
@@ -2050,13 +2085,12 @@ public partial class SpeechToTextViewModel : ObservableObject
                 var displayAligner = new SpeechToTextModelDisplay
                 {
                     Model = alignerWhisperModel,
-                    Display = SelectedForcedAligner.Display + " (" + SelectedForcedAligner.FileName + ")",
                     Engine = engine,
                 };
                 var answer = await MessageBox.Show(
                                 Window!,
-                                $"Download {SelectedForcedAligner.Display}?",
-                                $"'{SelectedForcedAligner.Display}' is selected but not installed.\nDownload and use {SelectedForcedAligner.FileName}?",
+                                $"Download {SelectedForcedAligner.BaseDisplay}?",
+                                $"'{SelectedForcedAligner.BaseDisplay}' is selected but not installed.\nDownload and use {SelectedForcedAligner.FileName}?",
                                 MessageBoxButtons.YesNoCancel,
                                 MessageBoxIcon.Question);
 
@@ -2077,6 +2111,8 @@ public partial class SpeechToTextViewModel : ObservableObject
                 {
                     return;
                 }
+
+                UpdateForcedAlignerUi();
             }
         }
 
