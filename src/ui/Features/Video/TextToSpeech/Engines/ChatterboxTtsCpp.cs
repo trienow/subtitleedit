@@ -20,14 +20,15 @@ namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 /// <summary>
 /// Chatterbox TTS via the existing CrispASR install (shared with the speech-to-text feature).
 /// Spawns `crispasr --server --backend chatterbox -m auto` and POSTs to the OpenAI-compatible
-/// /v1/audio/speech endpoint. Reference WAVs imported via <see cref="ImportVoice"/> are sent
-/// per-request as the `voice` field; whether cloning actually engages depends on the running
-/// CrispASR build (the chatterbox backend is wiring up runtime WAV cloning).
+/// /v1/audio/speech endpoint. Requires CrispASR v0.6.0 or newer.
+/// Chatterbox has one baked default voice; "voices" listed beyond Default come from
+/// WAVs imported via <see cref="ImportVoice"/>. The full reference-WAV path is sent per-request
+/// as the `voice` field — runtime WAV cloning is wired upstream in CrispASR's chatterbox backend.
 /// </summary>
 public class ChatterboxTtsCpp : ITtsEngine
 {
     public string Name => "Chatterbox TTS";
-    public string Description => "voice cloning via CrispASR";
+    public string Description => "via CrispASR (one baked voice + clone via Import voice)";
     public bool HasLanguageParameter => false;
     public bool HasApiKey => false;
     public bool HasRegion => false;
@@ -231,8 +232,6 @@ public class ChatterboxTtsCpp : ITtsEngine
             psi.ArgumentList.Add("127.0.0.1");
             psi.ArgumentList.Add("--port");
             psi.ArgumentList.Add(port.ToString());
-            psi.ArgumentList.Add("--voice-dir");
-            psi.ArgumentList.Add(GetSetVoicesFolder());
 
             var process = Process.Start(psi)
                 ?? throw new InvalidOperationException("Failed to start crispasr (chatterbox)");
@@ -263,6 +262,12 @@ public class ChatterboxTtsCpp : ITtsEngine
                     var tail = SnapshotStderr(stderrBuffer);
                     _serverProcess = null;
                     _serverPort = 0;
+                    if (LooksLikeOutdatedCrispAsr(tail))
+                    {
+                        throw new InvalidOperationException(
+                            "Chatterbox requires CrispASR v0.6.0 or newer. Re-download CrispASR via "
+                            + "Video → Audio to text → Engine settings → Re-download, then try again.");
+                    }
                     throw new InvalidOperationException(
                         $"crispasr (chatterbox) exited during startup (code {process.ExitCode}). Output: {tail}");
                 }
@@ -282,6 +287,15 @@ public class ChatterboxTtsCpp : ITtsEngine
         {
             ServerLock.Release();
         }
+    }
+
+    private static bool LooksLikeOutdatedCrispAsr(string output)
+    {
+        // v0.5.x exits 0 and prints `error: unknown argument: ...` when it doesn't
+        // recognise --voice-dir / --backend chatterbox. v0.6.x without the chatterbox
+        // backend (e.g. ASR-only build) prints `unknown backend 'chatterbox'`.
+        return output.Contains("unknown argument", StringComparison.Ordinal)
+            || output.Contains("unknown backend", StringComparison.Ordinal);
     }
 
     private static string SnapshotStderr(StringBuilder buffer)
