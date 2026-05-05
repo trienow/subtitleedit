@@ -1579,10 +1579,58 @@ public partial class SpeechToTextViewModel : ObservableObject
         }
 
         var engine = GetEffectiveSelectedEngine();
-        var vm = await _windowService.ShowDialogAsync<DownloadSpeechToTextEngineWindow, DownloadSpeechToTextEngineViewModel>(
+        var crispVariant = "vulkan";
+        if (engine is ICrispAsrEngine && Configuration.IsRunningOnWindows)
+        {
+            var answer = await MessageBox.Show(
+                Window,
+                $"Download {CrispAsrEngine.StaticName}?",
+                $"{Environment.NewLine}\"{CrispAsrEngine.StaticName}\" requires downloading the CrispASR engine.{Environment.NewLine}{Environment.NewLine}Select a version to download:",
+                MessageBoxButtons.Cancel,
+                MessageBoxIcon.Question,
+                "CPU",
+                "Vulkan",
+                "CUDA");
+
+            if (answer == MessageBoxResult.None || answer == MessageBoxResult.Cancel)
+            {
+                return;
+            }
+
+            crispVariant = answer switch
+            {
+                MessageBoxResult.Custom1 => "cpu",
+                MessageBoxResult.Custom3 => "cuda",
+                _ => "vulkan",
+            };
+
+            if (crispVariant == "vulkan" && !VulkanHelper.IsInstalled())
+            {
+                var vulkanAnswer = await MessageBox.Show(
+                    Window,
+                    "Vulkan SDK may be required",
+                    $"The Vulkan version requires the Vulkan SDK to be installed.{Environment.NewLine}{Environment.NewLine}You can download it from:{Environment.NewLine}https://vulkan.lunarg.com/sdk/home{Environment.NewLine}{Environment.NewLine}Continue with Vulkan download?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (vulkanAnswer == MessageBoxResult.No)
+                {
+                    UiUtil.OpenUrl("https://vulkan.lunarg.com/sdk/home");
+                    return;
+                }
+
+                if (vulkanAnswer != MessageBoxResult.Yes)
+                {
+                    return;
+                }
+            }
+        }
+
+        await _windowService.ShowDialogAsync<DownloadSpeechToTextEngineWindow, DownloadSpeechToTextEngineViewModel>(
             Window, viewModel =>
             {
                 viewModel.Engine = engine;
+                viewModel.CrispAsrWindowsVariant = crispVariant;
                 viewModel.StartDownload();
             });
     }
@@ -3166,13 +3214,14 @@ public partial class SpeechToTextViewModel : ObservableObject
         }
 
         IsReDownloadVisible = true;
+        var displayName = engine is ICrispAsrEngine ? CrispAsrEngine.StaticName : engine.Name;
         if (engine.IsEngineInstalled())
         {
-            ReDownloadText = string.Format(Se.Language.General.ReDownloadX, engine.Name);
+            ReDownloadText = string.Format(Se.Language.General.ReDownloadX, displayName);
         }
         else
         {
-            ReDownloadText = string.Format(Se.Language.General.DownloadX, engine.Name);
+            ReDownloadText = string.Format(Se.Language.General.DownloadX, displayName);
         }
     }
 
