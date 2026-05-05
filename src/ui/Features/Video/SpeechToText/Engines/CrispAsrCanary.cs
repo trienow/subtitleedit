@@ -15,6 +15,7 @@ public class CrispAsrCanary : CrispAsrEngineBase
     public override string BackendName => "canary";
     public override string DefaultLanguage => "en";
     public override bool IncludeLanguage => true;
+    public override bool HasNativeTimestamps => true;
 
     public override List<WhisperLanguage> Languages =>
        new()

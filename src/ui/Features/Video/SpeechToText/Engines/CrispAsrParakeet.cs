@@ -15,6 +15,7 @@ public class CrispAsrParakeet : CrispAsrEngineBase
     public override string BackendName => "parakeet";
     public override string DefaultLanguage => "en";
     public override bool IncludeLanguage => false;
+    public override bool HasNativeTimestamps => true;
 
     public override List<WhisperLanguage> Languages =>
        new()

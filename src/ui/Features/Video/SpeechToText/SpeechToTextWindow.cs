@@ -71,6 +71,28 @@ public class SpeechToTextWindow : Window
             .WithMarginTop(10)
             .BindIsVisible(vm, nameof(vm.IsCrispAsrSelected));
 
+        var labelForcedAligner = UiUtil.MakeTextBlock("Forced aligner").WithMarginTop(10)
+            .BindIsVisible(vm, nameof(vm.IsForcedAlignerVisible));
+        var comboForcedAligner = UiUtil.MakeComboBox(vm.ForcedAligners, vm, nameof(vm.SelectedForcedAligner))
+            .WithMinWidth(220)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled))
+            .WithMarginTop(10);
+        var buttonForcedAlignerDownload = UiUtil.MakeButtonBrowse(vm.DownloadForcedAlignerCommand)
+            .WithMarginTop(10)
+            .WithMarginLeft(5)
+            .BindIsEnabled(vm, nameof(vm.IsTranscribeEnabled));
+        var panelForcedAlignerControls = new StackPanel
+        {
+            Orientation = Orientation.Horizontal,
+            HorizontalAlignment = HorizontalAlignment.Left,
+            VerticalAlignment = VerticalAlignment.Center,
+            Children =
+            {
+                comboForcedAligner,
+                buttonForcedAlignerDownload,
+            },
+        }.BindIsVisible(vm, nameof(vm.IsForcedAlignerVisible));
+
         var labelLanguage = UiUtil.MakeTextBlock(Se.Language.Video.AudioToText.InputLanguage).WithMarginTop(10);
         var comboLanguage = UiUtil.MakeComboBox(vm.Languages, vm, nameof(vm.SelectedLanguage))
             .WithMinWidth(220)
@@ -293,6 +315,7 @@ public class SpeechToTextWindow : Window
             {
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Engine
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Backend
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Forced aligner
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Language
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Model
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Translate to English
@@ -358,6 +381,10 @@ public class SpeechToTextWindow : Window
         grid.Add(labelBackend, row, 0);
         grid.Add(comboWhisperCppBackend, row, 1);
         grid.Add(comboCrispAsrBackend, row, 1);
+        row++;
+
+        grid.Add(labelForcedAligner, row, 0);
+        grid.Add(panelForcedAlignerControls, row, 1);
         row++;
 
         grid.Add(labelLanguage, row, 0);

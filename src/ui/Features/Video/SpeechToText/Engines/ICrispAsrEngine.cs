@@ -10,5 +10,8 @@ public interface ICrispAsrEngine : ISpeechToTextEngine
 
     /// <summary>Whether the -l (language) flag should be included in the command line.</summary>
     bool IncludeLanguage { get; }
+
+    /// <summary>Whether the backend produces native word/segment timestamps without an external CTC aligner.</summary>
+    bool HasNativeTimestamps { get; }
 }
 
