@@ -10756,6 +10756,9 @@ public partial class MainViewModel :
 
             ResetSubtitle();
 
+            AudioVisualizer?.StartPositionSeconds = 0;
+            AudioVisualizer?.CurrentVideoPositionSeconds = 0;
+
             SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == subtitle?.OriginalFormat?.Name) ??
                               SelectedSubtitleFormat);
 
