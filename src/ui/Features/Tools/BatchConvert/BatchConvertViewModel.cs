@@ -12,6 +12,7 @@ using Nikse.SubtitleEdit.Core.ContainerFormats.Matroska;
 using Nikse.SubtitleEdit.Core.ContainerFormats.Mp4;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Core.Translate;
+using Nikse.SubtitleEdit.Features.Assa;
 using Nikse.SubtitleEdit.Features.Edit.MultipleReplace;
 using Nikse.SubtitleEdit.Features.Files.ExportCustomTextFormat;
 using Nikse.SubtitleEdit.Features.Files.ExportEbuStl;
@@ -190,6 +191,13 @@ public partial class BatchConvertViewModel : ObservableObject
     [ObservableProperty] private bool _assaChangeResolutionChangePosition;
     [ObservableProperty] private bool _assaChangeResolutionChangeDrawing;
 
+    // ASSA change style
+    [ObservableProperty] private string _assaChangeStyleFromStyle;
+    [ObservableProperty] private string _assaChangeStyleToStyle;
+    [ObservableProperty] private string _assaChangeStyleImportFileName;
+    [ObservableProperty] private string _assaChangeStyleImportedStyleHeader;
+    [ObservableProperty] private bool _assaChangeStyleTrimUnusedStyles;
+
     // Merge short lines
     [ObservableProperty] private int _mergeShortLinesMaxCharacters;
     [ObservableProperty] private int _mergeShortLinesMaxMillisecondsBetweenLines;
@@ -353,6 +361,12 @@ public partial class BatchConvertViewModel : ObservableObject
         AssaChangeResolutionChangeFontSize = true;
         AssaChangeResolutionChangePosition = true;
         AssaChangeResolutionChangeDrawing = true;
+
+        AssaChangeStyleFromStyle = string.Empty;
+        AssaChangeStyleToStyle = string.Empty;
+        AssaChangeStyleImportFileName = string.Empty;
+        AssaChangeStyleImportedStyleHeader = string.Empty;
+        AssaChangeStyleTrimUnusedStyles = false;
 
         FixCommonErrorsProfile = LoadDefaultProfile();
 
@@ -522,6 +536,11 @@ public partial class BatchConvertViewModel : ObservableObject
         Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeFontSize = AssaChangeResolutionChangeFontSize;
         Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangePosition = AssaChangeResolutionChangePosition;
         Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeDrawing = AssaChangeResolutionChangeDrawing;
+
+        // ASSA change style
+        Se.Settings.Tools.BatchConvert.AssaChangeStyleFromStyle = AssaChangeStyleFromStyle ?? string.Empty;
+        Se.Settings.Tools.BatchConvert.AssaChangeStyleToStyle = AssaChangeStyleToStyle ?? string.Empty;
+        Se.Settings.Tools.BatchConvert.AssaChangeStyleTrimUnusedStyles = AssaChangeStyleTrimUnusedStyles;
 
         // Merge short lines
         Se.Settings.Tools.BatchConvert.MergeShortLinesMaxCharacters = MergeShortLinesMaxCharacters;
@@ -711,6 +730,11 @@ public partial class BatchConvertViewModel : ObservableObject
         AssaChangeResolutionChangeFontSize = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeFontSize;
         AssaChangeResolutionChangePosition = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangePosition;
         AssaChangeResolutionChangeDrawing = Se.Settings.Tools.BatchConvert.AssaChangeResolutionChangeDrawing;
+
+        // ASSA change style
+        AssaChangeStyleFromStyle = Se.Settings.Tools.BatchConvert.AssaChangeStyleFromStyle ?? string.Empty;
+        AssaChangeStyleToStyle = Se.Settings.Tools.BatchConvert.AssaChangeStyleToStyle ?? string.Empty;
+        AssaChangeStyleTrimUnusedStyles = Se.Settings.Tools.BatchConvert.AssaChangeStyleTrimUnusedStyles;
 
         // Merge short lines
         MergeShortLinesMaxCharacters = Se.Settings.Tools.BatchConvert.MergeShortLinesMaxCharacters;
@@ -1090,6 +1114,90 @@ public partial class BatchConvertViewModel : ObservableObject
         {
             vm.Initialize(BatchItems.ToList());
         });
+    }
+
+    [RelayCommand]
+    private async Task AssaChangeStyleBrowseFromStyle()
+    {
+        var name = await PickStyleNameAsync();
+        if (!string.IsNullOrEmpty(name))
+        {
+            AssaChangeStyleFromStyle = name;
+        }
+    }
+
+    [RelayCommand]
+    private async Task AssaChangeStyleBrowseToStyle()
+    {
+        var name = await PickStyleNameAsync();
+        if (!string.IsNullOrEmpty(name))
+        {
+            AssaChangeStyleToStyle = name;
+        }
+    }
+
+    [RelayCommand]
+    private async Task AssaChangeStyleImportStyle()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        var format = new AdvancedSubStationAlpha();
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Assa.OpenStyleImportFile, format.Name, "*" + format.Extension);
+        if (string.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
+
+        var s = Subtitle.Parse(fileName, format);
+        if (s == null || string.IsNullOrEmpty(s.Header))
+        {
+            return;
+        }
+
+        AssaChangeStyleImportedStyleHeader = s.Header;
+        AssaChangeStyleImportFileName = Path.GetFileName(fileName);
+
+        if (string.IsNullOrEmpty(AssaChangeStyleToStyle))
+        {
+            var styles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
+            if (styles.Count > 0)
+            {
+                AssaChangeStyleToStyle = styles[0].Name;
+            }
+        }
+    }
+
+    private async Task<string> PickStyleNameAsync()
+    {
+        if (Window == null)
+        {
+            return string.Empty;
+        }
+
+        var header = !string.IsNullOrEmpty(AssaChangeStyleImportedStyleHeader)
+            ? AssaChangeStyleImportedStyleHeader
+            : AdvancedSubStationAlpha.DefaultHeader;
+
+        var ssaStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(header);
+        if (ssaStyles.Count == 0)
+        {
+            return string.Empty;
+        }
+
+        var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
+        {
+            vm.Initialize(ssaStyles.Select(p => new StyleDisplay(p)).ToList(), Se.Language.General.Ok, false);
+        });
+
+        if (!result.OkPressed || result.SelectedStyle == null)
+        {
+            return string.Empty;
+        }
+
+        return result.SelectedStyle.Name;
     }
 
 
@@ -1711,6 +1819,15 @@ public partial class BatchConvertViewModel : ObservableObject
                 ChangeFontSize = AssaChangeResolutionChangeFontSize,
                 ChangePosition = AssaChangeResolutionChangePosition,
                 ChangeDrawing = AssaChangeResolutionChangeDrawing,
+            },
+
+            AssaChangeStyle = new BatchConvertConfig.AssaChangeStyleSettings
+            {
+                IsActive = activeFunctions.Contains(BatchConvertFunctionType.AssaChangeStyle),
+                FromStyle = AssaChangeStyleFromStyle ?? string.Empty,
+                ToStyle = AssaChangeStyleToStyle ?? string.Empty,
+                ImportedStyleHeader = AssaChangeStyleImportedStyleHeader ?? string.Empty,
+                TrimUnusedStyles = AssaChangeStyleTrimUnusedStyles,
             },
 
             MergeShortLines = new BatchConvertConfig.MergeShortLinesSettings

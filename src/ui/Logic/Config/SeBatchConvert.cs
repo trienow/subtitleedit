@@ -59,6 +59,10 @@ public class SeBatchConvert
     public bool AssaChangeResolutionChangePosition { get; set; }
     public bool AssaChangeResolutionChangeDrawing { get; set; }
 
+    public string AssaChangeStyleFromStyle { get; set; }
+    public string AssaChangeStyleToStyle { get; set; }
+    public bool AssaChangeStyleTrimUnusedStyles { get; set; }
+
     public bool SaveInSourceFolder { get; set; }
 
     public string AutoTranslateEngine { get; set; }
@@ -116,6 +120,9 @@ public class SeBatchConvert
         AssaChangeResolutionChangeFontSize = true;
         AssaChangeResolutionChangePosition = true;
         AssaChangeResolutionChangeDrawing = true;
+        AssaChangeStyleFromStyle = string.Empty;
+        AssaChangeStyleToStyle = string.Empty;
+        AssaChangeStyleTrimUnusedStyles = false;
         AutoTranslateEngine = new OllamaTranslate().Name;
         AutoTranslateSourceLanguage = "auto";
         AutoTranslateTargetLanguage = "en";

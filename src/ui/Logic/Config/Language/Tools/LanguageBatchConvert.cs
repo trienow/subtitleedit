@@ -35,6 +35,12 @@ public class LanguageBatchConvert
     public string TiltBounce { get; set; }
     public string FontSizeBounceIn { get; set; }
     public string AssaChangeResolutionOnlyAppliesToAssa { get; set; }
+    public string AssaChangeStyleTitle { get; set; }
+    public string AssaChangeStyleFromStyle { get; set; }
+    public string AssaChangeStyleToStyle { get; set; }
+    public string AssaChangeStyleImportStyle { get; set; }
+    public string AssaChangeStyleImportedX { get; set; }
+    public string AssaChangeStyleTrimUnusedStyles { get; set; }
 
     public LanguageBatchConvert()
     {
@@ -68,5 +74,11 @@ public class LanguageBatchConvert
         TiltBounce = "Tilt bounce";
         FontSizeBounceIn = "Font size bounce in";
         AssaChangeResolutionOnlyAppliesToAssa = "Only applies to Advanced Sub Station Alpha (ASSA) subtitles";
+        AssaChangeStyleTitle = "Change style";
+        AssaChangeStyleFromStyle = "Change style from";
+        AssaChangeStyleToStyle = "to";
+        AssaChangeStyleImportStyle = "Import style...";
+        AssaChangeStyleImportedX = "Imported: {0}";
+        AssaChangeStyleTrimUnusedStyles = "Trim unused styles";
     }
 }

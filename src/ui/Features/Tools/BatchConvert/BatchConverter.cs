@@ -1438,6 +1438,7 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             s = RemoveTextForHearingImpaired(s, Language);
             s = FixRightToLeft(s);
             s = AssaChangeResolution(s);
+            s = AssaChangeStyle(s);
             s = SortBy(s);
         }
 
@@ -1967,6 +1968,67 @@ public class BatchConverter : IBatchConverter, IFixCallbacks
             c.ChangeFontSize,
             c.ChangeDrawing,
             c.ChangePosition);
+
+        return subtitle;
+    }
+
+    private Subtitle AssaChangeStyle(Subtitle subtitle)
+    {
+        if (!_config.AssaChangeStyle.IsActive)
+        {
+            return subtitle;
+        }
+
+        if (subtitle.OriginalFormat == null || subtitle.OriginalFormat.Name != AdvancedSubStationAlpha.NameOfFormat)
+        {
+            return subtitle;
+        }
+
+        var c = _config.AssaChangeStyle;
+
+        if (string.IsNullOrEmpty(subtitle.Header))
+        {
+            subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+        }
+
+        if (!string.IsNullOrEmpty(c.ImportedStyleHeader))
+        {
+            var importedStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(c.ImportedStyleHeader);
+            foreach (var style in importedStyles)
+            {
+                subtitle.Header = AdvancedSubStationAlpha.UpdateOrAddStyle(subtitle.Header, style);
+            }
+        }
+
+        if (!string.IsNullOrEmpty(c.FromStyle) && !string.IsNullOrEmpty(c.ToStyle))
+        {
+            foreach (var p in subtitle.Paragraphs)
+            {
+                if (string.Equals(p.Extra?.TrimStart('*'), c.FromStyle, StringComparison.OrdinalIgnoreCase))
+                {
+                    p.Extra = c.ToStyle;
+                }
+            }
+        }
+
+        if (c.TrimUnusedStyles)
+        {
+            var usedStyleNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (var p in subtitle.Paragraphs)
+            {
+                if (!string.IsNullOrEmpty(p.Extra))
+                {
+                    usedStyleNames.Add(p.Extra.TrimStart('*'));
+                }
+            }
+
+            var allStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(subtitle.Header);
+            var keptStyles = allStyles.Where(s => usedStyleNames.Contains(s.Name)).ToList();
+            if (keptStyles.Count > 0 && keptStyles.Count != allStyles.Count)
+            {
+                subtitle.Header = AdvancedSubStationAlpha.GetHeaderAndStylesFromAdvancedSubStationAlpha(subtitle.Header, keptStyles);
+            }
+        }
 
         return subtitle;
     }

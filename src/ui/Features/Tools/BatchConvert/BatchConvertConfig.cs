@@ -41,6 +41,7 @@ public class BatchConvertConfig
     public ApplyMinGapSettings ApplyMinGap { get; set; }
     public SplitBreakLongLinesSettings SplitBreakLongLines { get; set; }
     public AssaChangeResolutionSettings AssaChangeResolution { get; set; }
+    public AssaChangeStyleSettings AssaChangeStyle { get; set; }
     public MergeShortLinesSettings MergeShortLines { get; set; }
     public ApplyDurationLimitsSettings ApplyDurationLimits { get; set; }
     public AutoBalanceLinesSettings AutoBalanceLines { get; set; }
@@ -76,6 +77,7 @@ public class BatchConvertConfig
         ApplyMinGap = new ApplyMinGapSettings();
         SplitBreakLongLines = new SplitBreakLongLinesSettings();
         AssaChangeResolution = new AssaChangeResolutionSettings();
+        AssaChangeStyle = new AssaChangeStyleSettings();
         MergeShortLines = new MergeShortLinesSettings();
         ApplyDurationLimits = new ApplyDurationLimitsSettings();
         AutoBalanceLines = new AutoBalanceLinesSettings();
@@ -293,6 +295,22 @@ public class BatchConvertConfig
             ChangeFontSize = true;
             ChangePosition = true;
             ChangeDrawing = true;
+        }
+    }
+
+    public class AssaChangeStyleSettings
+    {
+        public bool IsActive { get; set; }
+        public string FromStyle { get; set; }
+        public string ToStyle { get; set; }
+        public string ImportedStyleHeader { get; set; }
+        public bool TrimUnusedStyles { get; set; }
+
+        public AssaChangeStyleSettings()
+        {
+            FromStyle = string.Empty;
+            ToStyle = string.Empty;
+            ImportedStyleHeader = string.Empty;
         }
     }
 
