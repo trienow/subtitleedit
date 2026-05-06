@@ -1437,7 +1437,13 @@
       "rotateIn": "Rotate in",
       "tiltBounce": "Tilt bounce",
       "fontSizeBounceIn": "Font size bounce in",
-      "assaChangeResolutionOnlyAppliesToAssa": "Only applies to Advanced Sub Station Alpha (ASSA) subtitles"
+      "assaChangeResolutionOnlyAppliesToAssa": "Only applies to Advanced Sub Station Alpha (ASSA) subtitles",
+      "assaChangeStyleTitle": "Change style",
+      "assaChangeStyleFromStyle": "Change style from",
+      "assaChangeStyleToStyle": "to",
+      "assaChangeStyleImportStyle": "Import style...",
+      "assaChangeStyleImportedX": "Imported: {0}",
+      "assaChangeStyleTrimUnusedStyles": "Trim unused styles"
     },
     "changeCasing": {
       "title": "Change casing",
