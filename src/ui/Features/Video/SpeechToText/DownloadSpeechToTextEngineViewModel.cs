@@ -35,7 +35,7 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
     public ISpeechToTextEngine? Engine { get; internal set; }
 
     /// <summary>
-    /// Windows-only CrispASR download variant: "cpu", "vulkan", or "cuda". Defaults to "vulkan".
+    /// Windows-only CrispASR download variant: "cpu", "cpu-legacy", "vulkan", or "cuda". Defaults to "vulkan".
     /// </summary>
     public string CrispAsrWindowsVariant { get; set; } = "vulkan";
 
@@ -173,10 +173,11 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
                                 ? "crispasr-macos"
                                 : CrispAsrWindowsVariant switch
                                 {
-                                    "cuda"   => "crispasr-windows-x86_64-cuda",
-                                    "cpu"    => "crispasr-windows-x86_64-cpu-legacy",
-                                    "vulkan" => "crispasr-windows-x86_64-vulkan",
-                                    _        => Engine.UnpackSkipFolder,
+                                    "cuda"       => "crispasr-windows-x86_64-cuda",
+                                    "cpu"        => "crispasr-windows-x86_64-cpu",
+                                    "cpu-legacy" => "crispasr-windows-x86_64-cpu-legacy",
+                                    "vulkan"     => "crispasr-windows-x86_64-vulkan",
+                                    _            => Engine.UnpackSkipFolder,
                                 }
                         : Engine.UnpackSkipFolder;
 
@@ -441,9 +442,10 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
             {
                 _downloadTask = CrispAsrWindowsVariant switch
                 {
-                    "cuda" => _crispAsrDownloadService.DownloadEngineWindowsCuda(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
-                    "cpu"  => _crispAsrDownloadService.DownloadEngineWindowsCpu(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
-                    _      => _crispAsrDownloadService.DownloadEngineWindowsVulkan(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    "cuda"       => _crispAsrDownloadService.DownloadEngineWindowsCuda(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    "cpu"        => _crispAsrDownloadService.DownloadEngineWindowsCpu(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    "cpu-legacy" => _crispAsrDownloadService.DownloadEngineWindowsCpuLegacy(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    _            => _crispAsrDownloadService.DownloadEngineWindowsVulkan(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
                 };
             }
             else

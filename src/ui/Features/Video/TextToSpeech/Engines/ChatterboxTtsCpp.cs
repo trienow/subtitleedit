@@ -237,12 +237,13 @@ public class ChatterboxTtsCpp : ITtsEngine
                 StopServerInternal();
             }
             Se.LogError(ex, $"Chatterbox TTS request failed - Voice: {chatterboxVoice}, Text: {text}, "
-                + $"ServerExited: {died}, ServerLog: {serverLog}");
+                + $"RequestJson: {body}, ServerExited: {died}, ServerLog: {serverLog}");
 
             var prefix = LooksLikeUpstreamChatterboxCrash(serverLog)
                 ? "Chatterbox TTS hit a CrispASR runtime bug during synthesis (ggml tensor read out of bounds). "
                   + "This is an upstream issue — please file it at https://github.com/CrispStrobe/CrispASR/issues with the server log below. "
-                  + "Switching to the Vulkan or CUDA CrispASR build (re-download via Audio to text) may avoid the CPU-only code path that triggers it."
+                  + "The crash reproduces on the CPU and Vulkan builds (chatterbox's T3 step runs on CPU regardless of the build); "
+                  + "the CUDA build may avoid it but is unverified."
                 : "Chatterbox TTS request failed — "
                   + (died ? "the crispasr server crashed during synthesis." : "the connection to the crispasr server was dropped.");
 
@@ -258,7 +259,8 @@ public class ChatterboxTtsCpp : ITtsEngine
                 var errorBody = await SafeReadErrorAsync(response, cancellationToken);
                 var serverLog = SnapshotServerLog();
                 Se.LogError($"Chatterbox TTS server error {(int)response.StatusCode} {response.StatusCode} - "
-                    + $"Voice: {chatterboxVoice}, Text: {text}, Body: {errorBody}, ServerLog: {serverLog}");
+                    + $"Voice: {chatterboxVoice}, Text: {text}, RequestJson: {body}, "
+                    + $"ResponseBody: {errorBody}, ServerLog: {serverLog}");
                 throw new InvalidOperationException(
                     $"Chatterbox TTS synthesis failed ({(int)response.StatusCode}): {errorBody}"
                     + (string.IsNullOrEmpty(serverLog) ? string.Empty : $"{Environment.NewLine}Server log:{Environment.NewLine}{serverLog}"));
@@ -270,6 +272,25 @@ public class ChatterboxTtsCpp : ITtsEngine
         }
 
         return new TtsResult(outputFileName, text);
+    }
+
+    /// <summary>
+    /// Renders the server launch as a shell-quotable string (file path + each arg quoted only
+    /// when it contains whitespace). Goes into the error log so failures can be reproduced.
+    /// </summary>
+    private static string FormatLaunchCommand(string exe, System.Collections.ObjectModel.Collection<string> args)
+    {
+        static string Quote(string s) =>
+            !string.IsNullOrEmpty(s) && s.IndexOfAny(new[] { ' ', '\t' }) >= 0
+                ? "\"" + s.Replace("\"", "\\\"") + "\""
+                : s;
+
+        var sb = new StringBuilder(Quote(exe));
+        foreach (var a in args)
+        {
+            sb.Append(' ').Append(Quote(a));
+        }
+        return sb.ToString();
     }
 
     private static async Task<string> SafeReadErrorAsync(HttpResponseMessage response, CancellationToken ct)
@@ -335,9 +356,25 @@ public class ChatterboxTtsCpp : ITtsEngine
             psi.ArgumentList.Add("127.0.0.1");
             psi.ArgumentList.Add("--port");
             psi.ArgumentList.Add(port.ToString());
+            // The crispasr server gates /v1/audio/speech requests with a `voice` field
+            // behind --voice-dir being set ("warning: --voice-dir not set; … will reject
+            // requests with a 'voice' field"). Imported reference-WAV cloning sends an
+            // absolute path as `voice`, which the chatterbox backend resolves directly,
+            // but the server-level gate still applies. Pointing --voice-dir at our
+            // voices folder satisfies the gate and also makes /v1/voices reflect the
+            // imported WAVs.
+            psi.ArgumentList.Add("--voice-dir");
+            psi.ArgumentList.Add(GetSetVoicesFolder());
 
             var process = Process.Start(psi)
                 ?? throw new InvalidOperationException("Failed to start crispasr (chatterbox)");
+
+            // Record the exact launch command in the error log so failures later in this
+            // session can be reproduced from a shell. Logged via LogError because that's
+            // the only severity exposed by Se; this entry is informational.
+            Se.LogError("Chatterbox TTS server starting - "
+                + $"PID: {process.Id}, "
+                + $"Cmd: {FormatLaunchCommand(exe, psi.ArgumentList)}");
 
             lock (_serverLog) _serverLog.Clear();
             process.ErrorDataReceived += (_, e) =>

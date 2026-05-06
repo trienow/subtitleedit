@@ -952,6 +952,16 @@ public partial class TextToSpeechViewModel : ObservableObject
                 _ => "vulkan",
             };
 
+            if (crispVariant == "cpu")
+            {
+                var cpuAnswer = await PromptCrispAsrCpuFlavorAsync();
+                if (cpuAnswer == null)
+                {
+                    return false;
+                }
+                crispVariant = cpuAnswer;
+            }
+
             if (crispVariant == "vulkan" && !VulkanHelper.IsInstalled())
             {
                 var vulkanAnswer = await MessageBox.Show(
@@ -1004,6 +1014,30 @@ public partial class TextToSpeechViewModel : ObservableObject
         }
 
         return await engine.IsInstalled(SelectedRegion) && ChatterboxTtsCpp.IsCrispAsrChatterboxCapable();
+    }
+
+    /// <summary>
+    /// Follow-up prompt after the user picks "CPU" in the CrispASR variant selector.
+    /// Returns "cpu" (modern, recommended), "cpu-legacy" (compatibility build for CPUs without AVX2),
+    /// or null when the user cancels.
+    /// </summary>
+    private async Task<string?> PromptCrispAsrCpuFlavorAsync()
+    {
+        var cpuAnswer = await MessageBox.Show(
+            Window!,
+            "CrispASR CPU build",
+            $"{Environment.NewLine}Standard is recommended for most machines.{Environment.NewLine}{Environment.NewLine}Legacy is a fallback for older CPUs without AVX2 support.",
+            MessageBoxButtons.Cancel,
+            MessageBoxIcon.Question,
+            "Standard",
+            "Legacy");
+
+        return cpuAnswer switch
+        {
+            MessageBoxResult.Custom1 => "cpu",
+            MessageBoxResult.Custom2 => "cpu-legacy",
+            _ => null,
+        };
     }
 
     private async Task MergeAndAddToVideo(TtsStepResult[] fixSpeedResult)
