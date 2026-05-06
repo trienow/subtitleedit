@@ -466,6 +466,11 @@ public partial class BatchConvertViewModel : ObservableObject
     {
         Se.Settings.Tools.BatchConvert.TargetFormat = SelectedTargetFormat ?? TargetFormats.First();
 
+        Se.Settings.Tools.BatchConvert.ActiveFunctions = BatchFunctions
+            .Where(p => p.IsSelected)
+            .Select(p => p.Type.ToString())
+            .ToArray();
+
         Se.Settings.Tools.BatchConvert.LastFilterItem = SelectedFilterItem ?? string.Empty;
 
         Se.Settings.Tools.BatchConvert.AdjustVia = SelectedAdjustType.Name;
