@@ -96,7 +96,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
         _timerUpdatePreview.Elapsed += TimerUpdatePreviewElapsed;
 
         FormatTextNone = false;
-        FormatTextNone = false;
+        FormatTextMerge = false;
         FormatTextUnbreak = false;
         if (Se.Settings.File.ExportPlainText.TextProcessing == "Merge")
         {
@@ -124,7 +124,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
 
     private void SaveSettings()
     {
-        Se.Settings.File.ExportPlainText.TextRemoveStyling = TextRemoveStyling;
+        Se.Settings.File.ExportPlainText.TextProcessing = FormatTextMerge ? "Merge" : FormatTextUnbreak ? "Unbreak" : "None";
         Se.Settings.File.ExportPlainText.TextRemoveStyling = TextRemoveStyling;
         Se.Settings.File.ExportPlainText.ShowLineNumbers = ShowLineNumbers;
         Se.Settings.File.ExportPlainText.AddNewLineAfterLineNumber = AddNewLineAfterLineNumber;
@@ -153,6 +153,25 @@ public partial class ExportPlainTextViewModel : ObservableObject
 
     private string GetExportText()
     {
+        if (FormatTextMerge)
+        {
+            var parts = new List<string>();
+            foreach (var subtitleLine in _subtitles)
+            {
+                var text = subtitleLine.Text ?? string.Empty;
+                if (TextRemoveStyling)
+                {
+                    text = HtmlUtil.RemoveHtmlTags(text, true);
+                }
+                text = text.Replace(Environment.NewLine, " ").Trim();
+                if (!string.IsNullOrEmpty(text))
+                {
+                    parts.Add(text);
+                }
+            }
+            return string.Join(" ", parts);
+        }
+
         var sb = new StringBuilder();
 
         foreach (var subtitleLine in _subtitles)
@@ -165,12 +184,7 @@ public partial class ExportPlainTextViewModel : ObservableObject
                 text = HtmlUtil.RemoveHtmlTags(text, true);
             }
 
-            // Handle text formatting modes
-            if (FormatTextMerge)
-            {
-                text = text.Replace(Environment.NewLine, " ");
-            }
-            else if (FormatTextUnbreak)
+            if (FormatTextUnbreak)
             {
                 text = text.Replace(Environment.NewLine, " ");
                 text = Utilities.UnbreakLine(text);
