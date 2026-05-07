@@ -29,8 +29,10 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
         /// </summary>
         public static string[] Models => new[]
         {
-            "claude-sonnet-4-5",
+            "claude-opus-4-7",
+            "claude-sonnet-4-6",
             "claude-haiku-4-5",
+            "claude-sonnet-4-5",
             "claude-opus-4-5",
         };
 

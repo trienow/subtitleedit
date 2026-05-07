@@ -33,9 +33,11 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
         /// </summary>
         public static string[] Models => new[]
         {
-            "mistral-small-latest",
-            "mistral-medium-latest",
-            "open-mistral-nemo-latest",
+            "mistral-large-latest",     // Mistral Large 3 — flagship, best for nuanced translation
+            "mistral-medium-latest",    // Mistral Medium 3.5 — balanced quality/cost
+            "mistral-small-latest",     // Mistral Small 4 — efficient mid-tier
+            "ministral-8b-latest",      // Ministral 8B — lightweight, fast
+            "magistral-medium-latest",  // Magistral Medium — reasoning-focused
         };
 
         public void Initialize()
