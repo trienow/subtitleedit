@@ -1,7 +1,9 @@
-﻿using Avalonia.Controls;
+﻿using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Nikse.SubtitleEdit.Features.Shared.ColorPicker;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 
@@ -438,13 +440,13 @@ public class AssaStylesWindow : Window
         var panelTransform2 = UiUtil.MakeHorizontalPanel(labelSpacing, numericUpDownSpacing, labelAngle, numericUpDownAngle).WithMarginBottom(10);
 
         var labelColorPrimary = UiUtil.MakeLabel(Se.Language.Assa.Primary);
-        var colorPickerPrimary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorPrimary));
+        var colorPickerPrimary = MakeStyleColorPickerButton(vm, nameof(StyleDisplay.ColorPrimary));
         var labelColorOutline = UiUtil.MakeLabel(Se.Language.General.Outline);
-        var colorPickerOutline = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorOutline));
+        var colorPickerOutline = MakeStyleColorPickerButton(vm, nameof(StyleDisplay.ColorOutline));
         var labelColorShadow = UiUtil.MakeLabel(Se.Language.General.Shadow);
-        var colorPickerShadow = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorShadow));
+        var colorPickerShadow = MakeStyleColorPickerButton(vm, nameof(StyleDisplay.ColorShadow));
         var labelColorSecondary = UiUtil.MakeLabel(Se.Language.Assa.Secondary);
-        var colorPickerSecondary = UiUtil.MakeColorPicker(vm, nameof(vm.CurrentStyle) + "." + nameof(StyleDisplay.ColorSecondary));
+        var colorPickerSecondary = MakeStyleColorPickerButton(vm, nameof(StyleDisplay.ColorSecondary));
         var panelColors = UiUtil.MakeHorizontalPanel(
             labelColorPrimary,
             colorPickerPrimary,
@@ -628,5 +630,53 @@ public class AssaStylesWindow : Window
         grid.Add(image, 1);
 
         return UiUtil.MakeBorderForControl(grid);
+    }
+
+    private static Button MakeStyleColorPickerButton(AssaStylesViewModel vm, string colorPropertyName)
+    {
+        var swatch = new Border
+        {
+            Width = 30,
+            Height = 20,
+            CornerRadius = new CornerRadius(3),
+            BorderThickness = new Thickness(1),
+            BorderBrush = new SolidColorBrush(Colors.Gray),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+        swatch.Bind(Border.BackgroundProperty, new Binding(nameof(vm.CurrentStyle) + "." + colorPropertyName)
+        {
+            Source = vm,
+            Converter = new ColorToBrushConverter(),
+        });
+
+        var button = new Button
+        {
+            Content = swatch,
+            Padding = new Thickness(4, 2),
+            VerticalAlignment = VerticalAlignment.Center,
+        };
+
+        button.Click += async (_, _) =>
+        {
+            if (TopLevel.GetTopLevel(button) is not Window window || vm.CurrentStyle is null)
+            {
+                return;
+            }
+
+            var propInfo = typeof(StyleDisplay).GetProperty(colorPropertyName);
+            var currentColor = propInfo?.GetValue(vm.CurrentStyle) is Color c ? c : Colors.White;
+
+            var pickerVm = new ColorPickerViewModel();
+            pickerVm.Initialize(currentColor);
+            var pickerWindow = new ColorPickerWindow(pickerVm);
+            await pickerWindow.ShowDialog(window);
+
+            if (pickerVm.OkPressed)
+            {
+                propInfo?.SetValue(vm.CurrentStyle, pickerVm.SelectedColor);
+            }
+        };
+
+        return button;
     }
 }
