@@ -109,10 +109,12 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
     private void LoadChecks()
     {
         Checks.Clear();
+        var saved = Se.Settings.Tools.FixNetflixErrors.SelectedRules;
+        var hasSaved = saved.Count > 0;
         foreach (var checker in NetflixQualityController.GetAllCheckers())
         {
-            var name = checker.Name;
-            Checks.Add(new NetflixCheckDisplayItem(checker, name, true));
+            var isSelected = !hasSaved || saved.Contains(checker.GetType().Name);
+            Checks.Add(new NetflixCheckDisplayItem(checker, checker.Name, isSelected));
         }
     }
 
@@ -122,6 +124,10 @@ public partial class FixNetflixErrorsViewModel : ObservableObject
 
     private void SaveSettings()
     {
+        Se.Settings.Tools.FixNetflixErrors.SelectedRules = Checks
+            .Where(c => c.IsSelected)
+            .Select(c => c.Checker.GetType().Name)
+            .ToList();
         Se.SaveSettings();
     }
 
