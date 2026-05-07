@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
@@ -31,6 +32,7 @@ public static class DownloadHashManager
         // Hashes of the release archive (.zip / .tar.gz) — used when a sidecar hash exists alongside the install.
         public const string WindowsCuda = "CrispAsr.Windows.Cuda";
         public const string WindowsVulkan = "CrispAsr.Windows.Vulkan";
+        public const string WindowsCpu = "CrispAsr.Windows.Cpu";
         public const string WindowsCpuLegacy = "CrispAsr.Windows.CpuLegacy";
         public const string MacOs = "CrispAsr.MacOs";
         public const string Linux = "CrispAsr.Linux";
@@ -39,6 +41,7 @@ public static class DownloadHashManager
         // installed version when no sidecar is present (e.g. installs from older SE builds).
         public const string WindowsCudaExecutable = "CrispAsr.Windows.Cuda.Executable";
         public const string WindowsVulkanExecutable = "CrispAsr.Windows.Vulkan.Executable";
+        public const string WindowsCpuExecutable = "CrispAsr.Windows.Cpu.Executable";
         public const string WindowsCpuLegacyExecutable = "CrispAsr.Windows.CpuLegacy.Executable";
         public const string MacOsExecutable = "CrispAsr.MacOs.Executable";
         public const string LinuxExecutable = "CrispAsr.Linux.Executable";
@@ -71,6 +74,10 @@ public static class DownloadHashManager
                 "1f0793e6279bc5e82a17eaacc6a2227842d4a839f9ed3b2e244b8515746a66bd", // v0.5.4
                 "aadb324d33dea7c28ff703a64403169a0814dc71449f7d635f270e8bc1e0b7c3", // v0.5.3
                 "b7c58fba959f8a7a013e458764cf526a4cf6595d8c6247b8893c37cb8c9dd000", // v0.5.2
+            },
+            [CrispAsr.WindowsCpu] = new[]
+            {
+                "46fe3bc88966c973eef66b7c2271f95bb40b2b4bf338643e71834186cba0ae3d", // v0.6.0 (current download URL — first non-legacy CPU build SE has shipped)
             },
             [CrispAsr.WindowsCpuLegacy] = new[]
             {
@@ -114,6 +121,10 @@ public static class DownloadHashManager
                 "50a4934aa3adb7bd9e78ddea407f9125f605ebf85f0f1fb286718a0216b5140d", // v0.5.4
                 "6217ae5ff00fac3997225e930576aa9ff58b8708d8a66a86163c2c555bb88ec5", // v0.5.3
                 "112862f031cfc65656e282a61b0b156f8f3037a3d2f606df826fb7ed824d3d92", // v0.5.2
+            },
+            [CrispAsr.WindowsCpuExecutable] = new[]
+            {
+                "28da4dcf6e72738b408400ebdef00203f8e70dccf392446ecee90a15c971e186", // v0.6.0 (current download URL — first non-legacy CPU build SE has shipped)
             },
             [CrispAsr.WindowsCpuLegacyExecutable] = new[]
             {
@@ -250,7 +261,8 @@ public static class DownloadHashManager
             return windowsVariant switch
             {
                 "cuda" => CrispAsr.WindowsCuda,
-                "cpu" => CrispAsr.WindowsCpuLegacy,
+                "cpu" => CrispAsr.WindowsCpu,
+                "cpu-legacy" => CrispAsr.WindowsCpuLegacy,
                 "vulkan" => CrispAsr.WindowsVulkan,
                 _ => null,
             };
@@ -261,7 +273,7 @@ public static class DownloadHashManager
 
     /// <summary>
     /// Reverse of <see cref="ResolveCrispAsrKey"/> for Windows variants only:
-    /// returns "cuda" / "vulkan" / "cpu" matching the given key, or null otherwise.
+    /// returns "cuda" / "vulkan" / "cpu" / "cpu-legacy" matching the given key, or null otherwise.
     /// </summary>
     public static string? GetCrispAsrWindowsVariant(string key)
     {
@@ -269,7 +281,8 @@ public static class DownloadHashManager
         {
             CrispAsr.WindowsCuda or CrispAsr.WindowsCudaExecutable => "cuda",
             CrispAsr.WindowsVulkan or CrispAsr.WindowsVulkanExecutable => "vulkan",
-            CrispAsr.WindowsCpuLegacy or CrispAsr.WindowsCpuLegacyExecutable => "cpu",
+            CrispAsr.WindowsCpu or CrispAsr.WindowsCpuExecutable => "cpu",
+            CrispAsr.WindowsCpuLegacy or CrispAsr.WindowsCpuLegacyExecutable => "cpu-legacy",
             _ => null,
         };
     }
@@ -295,7 +308,8 @@ public static class DownloadHashManager
             return windowsVariant switch
             {
                 "cuda" => CrispAsr.WindowsCudaExecutable,
-                "cpu" => CrispAsr.WindowsCpuLegacyExecutable,
+                "cpu" => CrispAsr.WindowsCpuExecutable,
+                "cpu-legacy" => CrispAsr.WindowsCpuLegacyExecutable,
                 "vulkan" => CrispAsr.WindowsVulkanExecutable,
                 _ => null,
             };
@@ -305,8 +319,12 @@ public static class DownloadHashManager
     }
 
     /// <summary>
-    /// Detects which Windows CrispASR variant is installed by looking for variant-specific DLLs.
-    /// Returns "cuda" / "vulkan" / "cpu", or null if the folder doesn't look like a CrispASR install.
+    /// Detects which Windows CrispASR variant is installed.
+    /// Returns "cuda" / "vulkan" / "cpu" / "cpu-legacy", or null if the folder doesn't look like a CrispASR install.
+    /// CUDA and Vulkan are identified by their backend DLLs. CPU vs CPU-legacy share an identical layout
+    /// (only crispasr.exe at the top level), so we disambiguate from the .installed.sha256 sidecar
+    /// recorded at install time, falling back to hashing crispasr.exe against the known CPU-legacy set.
+    /// Unknown CPU EXE hashes default to "cpu" (the modern build).
     /// </summary>
     public static string? DetectCrispAsrWindowsVariant(string installFolder)
     {
@@ -325,11 +343,54 @@ public static class DownloadHashManager
             return "vulkan";
         }
 
-        if (File.Exists(Path.Combine(installFolder, "crispasr.exe")))
+        var exe = Path.Combine(installFolder, "crispasr.exe");
+        if (!File.Exists(exe))
+        {
+            return null;
+        }
+
+        var sidecarKey = TryReadInstalledKey(installFolder);
+        if (sidecarKey == CrispAsr.WindowsCpuLegacy)
+        {
+            return "cpu-legacy";
+        }
+        if (sidecarKey == CrispAsr.WindowsCpu)
         {
             return "cpu";
         }
 
-        return null;
+        // No usable sidecar — match the EXE against known CPU-legacy hashes so older
+        // installs (made before the sidecar existed) are still recognised as legacy.
+        var exeHash = ComputeSha256(exe);
+        if (exeHash != null)
+        {
+            foreach (var legacy in GetKnownHashes(CrispAsr.WindowsCpuLegacyExecutable))
+            {
+                if (legacy.Equals(exeHash, StringComparison.OrdinalIgnoreCase))
+                {
+                    return "cpu-legacy";
+                }
+            }
+        }
+
+        return "cpu";
+    }
+
+    private static string? TryReadInstalledKey(string installFolder)
+    {
+        try
+        {
+            var sidecar = Path.Combine(installFolder, ".installed.sha256");
+            if (!File.Exists(sidecar))
+            {
+                return null;
+            }
+            var firstLine = File.ReadLines(sidecar).FirstOrDefault();
+            return string.IsNullOrWhiteSpace(firstLine) ? null : firstLine.Trim();
+        }
+        catch
+        {
+            return null;
+        }
     }
 }

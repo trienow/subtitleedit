@@ -1604,6 +1604,16 @@ public partial class SpeechToTextViewModel : ObservableObject
                 _ => "vulkan",
             };
 
+            if (crispVariant == "cpu")
+            {
+                var cpuAnswer = await PromptCrispAsrCpuFlavorAsync();
+                if (cpuAnswer == null)
+                {
+                    return;
+                }
+                crispVariant = cpuAnswer;
+            }
+
             if (crispVariant == "vulkan" && !VulkanHelper.IsInstalled())
             {
                 var vulkanAnswer = await MessageBox.Show(
@@ -1633,6 +1643,30 @@ public partial class SpeechToTextViewModel : ObservableObject
                 viewModel.CrispAsrWindowsVariant = crispVariant;
                 viewModel.StartDownload();
             });
+    }
+
+    /// <summary>
+    /// Follow-up prompt after the user picks "CPU" in the CrispASR variant selector.
+    /// Returns "cpu" (modern, recommended), "cpu-legacy" (compatibility build for CPUs without AVX2),
+    /// or null when the user cancels.
+    /// </summary>
+    private async Task<string?> PromptCrispAsrCpuFlavorAsync()
+    {
+        var cpuAnswer = await MessageBox.Show(
+            Window!,
+            "CrispASR CPU build",
+            $"{Environment.NewLine}Standard is recommended for most machines.{Environment.NewLine}{Environment.NewLine}Legacy is a fallback for older CPUs without AVX2 support.",
+            MessageBoxButtons.Cancel,
+            MessageBoxIcon.Question,
+            "Standard",
+            "Legacy");
+
+        return cpuAnswer switch
+        {
+            MessageBoxResult.Custom1 => "cpu",
+            MessageBoxResult.Custom2 => "cpu-legacy",
+            _ => null,
+        };
     }
 
     [RelayCommand]
@@ -1912,6 +1946,16 @@ public partial class SpeechToTextViewModel : ObservableObject
                     MessageBoxResult.Custom3 => "cuda",
                     _ => "vulkan",
                 };
+
+                if (crispVariant == "cpu")
+                {
+                    var cpuAnswer = await PromptCrispAsrCpuFlavorAsync();
+                    if (cpuAnswer == null)
+                    {
+                        return;
+                    }
+                    crispVariant = cpuAnswer;
+                }
 
                 if (crispVariant == "vulkan" && !VulkanHelper.IsInstalled())
                 {

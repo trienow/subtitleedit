@@ -35,7 +35,7 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
     public ISpeechToTextEngine? Engine { get; internal set; }
 
     /// <summary>
-    /// Windows-only CrispASR download variant: "cpu", "vulkan", or "cuda". Defaults to "vulkan".
+    /// Windows-only CrispASR download variant: "cpu", "cpu-legacy", "vulkan", or "cuda". Defaults to "vulkan".
     /// </summary>
     public string CrispAsrWindowsVariant { get; set; } = "vulkan";
 
@@ -173,16 +173,18 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
                                 ? "crispasr-macos"
                                 : CrispAsrWindowsVariant switch
                                 {
-                                    "cuda"   => "crispasr-windows-x86_64-cuda",
-                                    "cpu"    => "crispasr-windows-x86_64-cpu-legacy",
-                                    "vulkan" => "crispasr-windows-x86_64-vulkan",
-                                    _        => Engine.UnpackSkipFolder,
+                                    "cuda"       => "crispasr-windows-x86_64-cuda",
+                                    "cpu"        => "crispasr-windows-x86_64-cpu",
+                                    "cpu-legacy" => "crispasr-windows-x86_64-cpu-legacy",
+                                    "vulkan"     => "crispasr-windows-x86_64-vulkan",
+                                    _            => Engine.UnpackSkipFolder,
                                 }
                         : Engine.UnpackSkipFolder;
 
                     if (Engine is ICrispAsrEngine)
                     {
                         WriteCrispAsrInstalledHash(folder);
+                        RemoveStaleCrispAsrBinaries(folder);
                     }
 
                     TitleText = Se.Language.Video.AudioToText.UnpackingSpeechToTextEngine;
@@ -233,6 +235,55 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
             {
                 LinuxHelper.MakeExecutable(path);
             }
+        }
+    }
+
+    /// <summary>
+    /// Removes leftover binaries from a previous CrispASR install before extracting
+    /// the new zip. Switching variants (e.g. Vulkan → CPU-legacy) leaves orphan DLLs
+    /// in place because the CPU-legacy zip ships only EXEs — Windows then loads the
+    /// stale ggml*.dll alongside the new statically-linked EXE, which trips
+    /// `GGML_ASSERT(prev != ggml_uncaught_exception)` (a duplicate static-init).
+    ///
+    /// Only top-level executables and shared libraries are removed. Subfolders
+    /// (models/, vibevoice/), the Silero VAD .bin, downloaded GGUFs and the
+    /// .installed.sha256 sidecar are left in place.
+    /// </summary>
+    private static void RemoveStaleCrispAsrBinaries(string folder)
+    {
+        if (!Directory.Exists(folder))
+        {
+            return;
+        }
+
+        try
+        {
+            foreach (var file in Directory.GetFiles(folder, "*", SearchOption.TopDirectoryOnly))
+            {
+                var ext = Path.GetExtension(file).ToLowerInvariant();
+                var name = Path.GetFileName(file);
+                var isBinary = ext is ".exe" or ".dll" or ".so" or ".dylib"
+                    || (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        && (name == "crispasr" || name == "crispasr-quantize"));
+                if (!isBinary)
+                {
+                    continue;
+                }
+
+                try
+                {
+                    File.Delete(file);
+                }
+                catch
+                {
+                    // best-effort — a locked file (e.g. an in-flight server) will
+                    // be overwritten by the unpack step that follows.
+                }
+            }
+        }
+        catch
+        {
+            // ignore — cleanup is best-effort
         }
     }
 
@@ -391,9 +442,10 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
             {
                 _downloadTask = CrispAsrWindowsVariant switch
                 {
-                    "cuda" => _crispAsrDownloadService.DownloadEngineWindowsCuda(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
-                    "cpu"  => _crispAsrDownloadService.DownloadEngineWindowsCpu(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
-                    _      => _crispAsrDownloadService.DownloadEngineWindowsVulkan(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    "cuda"       => _crispAsrDownloadService.DownloadEngineWindowsCuda(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    "cpu"        => _crispAsrDownloadService.DownloadEngineWindowsCpu(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    "cpu-legacy" => _crispAsrDownloadService.DownloadEngineWindowsCpuLegacy(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
+                    _            => _crispAsrDownloadService.DownloadEngineWindowsVulkan(_downloadStream, downloadProgress, _cancellationTokenSource.Token),
                 };
             }
             else
