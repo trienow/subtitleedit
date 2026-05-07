@@ -290,7 +290,8 @@ public partial class MainViewModel :
     private bool _loading;
     private bool _opening;
     private PointerEventArgs? _lastTextEditorPointerArgs;
-    private List<int>? _visibleLayers;
+    private HashSet<int>? _visibleLayers;
+    private readonly List<SubtitleLineViewModel> _waveformSubtitleBuffer = new();
     private DispatcherTimer _positionTimer = new();
     private DispatcherTimer _slowTimer = new();
     private CancellationTokenSource _videoOpenTokenSource;
@@ -3093,14 +3094,14 @@ public partial class MainViewModel :
         }
 
         var result =
-            await ShowDialogAsync<PickLayerFilterWindow, PickLayerFilterViewModel>(vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers); });
+            await ShowDialogAsync<PickLayerFilterWindow, PickLayerFilterViewModel>(vm => { vm.Initialize(Subtitles.ToList(), _visibleLayers?.ToList()); });
 
         if (!result.OkPressed)
         {
             return;
         }
 
-        _visibleLayers = result.SelectedLayers;
+        _visibleLayers = result.SelectedLayers != null ? new HashSet<int>(result.SelectedLayers) : null;
         ShowLayerFilterIcon = IsFormatAssa && Se.Settings.Appearance.ShowLayer && _visibleLayers != null;
         _updateAudioVisualizer = true;
     }
@@ -14818,10 +14819,32 @@ public partial class MainViewModel :
                 }
 
                 var noLayers = _visibleLayers == null || !Se.Settings.Assa.HideLayersFromWaveform || _visibleLayers.Count == 0;
-                var subtitle = Subtitles
-                    .Where(p => noLayers || _visibleLayers!.Contains(p.Layer))
-                    .OrderBy(p => p.StartTime.TotalMilliseconds)
-                    .ToList();
+                var subtitle = _waveformSubtitleBuffer;
+                subtitle.Clear();
+                if (subtitle.Capacity < Subtitles.Count)
+                {
+                    subtitle.Capacity = Subtitles.Count;
+                }
+                if (noLayers)
+                {
+                    for (var i = 0; i < Subtitles.Count; i++)
+                    {
+                        subtitle.Add(Subtitles[i]);
+                    }
+                }
+                else
+                {
+                    var layerSet = _visibleLayers!;
+                    for (var i = 0; i < Subtitles.Count; i++)
+                    {
+                        var p = Subtitles[i];
+                        if (layerSet.Contains(p.Layer))
+                        {
+                            subtitle.Add(p);
+                        }
+                    }
+                }
+                subtitle.Sort((a, b) => a.StartTime.Ticks.CompareTo(b.StartTime.Ticks));
 
                 var mediaPlayerSeconds = vp.Position;
                 var startPos = mediaPlayerSeconds - 0.01;
