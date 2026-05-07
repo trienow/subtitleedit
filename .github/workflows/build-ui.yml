@@ -74,7 +74,7 @@ jobs:
 
       - name: Download libmpv for Windows
         run: |
-          Invoke-WebRequest -Uri "https://github.com/SubtitleEdit/support-files/releases/download/libmpv-2025-01-25/libmpv2-64.zip" -OutFile "libmpv2-64.zip"
+          Invoke-WebRequest -Uri "https://github.com/SubtitleEdit/support-files/releases/download/libmpv-2026-04-21/libmpv2-win64.zip" -OutFile "libmpv2-64.zip"
           Expand-Archive -Path "libmpv2-64.zip" -DestinationPath "libmpv-temp"
 
       - name: Publish Windows x64 app
