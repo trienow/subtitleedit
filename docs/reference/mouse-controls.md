@@ -20,8 +20,8 @@ See also: [Audio Visualizer](../features/audio-visualizer.md) | [Video Player](.
 | Left-click + drag in empty area | Create a new selection |
 | Right-click | Open context menu |
 | Scroll wheel | Scroll waveform |
-| Shift + Scroll wheel | Scroll waveform (alternate) |
-| Ctrl + Scroll wheel | Zoom in/out |
+| Alt + Scroll wheel | Horizontal zoom in/out |
+| Shift + Scroll wheel | Vertical zoom in/out |
 | Double-click on subtitle | Select the subtitle in the grid |
 
 ## Subtitle Grid

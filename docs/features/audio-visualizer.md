@@ -19,7 +19,7 @@ The spectrogram can be generated and toggled independently of the waveform. If y
 | Mouse Action | Effect |
 |--------------|--------|
 | **Scroll wheel** | Scroll waveform left/right |
-| **Ctrl+Scroll wheel** | Horizontal zoom in/out |
+| **Alt+Scroll wheel** | Horizontal zoom in/out |
 | **Shift+Scroll wheel** | Vertical zoom in/out |
 | **Middle-click drag** | Pan the waveform |
 

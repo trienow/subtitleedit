@@ -425,7 +425,7 @@ public class InitWaveform
         var sliderHorizontalZoom = new Slider
         {
             Minimum = 0.1,
-            Maximum = 20.0,
+            Maximum = 5.0,
             Width = 80,
             VerticalAlignment = VerticalAlignment.Center,
             Value = 1,
@@ -472,7 +472,7 @@ public class InitWaveform
         var sliderVerticalZoom = new Slider
         {
             Minimum = 0.1,
-            Maximum = 20.0,
+            Maximum = 5.0,
             Width = 80,
             VerticalAlignment = VerticalAlignment.Center,
             Margin = new Thickness(0, 0, 0, 0),
