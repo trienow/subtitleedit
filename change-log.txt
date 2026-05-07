@@ -1,6 +1,29 @@
 
 Subtitle Edit Changelog
 
+v5.0.0-beta23 (xth May 2026)
+
+* Update Italian translation - thx bovirus
+* Add Czech translation - thx Matěj
+* Add forced aligner picker for CrispASR
+* Show install status and size in forced aligner pickers
+* Prompt for variant when re-downloading CrispASR
+* Update CrispASR to v0.6.0
+* Add change-style action to Batch-convert
+* Remember active functions in Batch-convert
+* Remember selected rules in Fix Netflix errors
+* Add tooltips for video player - thx Monstercate
+* Show friendly voice names in Kokoro TTS - thx David
+* Set max waveform zoom to 500
+* Update libmpv to 2026-04-21
+* Reset fullscreen auto-hide timer on each user activity
+* Drop right padding on undocked video player
+* Preserve PAC justification on italic lines
+* Fix merge-lines in export-plain-text to merge all text
+* Fix mp3 file not stopping at end (regression)
+* Fix crash when loading idx file - thx Codling
+
+-----------------------------------------------------------------------------------------------------
 
 v5.0.0-beta22 (5th May 2026)
 
