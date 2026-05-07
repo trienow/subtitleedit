@@ -29,36 +29,56 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
         public static string[] Models => new[]
         {
             // Meta Llama
+            "meta/llama-4-maverick-17b-128e-instruct",
             "meta/llama-3.3-70b-instruct",
-            "meta/llama-3.1-405b-instruct",
             "meta/llama-3.1-70b-instruct",
             "meta/llama-3.1-8b-instruct",
 
             // NVIDIA Nemotron
-            "nvidia/llama-3.1-nemotron-70b-instruct",
+            "nvidia/nemotron-3-super-120b-a12b",
+            "nvidia/llama-3.3-nemotron-super-49b-v1.5",
             "nvidia/llama-3.1-nemotron-ultra-253b-v1",
-            "nvidia/nemotron-4-340b-instruct",
+            "nvidia/llama-3.1-nemotron-70b-instruct",
+            "nvidia/nemotron-nano-3-30b-a3b",
+            "nvidia/nvidia-nemotron-nano-9b-v2",
+
+            // NVIDIA Riva (translation-specific)
+            "nvidia/riva-translate-4b-instruct-v1.1",
+            "nvidia/riva-translate-4b-instruct",
 
             // DeepSeek
-            "deepseek-ai/deepseek-r1",
-            "deepseek-ai/deepseek-r1-distill-llama-70b",
+            "deepseek-ai/deepseek-v4-pro",
+            "deepseek-ai/deepseek-v4-flash",
 
             // Mistral
-            "mistralai/mistral-large-2-instruct",
+            "mistralai/mistral-large-3-675b-instruct-2512",
+            "mistralai/mistral-medium-3.5-128b",
+            "mistralai/mistral-medium-3-instruct",
+            "mistralai/mistral-small-4-119b-2603",
             "mistralai/mixtral-8x22b-instruct-v0.1",
-            "mistralai/mixtral-8x7b-instruct-v0.1",
+            "mistralai/mistral-nemotron",
 
             // Google Gemma
-            "google/gemma-2-27b-it",
-            "google/gemma-2-9b-it",
+            "google/gemma-4-31b-it",
+            "google/gemma-3-27b-it",
+            "google/gemma-3-12b-it",
 
             // Qwen
-            "qwen/qwen2.5-7b-instruct",
-            "qwen/qwen2.5-coder-32b-instruct",
+            "qwen/qwen3.5-397b-a17b",
+            "qwen/qwen3.5-122b-a10b",
+            "qwen/qwen3-next-80b-a3b-instruct",
+
+            // Moonshot Kimi
+            "moonshotai/kimi-k2.6",
+            "moonshotai/kimi-k2-thinking",
+
+            // OpenAI (open weights)
+            "openai/gpt-oss-120b",
+            "openai/gpt-oss-20b",
 
             // Microsoft Phi
-            "microsoft/phi-3-medium-4k-instruct",
-            "microsoft/phi-3.5-mini-instruct",
+            "microsoft/phi-4-mini-instruct",
+            "microsoft/phi-3.5-moe-instruct",
         };
 
         public void Initialize()
