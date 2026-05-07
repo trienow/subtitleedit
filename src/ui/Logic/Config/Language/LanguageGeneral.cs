@@ -663,6 +663,7 @@ public class LanguageGeneral
     public string UnsupportedVideoFormat { get; set; }
     public string PlaybackSpeed { get; set; }
     public string HoursMinutesSecondsMilliseconds { get; set; }
+    public string ImageFiles { get; set; }
 
     public LanguageGeneral()
     {
@@ -1325,5 +1326,6 @@ public class LanguageGeneral
         UnsupportedVideoFormat = "Unsupported video format";
         PlaybackSpeed = "Playback speed";
         HoursMinutesSecondsMilliseconds = "HH:MM:SS.FFF";
+        ImageFiles = "Image files";
     }
 }

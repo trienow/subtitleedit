@@ -746,6 +746,9 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayer
             e => e.Equals(ext, StringComparison.OrdinalIgnoreCase));
         SetOptionString("lavfi-complex", isAudioOnly ? "color=black:size=1280x720:rate=25[vo]" : "");
 
+        // Reset any end-of-playback bound from a previous file (see audio-only handling below).
+        SetOptionString("end", "none");
+
         var err = await Task.Run(() => DoMpvCommand("loadfile", path));
         if (_disposed)
         {
@@ -815,6 +818,23 @@ public sealed class LibMpvDynamicPlayer : IDisposable, IVideoPlayer
         SetOptionString("rebase-start-time", "no");
 
         _fileName = path;
+
+        if (isAudioOnly)
+        {
+            // The lavfi-complex color source above produces frames forever, so without
+            // an explicit end mpv would keep "playing" the black video past the audio's
+            // end. Bound playback to the audio duration so it pauses at EOF.
+            for (var i = 0; i < 50 && !_disposed; i++)
+            {
+                var d = Duration;
+                if (d > 0 && !double.IsInfinity(d) && !double.IsNaN(d))
+                {
+                    SetOptionString("end", d.ToString(CultureInfo.InvariantCulture));
+                    break;
+                }
+                await Task.Delay(50);
+            }
+        }
     }
 
     public async Task LoadAudio(string path)

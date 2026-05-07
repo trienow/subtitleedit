@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Globalization;
-using System.Threading.Tasks;
-using Avalonia.Controls;
+﻿using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
@@ -13,6 +10,8 @@ using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Assa.ResolutionResampler;
 
@@ -96,8 +95,8 @@ public partial class AssaResolutionResamplerViewModel : ObservableObject
             AllowMultiple = false,
             FileTypeFilter = new List<FilePickerFileType>
             {
-                new("Video files") { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
-                new("All files") { Patterns = new[] { "*.*" } }
+                new(Se.Language.General.VideoFiles) { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
+                new(Se.Language.General.AllFiles) { Patterns = new[] { "*.*" } }
             }
         });
 
@@ -127,8 +126,8 @@ public partial class AssaResolutionResamplerViewModel : ObservableObject
             AllowMultiple = false,
             FileTypeFilter = new List<FilePickerFileType>
             {
-                new("Video files") { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
-                new("All files") { Patterns = new[] { "*.*" } }
+                new(Se.Language.General.VideoFiles) { Patterns = new[] { "*.mp4", "*.mkv", "*.avi", "*.mov", "*.wmv", "*.webm", "*.ts", "*.m2ts" } },
+                new(Se.Language.General.AllFiles) { Patterns = new[] { "*.*" } }
             }
         });
 

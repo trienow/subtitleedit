@@ -69,7 +69,7 @@ public partial class BurnInLogoViewModel : ObservableObject
         }
 
         var fileHelper = new FileHelper();
-        var fileName = await fileHelper.PickOpenFile(Window, Se.Language.General.OpenImageFile, "PNG files", "*.png", "All files", "*.*");
+        var fileName = await fileHelper.PickOpenFile(Window, Se.Language.General.OpenImageFile, "PNG files", "*.png", Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
         {
             return;

@@ -1,6 +1,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
+using Nikse.SubtitleEdit.Core.Common;
 using Nikse.SubtitleEdit.Core.SubtitleFormats;
 using Nikse.SubtitleEdit.Logic.Config;
 using System;
@@ -176,11 +177,11 @@ namespace Nikse.SubtitleEdit.Logic.Media
                 {
                     Patterns = MakeOpenSubtitlePatterns(includeVideoFiles),
                 },
-                new FilePickerFileType("Video files")
+                new FilePickerFileType(Se.Language.General.VideoFiles)
                 {
                     Patterns = GetVideoExtensions(),
                 },
-                new FilePickerFileType("All files")
+                new FilePickerFileType(Se.Language.General.AllFiles)
                 {
                     Patterns = new List<string> { "*" },
                 }
@@ -490,11 +491,15 @@ namespace Nikse.SubtitleEdit.Logic.Media
         {
             var fileTypes = new List<FilePickerFileType>
             {
-                new FilePickerFileType("Video files")
+                new FilePickerFileType(Se.Language.General.VideoFiles)
                 {
                     Patterns = GetVideoExtensions()
                 },
-                new FilePickerFileType("All files")
+                new FilePickerFileType(Se.Language.General.AudioFiles)
+                {
+                    Patterns = GetAudioExtensions()
+                },
+                new FilePickerFileType(Se.Language.General.AllFiles)
                 {
                     Patterns = new List<string> { "*" },
                 }
@@ -506,6 +511,11 @@ namespace Nikse.SubtitleEdit.Logic.Media
         private static List<string> GetVideoExtensions()
         {
             return new List<string> { "*.mkv", "*.mp4", "*.ts", "*.mov", "*.mpeg", "*.m2ts" };
+        }
+
+        private static List<string> GetAudioExtensions()
+        {
+            return Utilities.AudioFileExtensions.Select(e => "*" + e).ToList();
         }
 
         public async Task<string> PickOpenImageFile(Visual sender, string title)
@@ -531,11 +541,11 @@ namespace Nikse.SubtitleEdit.Logic.Media
         {
             var fileTypes = new List<FilePickerFileType>
             {
-                new FilePickerFileType("Image files")
+                new FilePickerFileType(Se.Language.General.ImageFiles)
                 {
                     Patterns = new List<string> { "*.png", "*.jpg" }
                 },
-                new FilePickerFileType("All files")
+                new FilePickerFileType(Se.Language.General.AllFiles)
                 {
                     Patterns = new List<string> { "*" },
                 }
