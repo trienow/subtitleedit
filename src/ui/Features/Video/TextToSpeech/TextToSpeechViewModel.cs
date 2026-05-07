@@ -131,6 +131,7 @@ public partial class TextToSpeechViewModel : ObservableObject
             new Qwen3TtsCpp(),
             new KokoroTtsCpp(),
             new ChatterboxTtsCpp(),
+            new OmniVoiceTtsCpp(),
         ];
 
         if (!OperatingSystem.IsMacOS())
@@ -788,6 +789,55 @@ public partial class TextToSpeechViewModel : ObservableObject
 
                 var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window!, vm => vm.StartDownloadChatterboxModels());
                 return dlResult.OkPressed && ChatterboxTtsCpp.AreModelsInstalled();
+            }
+
+            return true;
+        }
+
+        if (engine is OmniVoiceTtsCpp)
+        {
+            if (!await engine.IsInstalled(SelectedRegion))
+            {
+                var answer = await MessageBox.Show(
+                    Window,
+                    "Download OmniVoice TTS?",
+                    $"{Environment.NewLine}\"Text to speech\" requires OmniVoice TTS.{Environment.NewLine}{Environment.NewLine}Download and use OmniVoice TTS?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return false;
+                }
+
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadOmniVoice());
+                if (!dlResult.OkPressed)
+                {
+                    return false;
+                }
+
+                await Dispatcher.UIThread.InvokeAsync(async () =>
+                {
+                    await RefreshVoices(engine);
+                });
+            }
+
+            if (!OmniVoiceTtsCpp.IsModelsInstalled())
+            {
+                var answer = await MessageBox.Show(
+                    Window,
+                    "Download OmniVoice TTS models?",
+                    $"{Environment.NewLine}\"OmniVoice TTS\" requires models (~1.4 GB).{Environment.NewLine}{Environment.NewLine}Download models?",
+                    MessageBoxButtons.YesNoCancel,
+                    MessageBoxIcon.Question);
+
+                if (answer != MessageBoxResult.Yes)
+                {
+                    return false;
+                }
+
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window!, vm => vm.StartDownloadOmniVoiceModels());
+                return dlResult.OkPressed && OmniVoiceTtsCpp.IsModelsInstalled();
             }
 
             return true;

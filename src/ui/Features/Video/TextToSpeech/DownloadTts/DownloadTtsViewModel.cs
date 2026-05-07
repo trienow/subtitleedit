@@ -50,12 +50,15 @@ public partial class DownloadTtsViewModel : ObservableObject
     private Task? _downloadTaskKokoroTtsCpp;
     private Task? _downloadTaskKokoroTtsModels;
     private Task? _downloadTaskChatterboxModels;
+    private Task? _downloadTaskOmniVoice;
+    private Task? _downloadTaskOmniVoiceModels;
     private readonly Timer _timer = new();
 
     private readonly ITtsDownloadService _ttsDownloadService;
     private readonly IQwen3TtsCppDownloadService _qwen3TtsCppDownloadService;
     private readonly IKokoroTtsCppDownloadService _kokoroTtsCppDownloadService;
     private readonly IChatterboxTtsCppDownloadService _chatterboxTtsCppDownloadService;
+    private readonly IOmniVoiceDownloadService _omniVoiceDownloadService;
     private readonly CancellationTokenSource _cancellationTokenSource;
     private readonly MemoryStream _downloadStream;
     private readonly MemoryStream _downloadStreamModel;
@@ -63,6 +66,7 @@ public partial class DownloadTtsViewModel : ObservableObject
     private readonly MemoryStream _downloadStreamQwen3TtsCpp;
     private readonly MemoryStream _downloadStreamQwen3TtsCppVoices;
     private readonly MemoryStream _downloadStreamKokoroTtsCpp;
+    private readonly MemoryStream _downloadStreamOmniVoice;
     private readonly IZipUnpacker _zipUnpacker;
     private readonly object _lock = new();
     private string _modelFileName;
@@ -71,12 +75,14 @@ public partial class DownloadTtsViewModel : ObservableObject
     public DownloadTtsViewModel(ITtsDownloadService ttsDownloadService, IZipUnpacker zipUnpacker,
         IQwen3TtsCppDownloadService qwen3TtsCppDownloadService,
         IKokoroTtsCppDownloadService kokoroTtsCppDownloadService,
-        IChatterboxTtsCppDownloadService chatterboxTtsCppDownloadService)
+        IChatterboxTtsCppDownloadService chatterboxTtsCppDownloadService,
+        IOmniVoiceDownloadService omniVoiceDownloadService)
     {
         _ttsDownloadService = ttsDownloadService;
         _qwen3TtsCppDownloadService = qwen3TtsCppDownloadService;
         _kokoroTtsCppDownloadService = kokoroTtsCppDownloadService;
         _chatterboxTtsCppDownloadService = chatterboxTtsCppDownloadService;
+        _omniVoiceDownloadService = omniVoiceDownloadService;
         _zipUnpacker = zipUnpacker;
 
         _cancellationTokenSource = new CancellationTokenSource();
@@ -87,6 +93,7 @@ public partial class DownloadTtsViewModel : ObservableObject
         _downloadStreamQwen3TtsCpp = new MemoryStream();
         _downloadStreamQwen3TtsCppVoices = new MemoryStream();
         _downloadStreamKokoroTtsCpp = new MemoryStream();
+        _downloadStreamOmniVoice = new MemoryStream();
 
         _modelFileName = string.Empty;
         _configFileName = string.Empty;
@@ -487,6 +494,90 @@ public partial class DownloadTtsViewModel : ObservableObject
                     Error = ex?.Message ?? "Unknown error";
                 }
             }
+
+            if (_downloadTaskOmniVoice is { IsCompleted: true })
+            {
+                _timer.Stop();
+
+                if (_downloadStreamOmniVoice.Length == 0)
+                {
+                    ProgressText = "Download failed";
+                    Error = "No data received";
+                    return;
+                }
+
+                var folder = OmniVoiceTtsCpp.GetSetFolder();
+                try
+                {
+                    _downloadStreamOmniVoice.Position = 0;
+                    _zipUnpacker.UnpackZipStream(_downloadStreamOmniVoice, folder, string.Empty, false, new List<string>(), null);
+                    _downloadStreamOmniVoice.Dispose();
+                }
+                catch (Exception ex)
+                {
+                    ProgressText = "Unpack failed: " + ex.Message;
+                    Error = ex.Message;
+                    Se.LogError(ex);
+                    return;
+                }
+
+                var exePath = OmniVoiceTtsCpp.GetExecutableFileName();
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    if (File.Exists(exePath))
+                    {
+                        LinuxHelper.MakeExecutable(exePath);
+                    }
+                }
+                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    if (File.Exists(exePath))
+                    {
+                        MacHelper.MakeExecutable(exePath);
+                    }
+                }
+
+                _downloadTaskOmniVoice = null;
+                OkPressed = true;
+                Close();
+            }
+            else if (_downloadTaskOmniVoice is { IsFaulted: true })
+            {
+                _timer.Stop();
+                var ex = _downloadTaskOmniVoice.Exception?.InnerException ?? _downloadTaskOmniVoice.Exception;
+                if (ex is OperationCanceledException)
+                {
+                    ProgressText = "Download canceled";
+                    Close();
+                }
+                else
+                {
+                    ProgressText = "Download failed";
+                    Error = ex?.Message ?? "Unknown error";
+                }
+            }
+
+            if (_downloadTaskOmniVoiceModels is { IsCompleted: true })
+            {
+                _timer.Stop();
+                OkPressed = true;
+                Close();
+            }
+            else if (_downloadTaskOmniVoiceModels is { IsFaulted: true })
+            {
+                _timer.Stop();
+                var ex = _downloadTaskOmniVoiceModels.Exception?.InnerException ?? _downloadTaskOmniVoiceModels.Exception;
+                if (ex is OperationCanceledException)
+                {
+                    ProgressText = "Download canceled";
+                    Close();
+                }
+                else
+                {
+                    ProgressText = "Download failed";
+                    Error = ex?.Message ?? "Unknown error";
+                }
+            }
         }
     }
 
@@ -716,6 +807,43 @@ public partial class DownloadTtsViewModel : ObservableObject
 
         _downloadTaskChatterboxModels =
             _chatterboxTtsCppDownloadService.DownloadModels(ChatterboxTtsCpp.GetSetModelsFolder(), downloadProgress, titleProgress, _cancellationTokenSource.Token);
+    }
+
+    public void StartDownloadOmniVoice()
+    {
+        TitleText = "Downloading OmniVoice TTS";
+
+        var downloadProgress = new Progress<float>(number =>
+        {
+            var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+            var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+            ProgressValue = percentage;
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
+        });
+
+        _downloadTaskOmniVoice =
+            _omniVoiceDownloadService.DownloadEngine(_downloadStreamOmniVoice, downloadProgress, _cancellationTokenSource.Token);
+    }
+
+    public void StartDownloadOmniVoiceModels()
+    {
+        TitleText = "Downloading OmniVoice TTS models (~1.4 GB)";
+
+        var downloadProgress = new Progress<float>(number =>
+        {
+            var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+            var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+            ProgressValue = percentage;
+            ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
+        });
+
+        var titleProgress = new Action<string>(title =>
+        {
+            Dispatcher.UIThread.Post(() => TitleText = title);
+        });
+
+        _downloadTaskOmniVoiceModels =
+            _omniVoiceDownloadService.DownloadModels(OmniVoiceTtsCpp.GetSetModelsFolder(), downloadProgress, titleProgress, _cancellationTokenSource.Token);
     }
 
     internal void OnKeyDown(KeyEventArgs e)
