@@ -1493,7 +1493,8 @@ public partial class TextToSpeechViewModel : ObservableObject
                 var savedVoice = Se.Settings.Video.TextToSpeech.KokoroVoice;
                 if (!string.IsNullOrEmpty(savedVoice))
                 {
-                    var match = Voices.FirstOrDefault(v => v.Name == savedVoice);
+                    var match = Voices.FirstOrDefault(v =>
+                        v.EngineVoice is Voices.KokoroTtsVoice kv && kv.Voice == savedVoice);
                     if (match != null)
                     {
                         SelectedVoice = match;
