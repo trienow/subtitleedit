@@ -32,11 +32,13 @@
     "apply": "Apply",
     "applyTo": "Apply to",
     "ascending": "Ascending",
+    "descending": "Descending",
     "attachDotDotDot": "Attach...",
     "audioFiles": "Audio files",
     "audioVisualizer": "Audio visualizer",
     "auto": "Auto",
     "autoBreak": "Auto-break text",
+    "autoBalanceLines": "Auto-balance lines",
     "autoContinue": "Auto-continue",
     "autoTranslate": "Auto-translate",
     "autodetect": "Autodetect",
@@ -671,6 +673,7 @@
       "openKeepVideo": "Open (_keep video)...",
       "openOriginal": "Open ori_ginal...",
       "closeOriginal": "_Close original",
+      "closeTranslation": "Close _translation",
       "reopen": "_Reopen...",
       "clearRecentFiles": "_Clear recent files",
       "restoreAutoBackup": "Restore auto-_backup...",
@@ -1405,7 +1408,10 @@
     },
     "sortBy": {
       "title": "Sort subtitles",
-      "sortOrder": "Sort order"
+      "sortOrder": "Sort order",
+      "sortByNumber": "Number",
+      "sortByStartTime": "Start time",
+      "sortByEndTime": "End time"
     },
     "batchConvert": {
       "title": "Batch convert",
@@ -1489,7 +1495,10 @@
       "title": "Merge short lines",
       "highlightParts": "Highlight parts (karaoke)",
       "mergedLineInfo": "Merged line {0} into {1} - {2}",
-      "linesMergedX": "Lines merged: {0}"
+      "linesMergedX": "Lines merged: {0}",
+      "maxCharacters": "Maximum characters in one paragraph",
+      "maxMillisecondsBetweenLines": "Maximum milliseconds between lines",
+      "onlyContinuationLines": "Only continuation lines"
     },
     "mergeLinesWithSameText": {
       "title": "Merge lines with same text",
@@ -2322,6 +2331,7 @@
       "commandFileNewKeepVideo": "New (keep video)",
       "fileOpenOriginal": "Open original",
       "fileCloseOriginal": "Close original",
+      "fileCloseTranslation": "Close translation",
       "restoreAutoBackup": "Restore auto-backup",
       "openContainingFolder": "Open containing folder",
       "importTimeCodes": "Import time codes",
