@@ -166,6 +166,7 @@ public class LanguageGeneral
     public string ExtendSelectedToNext { get; set; }
     public string ExtendSelectedToPrevious { get; set; }
     public string ExtractingAudioClips { get; set; }
+    public string ExitFullScreen { get; set; }
     public string Fade { get; set; }
     public string FetchFirstWordFromNextSubtitle { get; set; }
     public string FileAlreadyExists { get; set; }
@@ -211,6 +212,7 @@ public class LanguageGeneral
     public string Frames { get; set; }
     public string From { get; set; }
     public string FromCurrentVideoPosition { get; set; }
+    public string FullScreen { get; set; }
     public string Gap { get; set; }
     public string General { get; set; }
     public string GeneralText { get; set; }
@@ -308,6 +310,7 @@ public class LanguageGeneral
     public string MoveDown { get; set; }
     public string MoveUp { get; set; }
     public string MultipleReplace { get; set; }
+    public string Mute { get; set; }
     public string Name { get; set; }
     public string Negative { get; set; }
     public string New { get; set; }
@@ -629,6 +632,7 @@ public class LanguageGeneral
     public string ViewX { get; set; }
     public string Visible { get; set; }
     public string Voice { get; set; }
+    public string Volume { get; set; }
     public string Warning { get; set; }
     public string WaveformCenterOnVideoPosition { get; set; }
     public string WaveformPasteFromClipboard { get; set; }
@@ -829,6 +833,7 @@ public class LanguageGeneral
         ExtendSelectedToNext = "Extend selected to next";
         ExtendSelectedToPrevious = "Extend selected to previous";
         ExtractingAudioClips = "Extracting audio clips...";
+        ExitFullScreen = "Exit full screen";
         Fade = "Fade";
         FetchFirstWordFromNextSubtitle = "Fetch first word from next subtitle";
         FileAlreadyExists = "File already exists";
@@ -874,6 +879,7 @@ public class LanguageGeneral
         Frames = "Frames";
         From = "From";
         FromCurrentVideoPosition = "from current video position";
+        FullScreen = "Full screen";
         Gap = "Gap";
         General = "General";
         GeneralText = "General";
@@ -971,6 +977,7 @@ public class LanguageGeneral
         MoveDown = "Move down";
         MoveUp = "Move up";
         MultipleReplace = "Multiple replace";
+        Mute = "Mute";
         Name = "Name";
         Negative = "Negative";
         New = "New";
@@ -1292,6 +1299,7 @@ public class LanguageGeneral
         ViewX = "View {0}";
         Visible = "Visible";
         Voice = "Voice";
+        Volume = "Volume";
         Warning = "Warning";
         WaveformCenterOnVideoPosition = "Waveform center on video position";
         WaveformPasteFromClipboard = "Paste from clipboard";

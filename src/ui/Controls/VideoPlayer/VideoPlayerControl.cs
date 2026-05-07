@@ -1,4 +1,5 @@
 ﻿using Avalonia;
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Controls.Presenters;
 using Avalonia.Controls.Primitives;
@@ -266,6 +267,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _buttonPlay = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
+                [AutomationProperties.NameProperty] = Se.Language.General.Play,
             };
             Attached.SetIcon(_buttonPlay, "fa-solid fa-play");
             _buttonPlay.Click += (_, _) =>
@@ -278,6 +280,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 Path = nameof(PlayCommand),
                 Source = this
             });
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(_buttonPlay, Se.Language.General.Play);
+            }
 
             stackPanel.Children.Add(_buttonPlay);
 
@@ -285,6 +291,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             var buttonStop = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
+                [AutomationProperties.NameProperty] = Se.Language.General.Stop,
             };
             buttonStop.Bind(Button.IsVisibleProperty, new Binding
             {
@@ -297,6 +304,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 _videoPlayerInstance.Stop();
                 StopRequested?.Invoke();
             };
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(buttonStop, Se.Language.General.Stop);
+            }
             stackPanel.Children.Add(buttonStop);
             buttonStop.Bind(Button.CommandProperty, new Binding
             {
@@ -308,6 +319,7 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             _buttonFullScreen = new Button
             {
                 Margin = new Thickness(0, 0, 3, 0),
+                [AutomationProperties.NameProperty] = Se.Language.General.FullScreen,
             };
             _buttonFullScreen.Bind(IsVisibleProperty, new Binding
             {
@@ -316,6 +328,10 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             });
             Attached.SetIcon(_buttonFullScreen, "fa-solid fa-expand");
             _buttonFullScreen.Click += (_, _) => FullscreenRequested?.Invoke();
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(_buttonFullScreen, Se.Language.General.FullScreen);
+            }
             stackPanel.Children.Add(_buttonFullScreen);
             _buttonFullScreen.Bind(Button.CommandProperty, new Binding
             {
@@ -328,9 +344,14 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 Margin = new Thickness(0, 0, 3, 0),
                 IsVisible = false,
+                [AutomationProperties.NameProperty] = Se.Language.General.ExitFullScreen,
             };
             Attached.SetIcon(_buttonFullScreenCollapse, "fa-solid fa-compress");
             _buttonFullScreenCollapse.Click += (_, _) => FullscreenCollapseRequested?.Invoke();
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(_buttonFullScreenCollapse, Se.Language.General.ExitFullScreen);
+            }
             stackPanel.Children.Add(_buttonFullScreenCollapse);
 
             _gridProgress.Children.Add(stackPanel);
@@ -340,7 +361,12 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             {
                 Minimum = 0,
                 Margin = new Thickness(2, 0, 0, 0),
+                [AutomationProperties.NameProperty] = Se.Language.General.VideoPosition,
             };
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(sliderPosition, Se.Language.General.VideoPosition);
+            }
             sliderPosition.TemplateApplied += (s, e) =>
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -376,8 +402,14 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
                 Minimum = 0,
                 Maximum = videoPlayerInstance.VolumeMaximum,
                 Width = 80,
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                Focusable = true,
+                [AutomationProperties.NameProperty] = Se.Language.General.Volume,
             };
+            if (Se.Settings.Appearance.ShowHints)
+            {
+                ToolTip.SetTip(sliderVolume, Se.Language.General.Volume);
+            }
             sliderVolume.TemplateApplied += (s, e) =>
             {
                 if (e.NameScope.Find<Thumb>("thumb") is Thumb thumb)
@@ -540,10 +572,20 @@ namespace Nikse.SubtitleEdit.Controls.VideoPlayer
             if (isPlaying)
             {
                 Attached.SetIcon(_buttonPlay, "fa-solid fa-pause");
+                AutomationProperties.SetName(_buttonPlay, Se.Language.General.Pause);
+                if (Se.Settings.Appearance.ShowHints)
+                {
+                    ToolTip.SetTip(_buttonPlay, Se.Language.General.Pause);
+                }
             }
             else
             {
                 Attached.SetIcon(_buttonPlay, "fa-solid fa-play");
+                AutomationProperties.SetName(_buttonPlay, Se.Language.General.Play);
+                if (Se.Settings.Appearance.ShowHints)
+                {
+                    ToolTip.SetTip(_buttonPlay, Se.Language.General.Play);
+                }
             }
         }
 
