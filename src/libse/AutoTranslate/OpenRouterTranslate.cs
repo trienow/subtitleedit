@@ -29,20 +29,29 @@ namespace Nikse.SubtitleEdit.Core.AutoTranslate
         public static string[] Models => new[]
         {
             // High-Reasoning & Multilingual (The Leaders)
-            "openai/gpt-5.2",                  // Top-tier reasoning for complex linguistics
-            "anthropic/claude-4.5-sonnet",     // Exceptional nuance and formal tone preservation
-            "google/gemini-3-pro",             // Massive context for translating whole books
-            "deepseek/deepseek-v3.2",          // The most cost-effective reasoning translator
+            "openai/gpt-5.5-pro",                       // Top-tier reasoning for complex linguistics
+            "openai/gpt-5.5",                           // Flagship general-purpose translator
+            "anthropic/claude-opus-4.7",                // Exceptional nuance and formal tone preservation
+            "anthropic/claude-sonnet-4.6",              // Strong balance of quality and cost
+            "google/gemini-3.1-pro-preview",            // Massive context for translating whole books
+            "deepseek/deepseek-v4-pro",                 // The most cost-effective reasoning translator
 
             // Efficient / Fast Translation
-            "google/gemini-3-flash",           // Speed-optimized with 2026 multimodal capabilities
-            "meta-llama/llama-4-maverick",     // Meta's new MoE architecture, strong in 12+ languages
-            "openai/gpt-5.2-mini",             // Replaces 4o-mini; faster and more accurate
+            "openai/gpt-5.4-mini",                      // Faster and cost-efficient
+            "openai/gpt-5.4-nano",                      // Smallest/fastest in the GPT-5.4 family
+            "google/gemini-3.1-flash-lite",             // Speed-optimized multimodal
+            "anthropic/claude-haiku-4.5",               // Fast Anthropic option
+            "deepseek/deepseek-v4-flash",               // Low-latency DeepSeek
 
             // Specialized & Open-Weight (High Translation Performance)
-            "qwen/qwen3-32b",                  // Specifically dominant for Asian & Middle Eastern languages
-            "mistralai/mistral-large-3",       // Superior for European romance languages
-            "deepseek/deepseek-v3.2:free",     // High-quality free-tier alternative to R1
+            "qwen/qwen3.6-max-preview",                 // Dominant for Asian & Middle Eastern languages
+            "meta-llama/llama-4-maverick",              // MoE architecture, strong multilingual coverage
+            "mistralai/mistral-large-2512",             // Superior for European romance languages
+            "mistralai/mistral-medium-3-5",             // Solid mid-tier European-language model
+
+            // Free tier
+            "meta-llama/llama-3.3-70b-instruct:free",   // High-quality free-tier model
+            "qwen/qwen3-next-80b-a3b-instruct:free",    // Free-tier MoE alternative
         };
 
         public void Initialize()
