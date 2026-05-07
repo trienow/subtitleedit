@@ -16,7 +16,7 @@ public class LanguageAbout
 
     public LanguageAbout()
     {
-        Title = "About Subtite Edit";
+        Title = "About Subtitle Edit";
         TranslatedBy = "Translated by: {0}";
         LicenseText = "Subtitle Edit is free software under the MIT license.";
         DescriptionTextBeta = "Subtitle Edit 5 beta is a development version of our upcoming major release.\nWe are actively refining the new tools and appreciate your help in testing.\nPlease share your feedback to help us ensure the best possible final version.\n\nThank you for being part of the Subtitle Edit community! :)";

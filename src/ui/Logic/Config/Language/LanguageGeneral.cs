@@ -242,7 +242,7 @@ public class LanguageGeneral
     public string Id { get; set; }
     public string Image { get; set; }
     public string ImageSaved { get; set; }
-    public string ImagedBasedSubtitles { get; set; }
+    public string ImageBasedSubtitles { get; set; }
     public string Images { get; set; }
     public string ImagesWithTimeCode { get; set; }
     public string Import { get; set; }
@@ -269,7 +269,7 @@ public class LanguageGeneral
     public string LayerFilterOn { get; set; }
     public string Left { get; set; }
     public string Light { get; set; }
-    public string LineHeigth { get; set; }
+    public string LineHeight { get; set; }
     public string LineNumber { get; set; }
     public string LineXColumnY { get; set; }
     public string Lines { get; set; }
@@ -909,7 +909,7 @@ public class LanguageGeneral
         Id = "ID";
         Image = "Image";
         ImageSaved = "Image saved";
-        ImagedBasedSubtitles = "Image-based subtitles";
+        ImageBasedSubtitles = "Image-based subtitles";
         Images = "Images";
         ImagesWithTimeCode = "Images with time code";
         Import = "Import";
@@ -936,7 +936,7 @@ public class LanguageGeneral
         LayerFilterOn = "Layer filter on";
         Left = "Left";
         Light = "Light";
-        LineHeigth = "Line height";
+        LineHeight = "Line height";
         LineNumber = "Line#";
         LineXColumnY = "Line {0}, column {1}";
         Lines = "Lines";
@@ -1009,7 +1009,7 @@ public class LanguageGeneral
         OneHundredMilliseconds = "100 milliseconds";
         OneSecond = "One second";
         OneSecondBack = "One second back";
-        OneSecondForward = "One second";
+        OneSecondForward = "One second forward";
         OnlineVideoFeatureNotAvailable = "Feature not available for online video";
         OpenContainingFolder = "Open containing folder";
         OpenDictionaryFolder = "Open dictionary folder";

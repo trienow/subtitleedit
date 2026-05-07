@@ -71,7 +71,7 @@ public class LanguageNetflixCheckAndFix
         NetflixReportSaved = "Netflix quality report saved";
         NetFlixQualityReportSavedToX = "Netflix quality report saved to:\n {0}";
         DialogHyphenSpace = "Dialog hyphen space";
-        EllipsesNotThreeDots = "Use elipses (not three dots)";
+        EllipsesNotThreeDots = "Use ellipses (not three dots)";
         OnlyAllowedGlyphs = "Only allowed glyphs";
         Italics = "Italics";
         MaxCharsSec = "Max chars/sec";

@@ -61,7 +61,7 @@ public class LanguageSettings
 
     public string Profiles { get; set; }
     public string AutoBackupDeleteAfterXMonths { get; set; }
-    public string SearchSettingsDotDoDot { get; set; }
+    public string SearchSettingsDotDotDot { get; set; }
     public string SyntaxColoring { get; set; }
     public string WaveformSpectrogram { get; set; }
     public string Network { get; set; }
@@ -259,7 +259,7 @@ public class LanguageSettings
     public string SplitOddLineActionWeightBottom { get; set; }
     public string SplitOddLinesAction { get; set; }
     public string OcrUseWordSplitList { get; set; }
-    public string SpeechToTextSelectedLinesPromptFistTimeOnly { get; set; }
+    public string SpeechToTextSelectedLinesPromptFirstTimeOnly { get; set; }
     public string MultipleReplaceShowDotDotDotButtons { get; set; }
     public string GridFocusTextboxAfterInsertNew { get; set; }
     public string UseFocusedButtonBackgroundColor { get; set; }
@@ -346,7 +346,7 @@ public class LanguageSettings
         AutoBackupDeleteAfterXMonths = "Delete auto-backups after {0} months";
 
         Profiles = "Profiles";
-        SearchSettingsDotDoDot = "Search for settings...";
+        SearchSettingsDotDotDot = "Search for settings...";
         SyntaxColoring = "Syntax coloring";
         WaveformSpectrogram = "Waveform/spectrogram";
         Network = "Network";
@@ -543,7 +543,7 @@ public class LanguageSettings
         SplitOddLineActionWeightBottom = "Weight bottom";
         SplitOddLinesAction = "Split odd lines action";
         OcrUseWordSplitList = "OCR: use word split list";
-        SpeechToTextSelectedLinesPromptFistTimeOnly = "Speech to text: selected lines, prompt for language/engine first time only";
+        SpeechToTextSelectedLinesPromptFirstTimeOnly = "Speech to text: selected lines, prompt for language/engine first time only";
         MultipleReplaceShowDotDotDotButtons = "Multiple replace: show context menu buttons";
         GridFocusTextboxAfterInsertNew = "Grid: focus text box after insert new subtitle";
         UseFocusedButtonBackgroundColor = "Use focused button background color";

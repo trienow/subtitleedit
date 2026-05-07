@@ -2502,7 +2502,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml",
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImageBasedSubtitles, "*.sup;*.sub;*.ts;*.xml",
             Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
@@ -2522,7 +2522,7 @@ public partial class MainViewModel :
             return;
         }
 
-        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImagedBasedSubtitles, "*.sup;*.sub;*.ts;*.xml",
+        var fileName = await _fileHelper.PickOpenFile(Window!, Se.Language.General.OpenImageBasedSubtitle, Se.Language.General.ImageBasedSubtitles, "*.sup;*.sub;*.ts;*.xml",
             Se.Language.General.AllFiles, "*.*");
         if (string.IsNullOrEmpty(fileName))
         {
@@ -4773,7 +4773,7 @@ public partial class MainViewModel :
     [RelayCommand]
     private async Task SpeechToTextSelectedLines()
     {
-        if (Se.Settings.Tools.SpeechToTextSelectedLinesPromptFistTimeOnly)
+        if (Se.Settings.Tools.SpeechToTextSelectedLinesPromptFirstTimeOnly)
         {
             await SpeechToTextSelectedLinesPromptForLangaugeFirstTime();
         }

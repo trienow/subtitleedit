@@ -30,7 +30,7 @@ public class SettingsPage : UserControl
 
         _searchBox = new TextBox
         {
-            PlaceholderText = Se.Language.Options.Settings.SearchSettingsDotDoDot,
+            PlaceholderText = Se.Language.Options.Settings.SearchSettingsDotDotDot,
             Margin = new Thickness(10),
             MaxWidth = 500,
             MinWidth = 360,
@@ -578,7 +578,7 @@ public class SettingsPage : UserControl
                 }
             }),
             MakeCheckboxSetting(Se.Language.Options.Settings.OcrUseWordSplitList, nameof(_vm.OcrUseWordSplitList)),
-            MakeCheckboxSetting(Se.Language.Options.Settings.SpeechToTextSelectedLinesPromptFistTimeOnly, nameof(_vm.SpeechToTextSelectedLinesPromptFistTimeOnly)),
+            MakeCheckboxSetting(Se.Language.Options.Settings.SpeechToTextSelectedLinesPromptFirstTimeOnly, nameof(_vm.SpeechToTextSelectedLinesPromptFistTimeOnly)),
             MakeCheckboxSetting(Se.Language.Options.Settings.MultipleReplaceShowDotDotDotButtons, nameof(_vm.MultipleReplaceShowDotDotDotButtons)),
             MakeCheckboxSetting(Se.Language.Options.Settings.GridFocusTextboxAfterInsertNew, nameof(_vm.GridFocusTextboxAfterInsertNew)),
         ]));

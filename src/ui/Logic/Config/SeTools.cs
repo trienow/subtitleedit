@@ -81,7 +81,7 @@ public class SeTools
     public string LastColorPickerColor6 { get; set; }
     public string LastColorPickerColor7 { get; set; }
     public bool ImportTextTryToFindTimeCodes { get; set; }
-    public bool SpeechToTextSelectedLinesPromptFistTimeOnly { get; set; }
+    public bool SpeechToTextSelectedLinesPromptFirstTimeOnly { get; set; }
     public bool MultipleReplaceShowDotDotDotButtons { get; set; }
     public bool GridFocusTextboxAfterInsertNew { get; set; }
     public List<string> FindHistory { get; set; } = new List<string>();
@@ -137,7 +137,7 @@ public class SeTools
         ImportTextDurationAuto = true;
         ImportTextFixedDuration = 3000;
         ImportTextTryToFindTimeCodes = false;
-        SpeechToTextSelectedLinesPromptFistTimeOnly = true;
+        SpeechToTextSelectedLinesPromptFirstTimeOnly = true;
         MultipleReplaceShowDotDotDotButtons = true;
         GridFocusTextboxAfterInsertNew = true;
         AllowSingleLetterShortcutsInTextbox = false; 

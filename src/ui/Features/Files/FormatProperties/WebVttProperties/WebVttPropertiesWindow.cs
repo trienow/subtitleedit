@@ -34,7 +34,7 @@ public class WebVttPropertiesWindow : Window
             }
         };
 
-        var labelLineHeight = UiUtil.MakeLabel(Se.Language.General.LineHeigth).WithMinWidth(labelWidth);
+        var labelLineHeight = UiUtil.MakeLabel(Se.Language.General.LineHeight).WithMinWidth(labelWidth);
         var textBoxLineHeight = UiUtil.MakeTextBox(100, vm, nameof(vm.SelectedLineHeight));
         var panelLineHeight = new StackPanel
         {
