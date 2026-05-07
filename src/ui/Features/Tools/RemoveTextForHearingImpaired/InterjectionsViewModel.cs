@@ -27,18 +27,27 @@ public partial class InterjectionsViewModel : ObservableObject
         _languageCode = string.Empty;
     }
     
-    [RelayCommand]                   
-    private void Ok() 
+    [RelayCommand]
+    private void Ok()
     {
-        var interjectionLanguage = 
-            Se.Settings.Tools.RemoveTextForHi.Interjections
-            .FirstOrDefault(p => p.LanguageCode == _languageCode);
-        
-        if (interjectionLanguage == null)
+        if (string.IsNullOrEmpty(_languageCode))
         {
             return;
         }
-        
+
+        var interjectionLanguage =
+            Se.Settings.Tools.RemoveTextForHi.Interjections
+            .FirstOrDefault(p => p.LanguageCode == _languageCode);
+
+        if (interjectionLanguage == null)
+        {
+            interjectionLanguage = new SeRemoveTextForHi.InterjectionLanguage
+            {
+                LanguageCode = _languageCode,
+            };
+            Se.Settings.Tools.RemoveTextForHi.Interjections.Add(interjectionLanguage);
+        }
+
         interjectionLanguage.Interjections = InterjectionsText.SplitToLines()
             .Where(p => !string.IsNullOrWhiteSpace(p))
             .Select(p => p.Trim())
