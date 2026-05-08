@@ -84,6 +84,11 @@ public class OmniVoiceTtsCpp : ITtsEngine
         return Path.Combine(GetSetFolder(), OperatingSystem.IsWindows() ? "omnivoice-tts.exe" : "omnivoice-tts");
     }
 
+    public static string GetCodecExecutableFileName()
+    {
+        return Path.Combine(GetSetFolder(), OperatingSystem.IsWindows() ? "omnivoice-codec.exe" : "omnivoice-codec");
+    }
+
     public static string GetModelBasePath() =>
         Path.Combine(GetSetModelsFolder(), OmniVoiceDownloadService.ModelBaseFileName);
 

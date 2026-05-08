@@ -25,6 +25,7 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
     private const string ModelTokenizerUrl = "https://huggingface.co/Serveurperso/OmniVoice-GGUF/resolve/main/omnivoice-tokenizer-F32.gguf";
 
     private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-win64-cpu.zip";
+    private const string MacOsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-macos-universal-cpu-metal.zip";
 
     public OmniVoiceDownloadService(HttpClient httpClient)
     {
@@ -64,6 +65,11 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
             return WindowsUrl;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return MacOsUrl;
         }
 
         throw new PlatformNotSupportedException();
