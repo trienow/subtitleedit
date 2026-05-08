@@ -522,11 +522,16 @@ public partial class DownloadTtsViewModel : ObservableObject
                 }
 
                 var exePath = OmniVoiceTtsCpp.GetExecutableFileName();
+                var codecExePath = OmniVoiceTtsCpp.GetCodecExecutableFileName();
                 if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     if (File.Exists(exePath))
                     {
                         LinuxHelper.MakeExecutable(exePath);
+                    }
+                    if (File.Exists(codecExePath))
+                    {
+                        LinuxHelper.MakeExecutable(codecExePath);
                     }
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
@@ -534,6 +539,10 @@ public partial class DownloadTtsViewModel : ObservableObject
                     if (File.Exists(exePath))
                     {
                         MacHelper.MakeExecutable(exePath);
+                    }
+                    if (File.Exists(codecExePath))
+                    {
+                        MacHelper.MakeExecutable(codecExePath);
                     }
                 }
 
