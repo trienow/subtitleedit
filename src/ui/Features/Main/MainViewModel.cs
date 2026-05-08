@@ -15692,6 +15692,17 @@ public partial class MainViewModel :
                 Number = 1
             };
 
+            if (SelectedSubtitleFormat is AdvancedSubStationAlpha or SubStationAlpha)
+            {
+                if (string.IsNullOrEmpty(_subtitle.Header))
+                {
+                    _subtitle.Header = AdvancedSubStationAlpha.DefaultHeader;
+                }
+
+                var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
+                newSubtitle.Style = styles.Count > 0 ? styles[0] : "Default";
+            }
+
             Subtitles.Add(newSubtitle);
             SelectedSubtitle = newSubtitle;
             SelectedSubtitleIndex = 0;
