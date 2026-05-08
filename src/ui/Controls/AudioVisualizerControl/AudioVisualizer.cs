@@ -320,6 +320,7 @@ public class AudioVisualizer : Control
     private static readonly Cursor _cursorSizeWestEast = new Cursor(StandardCursorType.SizeWestEast);
 
     private readonly List<SubtitleLineViewModel> _displayableParagraphs = new();
+    private readonly IsSelectedHelper _isSelectedHelper = new();
     private bool _isCtrlDown;
     private bool _isMetaDown;
     private bool _isAltDown;
@@ -1500,7 +1501,7 @@ public class AudioVisualizer : Control
 
         // Convert SKBitmap to Avalonia Bitmap and draw it
         var displayHeight = height;
-        var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
+        using var avaloniaBitmap = skBitmapCombined.ToAvaloniaBitmap();
 
         var destRectangle = new Rect(0, renderCtx.Height - displayHeight, renderCtx.Width, displayHeight);
         context.DrawImage(avaloniaBitmap, destRectangle);
@@ -1710,7 +1711,8 @@ public class AudioVisualizer : Control
 
     private void DrawWaveFormFancy(DrawingContext context, double waveformHeight, ref RenderContext renderCtx)
     {
-        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, renderCtx.SampleRate);
+        _isSelectedHelper.Reset(AllSelectedParagraphs, renderCtx.SampleRate);
+        var isSelectedHelper = _isSelectedHelper;
         var halfWaveformHeight = waveformHeight / 2;
         var div = renderCtx.SampleRate * renderCtx.ZoomFactor;
 
@@ -1826,7 +1828,8 @@ public class AudioVisualizer : Control
 
     private void DrawWaveFormClassic(DrawingContext context, double waveformHeight, ref RenderContext renderCtx)
     {
-        var isSelectedHelper = new IsSelectedHelper(AllSelectedParagraphs, renderCtx.SampleRate);
+        _isSelectedHelper.Reset(AllSelectedParagraphs, renderCtx.SampleRate);
+        var isSelectedHelper = _isSelectedHelper;
         var halfWaveformHeight = waveformHeight / 2;
         var div = renderCtx.SampleRate * renderCtx.ZoomFactor;
 
