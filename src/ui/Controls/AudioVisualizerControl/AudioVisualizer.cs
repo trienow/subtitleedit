@@ -584,7 +584,7 @@ public class AudioVisualizer : Control
 
         if (_isAltDown)
         {
-            var deltaAlt = InvertMouseWheel ? -e.Delta.Y : e.Delta.Y;
+            var deltaAlt = e.Delta.Y;
             var newZoomFactor = ZoomFactor + deltaAlt / 10.0;
 
             if (newZoomFactor < MinZoomFactor)
