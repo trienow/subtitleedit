@@ -1,7 +1,7 @@
 ﻿{
   "title": "Subtitle Edit",
   "version": null,
-  "translatedBy": "v3.05.2026 by Adam Malich",
+  "translatedBy": "Adam Malich v7.05.2026",
   "cultureName": "pl-PL",
   "general": {
     "abort": "Przerwij",
@@ -32,14 +32,17 @@
     "apply": "Zastosuj",
     "applyTo": "Zastosuj do",
     "ascending": "Rosnąco",
+    "descending": "Malejąco",
     "attachDotDotDot": "Przyłącz...",
     "audioFiles": "Pliki audio",
     "audioVisualizer": "Wizualizator audio",
     "auto": "Auto",
     "autoBreak": "Automatycznie przełamuj tekst",
+    "autoBalanceLines": "Automatycznie równoważ linie",
     "autoContinue": "Automatyczne kontynuowanie",
     "autoTranslate": "Automatyczne tłumaczenie",
     "autodetect": "Automatyczne wykrywanie",
+    "backend": "Na koniec",
     "background": "Tło",
     "backgroundColor": "Kolor tła",
     "backward": "Do tyłu",
@@ -163,6 +166,7 @@
     "extendSelectedToNext": "Rozciągnij zaznaczone do następnego",
     "extendSelectedToPrevious": "Rozciągnij zaznaczone do poprzedniego",
     "extractingAudioClips": "Wyodrębnianie klipów audio...",
+    "exitFullScreen": "Wyjdź z pełnego ekranu",
     "fade": "Zanikanie",
     "fetchFirstWordFromNextSubtitle": "Pobierz pierwsze słowo z następnego napisu",
     "fileAlreadyExists": "Plik już istnieje",
@@ -208,6 +212,7 @@
     "frames": "Klatki",
     "from": "Z",
     "fromCurrentVideoPosition": "od bieżącej pozycji wideo",
+    "fullScreen": "Pełny ekran",
     "gap": "Odstęp",
     "general": "Ogólne",
     "generalText": "Ogólne",
@@ -237,7 +242,7 @@
     "id": "ID",
     "image": "Obraz",
     "imageSaved": "Obraz zapisany",
-    "imagedBasedSubtitles": "Napisy oparte na obrazach",
+    "imageBasedSubtitles": "Napisy oparte na obrazach",
     "images": "Obrazy",
     "imagesWithTimeCode": "Obrazy z kodem czasowym",
     "import": "Importuj",
@@ -264,7 +269,7 @@
     "layerFilterOn": "Filtr warstwowy włączony",
     "left": "Lewo",
     "light": "Jasny",
-    "lineHeigth": "Wysokość linii",
+    "lineHeight": "Wysokość linii",
     "lineNumber": "Linia #",
     "lineXColumnY": "Linia {0}, kolumna {1}",
     "lines": "Linie",
@@ -305,6 +310,7 @@
     "moveDown": "W dół",
     "moveUp": "W górę",
     "multipleReplace": "Wielokrotne zastąpienie",
+    "mute": "Wycisz",
     "name": "Nazwa",
     "negative": "Negatywny",
     "new": "Nowy",
@@ -541,7 +547,7 @@
     "subtitleXOfY": "Napisy {0} z {1}",
     "suffix": "Sufiks",
     "suggestions": "Sugestie",
-    "sync": "Synchronizuj",
+    "sync": "Synchronizacja",
     "syntaxColoring": "Kolorowanie składni",
     "system": "Systemowy",
     "targetEncoding": "Docelowe kodowanie ",
@@ -626,6 +632,7 @@
     "viewX": "Widok {0}",
     "visible": "Widoczny",
     "voice": "Głos",
+    "volume": "Głośność",
     "warning": "Ostrzeżenie",
     "waveformCenterOnVideoPosition": "Środek przebiegu fali w pozycji wideo",
     "waveformPasteFromClipboard": "Wklej ze schowka",
@@ -659,7 +666,8 @@
     "manualSync": "Synchronizacja ręczna",
     "unsupportedVideoFormat": "Nieobsługiwany format wideo",
     "playbackSpeed": "Prędkość odtwarzania",
-    "hoursMinutesSecondsMilliseconds": "HH:MM:SS.FFF"
+    "hoursMinutesSecondsMilliseconds": "HH:MM:SS.FFF",
+    "imageFiles": "Pliki obrazów"
   },
   "main": {
     "menu": {
@@ -670,6 +678,7 @@
       "openKeepVideo": "Otwórz (_zachowaj wideo)...",
       "openOriginal": "Otwórz ory_ginał...",
       "closeOriginal": "_Zamknij oryginał",
+      "closeTranslation": "Zamknij _tłumaczenie",
       "reopen": "_Otwórz ponownie...",
       "clearRecentFiles": "_Wyczyść ostatnio używane pliki",
       "restoreAutoBackup": "Przywróć automatyczną _kopię zapasową...",
@@ -1404,7 +1413,10 @@
     },
     "sortBy": {
       "title": "Sortuj napisy",
-      "sortOrder": "Kolejność sortowania"
+      "sortOrder": "Kolejność sortowania",
+      "sortByNumber": "Numer",
+      "sortByStartTime": "Czas rozpoczęcia",
+      "sortByEndTime": "Czas zakończenia"
     },
     "batchConvert": {
       "title": "Konwersja wsadowa",
@@ -1436,7 +1448,13 @@
       "rotateIn": "Obróć w",
       "tiltBounce": "Odbicie pochyłe",
       "fontSizeBounceIn": "Zmiana rozmiaru czcionki na",
-      "assaChangeResolutionOnlyAppliesToAssa": "Dotyczy wyłącznie napisów Advanced Sub Station Alpha (ASSA)"
+      "assaChangeResolutionOnlyAppliesToAssa": "Dotyczy wyłącznie napisów Advanced Sub Station Alpha (ASSA)",
+      "assaChangeStyleTitle": "Zmień styl",
+      "assaChangeStyleFromStyle": "Zmień styl z",
+      "assaChangeStyleToStyle": "na",
+      "assaChangeStyleImportStyle": "Importuj styl...",
+      "assaChangeStyleImportedX": "Zaimportowano {0}",
+      "assaChangeStyleTrimUnusedStyles": "Usuń nieużywane style"
     },
     "changeCasing": {
       "title": "Zmień pisownię",
@@ -1488,7 +1506,10 @@
       "title": "Połącz krótkie linie",
       "highlightParts": "Podświetl fragmenty (karaoke)",
       "mergedLineInfo": "Połączono linię {0} z linią {1} – {2}",
-      "linesMergedX": "Połączone linie: {0}"
+      "linesMergedX": "Połączone linie: {0}",
+      "maxCharacters": "Maksymalna liczba znaków w jednym akapicie",
+      "maxMillisecondsBetweenLines": "Maksymalny czas w milisekundach między wierszami",
+      "onlyContinuationLines": "Tylko linie kontynuacji"
     },
     "mergeLinesWithSameText": {
       "title": "Połącz linie z tym samym tekstem",
@@ -1957,7 +1978,7 @@
       "autoBackupEveryXthMinute": "Co {0} minut",
       "profiles": "Profile",
       "autoBackupDeleteAfterXMonths": "Usuwaj automatyczne kopie zapasowe po {0} miesiącu(ach)",
-      "searchSettingsDotDoDot": "Wyszukaj ustawienia...",
+      "searchSettingsDotDotDot": "Wyszukaj ustawienia...",
       "syntaxColoring": "Kolorowanie składni",
       "waveformSpectrogram": "Przebieg fali/spektrogram",
       "network": "Sieć",
@@ -2148,7 +2169,7 @@
       "splitOddLineActionWeightBottom": "Szersza dolna",
       "splitOddLinesAction": "Działanie podziału nieparzystych linii",
       "ocrUseWordSplitList": "OCR: użyj listy podziału na słowa",
-      "speechToTextSelectedLinesPromptFistTimeOnly": "Zamiana mowy na tekst: wybrane fragmenty, prośba o wybór języka/silnika pojawia się tylko przy pierwszym użyciu",
+      "speechToTextSelectedLinesPromptFirstTimeOnly": "Zamiana mowy na tekst: wybrane fragmenty, prośba o wybór języka/silnika pojawia się tylko przy pierwszym użyciu",
       "multipleReplaceShowDotDotDotButtons": "Wielokrotne zastąpienie: pokaż menu kontekstowe przycisków",
       "gridFocusTextboxAfterInsertNew": "Siatka: aktywuj pole tekstowe po wprowadzeniu nowego napisu",
       "useFocusedButtonBackgroundColor": "Użyj koloru tła przycisku w stanie aktywnym",
@@ -2321,6 +2342,7 @@
       "commandFileNewKeepVideo": "Nowy (zachowaj wideo)",
       "fileOpenOriginal": "Otwórz oryginał",
       "fileCloseOriginal": "Zamknij oryginał",
+      "fileCloseTranslation": "Zamknij tłumaczenie",
       "restoreAutoBackup": "Przywróć automatyczną kopię zapasową",
       "openContainingFolder": "Otwórz folder z zawartością",
       "importTimeCodes": "Importuj kody czasowe",
@@ -2723,7 +2745,7 @@
     "overrideTagsHistory": "Nadpisz historię tagów"
   },
   "about": {
-    "title": "O programie Subtite Edit",
+    "title": "O programie Subtitle Edit",
     "translatedBy": "Przetłumaczył: {0}",
     "licenseText": "Subtitle Edit to darmowe oprogramowanie na licencji MIT.",
     "descriptionTextBeta": "Subtitle Edit 5 beta to wersja rozwojowa naszej nadchodzącej dużej aktualizacji.\nCiągle udoskonalamy nowe narzędzia i będziemy wdzięczni za pomoc w ich testowaniu.\nProsimy o przesyłanie opinii, abyśmy mogli stworzyć jak najlepszą wersję końcową.\n\nDziękujemy za przynależność do społeczności Subtitle Edit! :)",
