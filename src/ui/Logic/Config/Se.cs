@@ -39,6 +39,7 @@ public class Se
     public SeSpellCheck SpellCheck { get; set; } = new();
     public SeAppearance Appearance { get; set; } = new();
     public SeAssa Assa { get; set; } = new();
+    public SeSsa Ssa { get; set; } = new();
     public SeVideo Video { get; set; } = new();
     public SeWaveform Waveform { get; set; } = new();
     public SeFormats Formats { get; set; } = new();

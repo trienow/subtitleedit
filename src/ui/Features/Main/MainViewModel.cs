@@ -93,6 +93,7 @@ using Nikse.SubtitleEdit.Features.SpellCheck;
 using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleLines;
 using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
 using Nikse.SubtitleEdit.Features.SpellCheck.GetDictionaries;
+using Nikse.SubtitleEdit.Features.Ssa;
 using Nikse.SubtitleEdit.Features.Sync.AdjustAllTimes;
 using Nikse.SubtitleEdit.Features.Sync.ChangeFrameRate;
 using Nikse.SubtitleEdit.Features.Sync.ChangeSpeed;
@@ -165,7 +166,8 @@ public partial class MainViewModel :
     IFocusSubtitleLine,
     IUndoRedoClient,
     IFindResult,
-    IApplyAssaStyles
+    IApplyAssaStyles,
+    IApplySsaStyles
 {
     [ObservableProperty] private ObservableCollection<SubtitleLineViewModel> _subtitles;
     [ObservableProperty] private SubtitleLineViewModel? _selectedSubtitle;
@@ -940,6 +942,66 @@ public partial class MainViewModel :
     }
 
     public void ApplyAssaStyles(AssaStylesViewModel result)
+    {
+        _subtitle.Header = result.Header;
+        var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
+        var first = styles.FirstOrDefault() ?? "Default";
+
+        for (var i = 0; i < Subtitles.Count; i++)
+        {
+            var s = Subtitles[i];
+
+            if (string.IsNullOrEmpty(s.Style) || !styles.Contains(s.Style))
+            {
+                s.Style = first;
+            }
+
+            if (i < result.ResultSubtitle.Paragraphs.Count)
+            {
+                var extra = result.ResultSubtitle.Paragraphs[i].Extra;
+                if (!string.IsNullOrEmpty(extra))
+                {
+                    s.Style = extra.TrimStart('*');
+                }
+            }
+        }
+
+        RefreshSubtitlePreview();
+    }
+
+    [RelayCommand]
+    private async Task ShowSsaStyles()
+    {
+        if (Window == null || !IsFormatSsa)
+        {
+            return;
+        }
+
+        var result = await ShowDialogAsync<SsaStylesWindow, SsaStylesViewModel>(vm =>
+        {
+            vm.Initialize(_subtitle, SelectedSubtitleFormat, _subtitleFileName ?? string.Empty,
+                SelectedSubtitle?.Style ?? string.Empty, this);
+        });
+
+        if (result.OkPressed)
+        {
+            ApplySsaStyles(result);
+            _subtitle.Footer = result.ResultSubtitle.Footer;
+
+            var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);
+            foreach (var s in Subtitles)
+            {
+                if (!styles.Contains(s.Style))
+                {
+                    s.Style = styles.FirstOrDefault() ?? "Default";
+                }
+            }
+
+            RefreshSubtitlePreview();
+        }
+    }
+
+    public void ApplySsaStyles(SsaStylesViewModel result)
     {
         _subtitle.Header = result.Header;
         var styles = AdvancedSubStationAlpha.GetStylesFromHeader(_subtitle.Header);

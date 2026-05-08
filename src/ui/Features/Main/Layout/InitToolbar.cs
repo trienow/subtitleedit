@@ -244,6 +244,12 @@ public static class InitToolbar
             stackPanelLeft.Children.Add(assaSeparator);
             assaSeparator.DataContext = vm;
             assaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatAssa)) { Mode = BindingMode.TwoWay });
+
+            var ssaSeparator = MakeSeparator();
+            stackPanelLeft.Children.Add(ssaSeparator);
+            ssaSeparator.DataContext = vm;
+            ssaSeparator.Bind(Visual.IsVisibleProperty, new Binding(nameof(vm.IsFormatSsa)) { Mode = BindingMode.TwoWay });
+
             isLastSeparator = true;
         }
 
@@ -255,6 +261,19 @@ public static class InitToolbar
             [AutomationProperties.NameProperty] = languageHints.AssaStylesHint,
             [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaStylesHint, shortcuts, nameof(vm.ShowAssaStylesCommand)),
             [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatAssa))
+            {
+                Source = vm,
+            },
+        });
+
+        stackPanelLeft.Children.Add(new Button
+        {
+            Content = MakeImage("AssaStyle"),
+            Command = vm.ShowSsaStylesCommand,
+            Background = Brushes.Transparent,
+            [AutomationProperties.NameProperty] = languageHints.AssaStylesHint,
+            [ToolTip.TipProperty] = UiUtil.MakeToolTip(languageHints.AssaStylesHint, shortcuts, nameof(vm.ShowSsaStylesCommand)),
+            [!Visual.IsVisibleProperty] = new Binding(nameof(vm.IsFormatSsa))
             {
                 Source = vm,
             },

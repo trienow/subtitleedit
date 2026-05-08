@@ -86,6 +86,7 @@ using Nikse.SubtitleEdit.Features.Shared.SourceView;
 using Nikse.SubtitleEdit.Features.Shared.WaveformGuessTimeCodes;
 using Nikse.SubtitleEdit.Features.Shared.WaveformSeekSilence;
 using Nikse.SubtitleEdit.Features.SpellCheck;
+using Nikse.SubtitleEdit.Features.Ssa;
 using Nikse.SubtitleEdit.Features.SpellCheck.EditWholeText;
 using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleLines;
 using Nikse.SubtitleEdit.Features.SpellCheck.FindDoubleWords;
@@ -247,6 +248,7 @@ public static class DependencyInjectionExtensions
         collection.AddTransient<AssaSingleStyleViewModel>();
         collection.AddTransient<AssaStylePickerViewModel>();
         collection.AddTransient<AssaStylesViewModel>();
+        collection.AddTransient<SsaStylesViewModel>();
         collection.AddTransient<AssaTagHistoryViewModel>();
         collection.AddTransient<SpeechToTextViewModel>();
         collection.AddTransient<AudioVisualizerUndockedViewModel>();
