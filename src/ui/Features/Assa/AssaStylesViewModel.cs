@@ -121,14 +121,14 @@ public partial class AssaStylesViewModel : ObservableObject
         }
 
         var format = new AdvancedSubStationAlpha();
-        var fileName = await _fileHelper.PickOpenFile(Window, "Open subtitle file to import styles from", format.Name, "*" + format.Extension);
+        var fileName = await _fileHelper.PickOpenFile(Window, "Open subtitle file to import styles from", format.Name, "*" + format.Extension, "Aegisub style file", "*.sty");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
-        var s = Subtitle.Parse(fileName, format);
-        if (s == null || string.IsNullOrEmpty(s.Header))
+        var ssaStyles = LoadStylesFromImportFile(fileName);
+        if (ssaStyles.Count == 0)
         {
             await MessageBox.Show(
                 Window,
@@ -138,8 +138,6 @@ public partial class AssaStylesViewModel : ObservableObject
                 MessageBoxIcon.Error);
             return;
         }
-
-        var ssaStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
 
         var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
         {
@@ -185,6 +183,26 @@ public partial class AssaStylesViewModel : ObservableObject
                 _subtitle.Footer = result.Footer;
             }
         }
+    }
+
+    private static List<SsaStyle> LoadStylesFromImportFile(string fileName)
+    {
+        if (fileName.EndsWith(".sty", StringComparison.OrdinalIgnoreCase))
+        {
+            var content = System.IO.File.ReadAllText(fileName);
+            var header = "[V4+ Styles]" + Environment.NewLine +
+                         SsaStyle.DefaultAssStyleFormat + Environment.NewLine +
+                         content;
+            return AdvancedSubStationAlpha.GetSsaStylesFromHeader(header);
+        }
+
+        var s = Subtitle.Parse(fileName, new AdvancedSubStationAlpha());
+        if (s == null || string.IsNullOrEmpty(s.Header))
+        {
+            return new List<SsaStyle>();
+        }
+
+        return AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
     }
 
     private static string MakeUniqueName(string name, ObservableCollection<StyleDisplay> styles)
@@ -370,14 +388,13 @@ public partial class AssaStylesViewModel : ObservableObject
         }
 
         var format = new AdvancedSubStationAlpha();
-        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Assa.OpenStyleImportFile, format.Name, "*" + format.Extension);
+        var fileName = await _fileHelper.PickOpenFile(Window, Se.Language.Assa.OpenStyleImportFile, format.Name, "*" + format.Extension, "Aegisub style file", "*.sty");
         if (string.IsNullOrEmpty(fileName))
         {
             return;
         }
 
-        var s = Subtitle.Parse(fileName, format);
-        var ssaStyles = AdvancedSubStationAlpha.GetSsaStylesFromHeader(s.Header);
+        var ssaStyles = LoadStylesFromImportFile(fileName);
 
         var result = await _windowService.ShowDialogAsync<AssaStylePickerWindow, AssaStylePickerViewModel>(Window, vm =>
         {
