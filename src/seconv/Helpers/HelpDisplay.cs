@@ -78,6 +78,7 @@ internal static class HelpDisplay
 
         AnsiConsole.WriteLine();
         ShowSection("Subcommands", null);
+        ShowParameter("--version", "Print the seconv version and exit");
         ShowParameter("formats", "List all available subtitle formats");
         ShowParameter("list-encodings", "List all supported text encodings (code page + name)");
         ShowParameter("list-pac-codepages", "List PAC code pages (--pac-codepage values)");

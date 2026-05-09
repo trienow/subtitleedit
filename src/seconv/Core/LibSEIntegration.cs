@@ -117,6 +117,13 @@ internal static class LibSEIntegration
             }
         }
 
+        // 4. Last resort: generic auto-guesser (handles freeform CSV, xlsx, ods, JSON variants, ...)
+        var guessSubtitle = new UnknownFormatImporter { UseFrames = true }.AutoGuessImport(lines, filePath);
+        if (guessSubtitle.Paragraphs.Count > 0)
+        {
+            return (guessSubtitle, new SubRip());
+        }
+
         throw new InvalidOperationException($"Unable to determine subtitle format for: {filePath}");
     }
 
