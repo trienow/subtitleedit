@@ -51,6 +51,7 @@ public partial class DownloadTtsViewModel : ObservableObject
     private Task? _downloadTaskKokoroTtsModels;
     private Task? _downloadTaskChatterboxModels;
     private Task? _downloadTaskOmniVoice;
+    private Task? _downloadTaskOmniVoiceVoices;
     private Task? _downloadTaskOmniVoiceModels;
     private readonly Timer _timer = new();
 
@@ -67,6 +68,7 @@ public partial class DownloadTtsViewModel : ObservableObject
     private readonly MemoryStream _downloadStreamQwen3TtsCppVoices;
     private readonly MemoryStream _downloadStreamKokoroTtsCpp;
     private readonly MemoryStream _downloadStreamOmniVoice;
+    private readonly MemoryStream _downloadStreamOmniVoiceVoices;
     private readonly IZipUnpacker _zipUnpacker;
     private readonly object _lock = new();
     private string _modelFileName;
@@ -94,6 +96,7 @@ public partial class DownloadTtsViewModel : ObservableObject
         _downloadStreamQwen3TtsCppVoices = new MemoryStream();
         _downloadStreamKokoroTtsCpp = new MemoryStream();
         _downloadStreamOmniVoice = new MemoryStream();
+        _downloadStreamOmniVoiceVoices = new MemoryStream();
 
         _modelFileName = string.Empty;
         _configFileName = string.Empty;
@@ -547,8 +550,31 @@ public partial class DownloadTtsViewModel : ObservableObject
                 }
 
                 _downloadTaskOmniVoice = null;
-                OkPressed = true;
-                Close();
+
+                // Chain the voices download, unless the user already has voices installed.
+                var voicesFolder = OmniVoiceTtsCpp.GetSetVoicesFolder();
+                var voicesAlreadyInstalled = Directory.Exists(voicesFolder) &&
+                                             Directory.EnumerateFiles(voicesFolder, "*.wav").Any();
+                if (voicesAlreadyInstalled)
+                {
+                    OkPressed = true;
+                    Close();
+                    return;
+                }
+
+                TitleText = "Downloading OmniVoice TTS voices";
+                ProgressValue = 0;
+                ProgressText = Se.Language.General.StartingDotDotDot;
+                var voicesProgress = new Progress<float>(number =>
+                {
+                    var percentage = (int)Math.Round(number * 100.0, MidpointRounding.AwayFromZero);
+                    var pctString = percentage.ToString(CultureInfo.InvariantCulture);
+                    ProgressValue = percentage;
+                    ProgressText = string.Format(Se.Language.General.DownloadingXPercent, pctString);
+                });
+                _downloadTaskOmniVoiceVoices = _omniVoiceDownloadService.DownloadVoices(
+                    _downloadStreamOmniVoiceVoices, voicesProgress, _cancellationTokenSource.Token);
+                _timer.Start();
             }
             else if (_downloadTaskOmniVoice is { IsFaulted: true })
             {
@@ -564,6 +590,49 @@ public partial class DownloadTtsViewModel : ObservableObject
                     ProgressText = "Download failed";
                     Error = ex?.Message ?? "Unknown error";
                 }
+            }
+
+            if (_downloadTaskOmniVoiceVoices is { IsCompleted: true })
+            {
+                _timer.Stop();
+
+                if (_downloadStreamOmniVoiceVoices.Length > 0)
+                {
+                    var voicesFolder = OmniVoiceTtsCpp.GetSetVoicesFolder();
+                    try
+                    {
+                        _downloadStreamOmniVoiceVoices.Position = 0;
+                        _zipUnpacker.UnpackZipStream(_downloadStreamOmniVoiceVoices, voicesFolder, string.Empty, false, new List<string>(), null);
+                    }
+                    catch (Exception ex)
+                    {
+                        // Voices are optional; log and continue so the engine is still usable.
+                        Se.LogError(ex);
+                    }
+                    _downloadStreamOmniVoiceVoices.Dispose();
+                }
+
+                OkPressed = true;
+                Close();
+            }
+            else if (_downloadTaskOmniVoiceVoices is { IsFaulted: true })
+            {
+                _timer.Stop();
+                var ex = _downloadTaskOmniVoiceVoices.Exception?.InnerException ?? _downloadTaskOmniVoiceVoices.Exception;
+                if (ex is OperationCanceledException)
+                {
+                    ProgressText = "Download canceled";
+                    Close();
+                    return;
+                }
+
+                // Voices are optional — the engine is already installed. Log and close with success.
+                if (ex != null)
+                {
+                    Se.LogError(ex);
+                }
+                OkPressed = true;
+                Close();
             }
 
             if (_downloadTaskOmniVoiceModels is { IsCompleted: true })

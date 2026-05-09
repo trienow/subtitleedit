@@ -184,45 +184,97 @@ public class OmniVoiceTtsCpp : ITtsEngine
         }
 
         // Voice cloning: omnivoice-tts requires both --ref-wav and --ref-text.
-        // Pair each voices/<name>.wav with a sibling <name>.txt holding the transcript;
-        // skip cloning silently when the transcript is missing so the user gets the
-        // default speaker rather than a hard failure.
+        // Pair each voices/<name>.wav with a sibling <name>.txt holding the transcript.
+        // The transcript is captured at import time; if it has been deleted out from under
+        // us we fail loudly so the user knows custom voice cloning isn't happening, rather
+        // than silently producing the default speaker.
         if (!string.IsNullOrEmpty(omniVoice.FilePath) && File.Exists(omniVoice.FilePath))
         {
             var refTextPath = Path.ChangeExtension(omniVoice.FilePath, ".txt");
-            if (File.Exists(refTextPath))
+            if (!File.Exists(refTextPath))
             {
-                psi.ArgumentList.Add("--ref-wav");
-                psi.ArgumentList.Add(omniVoice.FilePath);
-                psi.ArgumentList.Add("--ref-text");
-                psi.ArgumentList.Add(refTextPath);
+                throw new FileNotFoundException(
+                    $"OmniVoice TTS voice cloning requires a transcript file at {refTextPath}. "
+                    + "Re-import the voice to provide its transcript.",
+                    refTextPath);
             }
+
+            psi.ArgumentList.Add("--ref-wav");
+            psi.ArgumentList.Add(omniVoice.FilePath);
+            psi.ArgumentList.Add("--ref-text");
+            psi.ArgumentList.Add(refTextPath);
         }
 
         var process = Process.Start(psi)
             ?? throw new InvalidOperationException("Failed to start omnivoice-tts");
 
-        var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
-        var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-
-        await process.StandardInput.WriteAsync(inputText.AsMemory(), cancellationToken);
-        process.StandardInput.Close();
-
-        await process.WaitForExitAsync(cancellationToken);
-        var stderr = await stderrTask;
-        var stdout = await stdoutTask;
-
-        if (process.ExitCode != 0 || !File.Exists(outputFileName))
+        try
         {
-            Se.LogError($"OmniVoice TTS failed (exit code {process.ExitCode}) - "
-                + $"Voice: {omniVoice}, Text: {text}, "
-                + $"Args: {string.Join(' ', psi.ArgumentList)}, "
-                + $"StdErr: {stderr.Trim()}, StdOut: {stdout.Trim()}");
-            throw new InvalidOperationException(
-                $"OmniVoice TTS failed (exit code {process.ExitCode}). {stderr.Trim()}");
-        }
+            var stderrTask = process.StandardError.ReadToEndAsync(cancellationToken);
+            var stdoutTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
 
-        return new TtsResult(outputFileName, text);
+            await process.StandardInput.WriteAsync(inputText.AsMemory(), cancellationToken);
+            process.StandardInput.Close();
+
+            await process.WaitForExitAsync(cancellationToken);
+            var stderr = await stderrTask;
+            var stdout = await stdoutTask;
+
+            if (process.ExitCode != 0 || !File.Exists(outputFileName))
+            {
+                Se.LogError($"OmniVoice TTS failed (exit code {process.ExitCode}) - "
+                    + $"Voice: {omniVoice}, Text: {text}, "
+                    + $"Args: {string.Join(' ', psi.ArgumentList)}, "
+                    + $"StdErr: {stderr.Trim()}, StdOut: {stdout.Trim()}");
+                throw new InvalidOperationException(
+                    $"OmniVoice TTS failed (exit code {process.ExitCode}). {stderr.Trim()}");
+            }
+
+            return new TtsResult(outputFileName, text);
+        }
+        catch (OperationCanceledException)
+        {
+            // The omnivoice-tts process keeps running after the await is cancelled. Kill the
+            // process tree and remove the partial output file before propagating the cancel,
+            // so we don't leak CPU work or stale .wav files.
+            TryKill(process);
+            TryDelete(outputFileName);
+            throw;
+        }
+        finally
+        {
+            process.Dispose();
+        }
+    }
+
+    private static void TryKill(Process process)
+    {
+        try
+        {
+            if (!process.HasExited)
+            {
+                process.Kill(entireProcessTree: true);
+            }
+        }
+        catch
+        {
+            // best effort
+        }
+    }
+
+    private static void TryDelete(string path)
+    {
+        try
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+        }
+        catch
+        {
+            // best effort
+        }
     }
 
     private static string GetUniqueDestinationFileName(string folder, string baseName, string extension)
@@ -243,7 +295,14 @@ public class OmniVoiceTtsCpp : ITtsEngine
         return candidate;
     }
 
-    public bool ImportVoice(string fileName)
+    public bool ImportVoice(string fileName) => ImportVoice(fileName, transcript: null);
+
+    /// <summary>
+    /// Imports a voice for cloning. If <paramref name="transcript"/> is provided it is written
+    /// next to the imported WAV as the required reference transcript; otherwise we fall back
+    /// to copying a sibling &lt;basename&gt;.txt from the source folder if one exists.
+    /// </summary>
+    public bool ImportVoice(string fileName, string? transcript)
     {
         if (string.IsNullOrEmpty(fileName) || !File.Exists(fileName))
         {
@@ -273,14 +332,16 @@ public class OmniVoiceTtsCpp : ITtsEngine
         }
 
         // Pair the imported WAV with a sibling .txt holding the transcript. Without it
-        // omnivoice-tts will reject --ref-wav, so we copy any existing &lt;basename&gt;.txt
-        // sitting next to the source file. Users can also drop the .txt into the voices
-        // folder later by hand.
-        var sourceTextFile = Path.ChangeExtension(fileName, ".txt");
-        if (File.Exists(sourceTextFile))
+        // omnivoice-tts will reject --ref-wav.
+        var destTextFile = Path.ChangeExtension(destinationFileName, ".txt");
+        if (!string.IsNullOrWhiteSpace(transcript))
         {
-            var destTextFile = Path.ChangeExtension(destinationFileName, ".txt");
-            if (!File.Exists(destTextFile))
+            File.WriteAllText(destTextFile, transcript);
+        }
+        else
+        {
+            var sourceTextFile = Path.ChangeExtension(fileName, ".txt");
+            if (File.Exists(sourceTextFile) && !File.Exists(destTextFile))
             {
                 File.Copy(sourceTextFile, destTextFile, overwrite: false);
             }

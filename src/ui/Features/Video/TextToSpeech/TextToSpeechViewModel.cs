@@ -434,6 +434,10 @@ public partial class TextToSpeechViewModel : ObservableObject
                 await PlayAudio(result.FileName);
             }
         }
+        catch (OperationCanceledException)
+        {
+            // User clicked Cancel on the GeneratingAudio window — close quietly.
+        }
         finally
         {
             generatingAudioVm.Close();

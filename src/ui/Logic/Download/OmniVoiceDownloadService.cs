@@ -12,6 +12,8 @@ public interface IOmniVoiceDownloadService
     Task DownloadModels(string modelsFolder, IProgress<float>? progress, Action<string>? titleProgress, CancellationToken cancellationToken);
 
     Task DownloadEngine(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
+
+    Task DownloadVoices(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
 }
 
 public class OmniVoiceDownloadService : IOmniVoiceDownloadService
@@ -27,6 +29,8 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
     private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-win64-cpu.zip";
     private const string MacOsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-macos-universal-cpu-metal.zip";
     private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-linux-x64-cpu.zip";
+
+    private const string VoicesUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/OmniVoices.zip";
 
     public OmniVoiceDownloadService(HttpClient httpClient)
     {
@@ -59,6 +63,11 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
     public async Task DownloadEngine(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
     {
         await DownloadHelper.DownloadFileAsync(_httpClient, GetUrl(), stream, progress, cancellationToken);
+    }
+
+    public async Task DownloadVoices(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
+    {
+        await DownloadHelper.DownloadFileAsync(_httpClient, VoicesUrl, stream, progress, cancellationToken);
     }
 
     private static string GetUrl()
