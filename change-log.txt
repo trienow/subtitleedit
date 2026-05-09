@@ -23,6 +23,9 @@ v5.0.0-beta23 (xth May 2026)
 * Fix mp3 file not stopping at end (regression)
 * Fix crash when loading idx file - thx Codling
 * Fix saving interjections for non-English languages - thx Pemicope
+* Update Polish translation - thx potplayer-fanpack 
+* Don't invert waveform zoom direction with "Invert mouse wheel" - thx bereld
+* Add OmniVoice TTS
 
 -----------------------------------------------------------------------------------------------------
 
