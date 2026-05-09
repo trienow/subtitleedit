@@ -1705,7 +1705,11 @@ public partial class TextToSpeechViewModel : ObservableObject
                     Languages.Add(language);
                 }
 
-                SelectedLanguage = Languages.FirstOrDefault();
+                // OmniVoice has 646 alphabetically-sorted languages; the first entry ("Abadi") is
+                // a useless default. Default to English so the engine is usable out of the box.
+                SelectedLanguage = engine is OmniVoiceTtsCpp
+                    ? Languages.FirstOrDefault(l => l.Code == "en") ?? Languages.FirstOrDefault()
+                    : Languages.FirstOrDefault();
             }
 
             if (HasRegion)

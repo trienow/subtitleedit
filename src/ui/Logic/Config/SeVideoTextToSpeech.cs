@@ -27,6 +27,7 @@ public class SeVideoTextToSpeech
     public string MistralModel { get; set; }
     public string Qwen3TtsCppModel { get; set; }
     public string Qwen3TtsCppVulkanPath { get; set; }
+    public string OmniVoiceTtsCppVulkanPath { get; set; }
     public string KokoroVoice { get; set; }
     public string GoogleApiKey { get; set; }
     public string GoogleKeyFile { get; set; }
@@ -86,6 +87,7 @@ public class SeVideoTextToSpeech
         MistralModel = "voxtral-mini-tts-2603";
         Qwen3TtsCppModel = "0.6B";
         Qwen3TtsCppVulkanPath = string.Empty;
+        OmniVoiceTtsCppVulkanPath = string.Empty;
         KokoroVoice = "af_maple";
         GoogleApiKey = string.Empty;
         GoogleKeyFile = string.Empty;

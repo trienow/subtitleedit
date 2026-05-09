@@ -167,6 +167,23 @@ public class OmniVoiceTtsCpp : ITtsEngine
             RedirectStandardError = true,
             StandardInputEncoding = Encoding.UTF8,
         };
+
+        // The Windows Vulkan build needs vulkan-1.dll on PATH at launch. Add the SDK bin
+        // folder if we know about it, so the binary works even when the runtime isn't in
+        // the global PATH.
+        if (OperatingSystem.IsWindows())
+        {
+            var vulkanPath = Se.Settings.Video.TextToSpeech.OmniVoiceTtsCppVulkanPath;
+            if (string.IsNullOrEmpty(vulkanPath))
+            {
+                vulkanPath = Logic.VulkanHelper.TryFindBinFolder();
+            }
+            if (!string.IsNullOrEmpty(vulkanPath) && psi.EnvironmentVariables["Path"] != null)
+            {
+                psi.EnvironmentVariables["Path"] =
+                    psi.EnvironmentVariables["Path"]?.TrimEnd(';') + ";" + vulkanPath;
+            }
+        }
         psi.ArgumentList.Add("--model");
         psi.ArgumentList.Add(modelPath);
         psi.ArgumentList.Add("--codec");
