@@ -246,6 +246,16 @@ internal class SubtitleConverter
             LibSEIntegration.ApplyOperations(subtitle, options.Operations, options.FixCommonErrorsRules);
         }
 
+        if (options.BridgeGapsMaxMs.HasValue && options.BridgeGapsMaxMs.Value > 0)
+        {
+            LibSEIntegration.BridgeGaps(subtitle, options.BridgeGapsMaxMs.Value);
+        }
+
+        if (options.ApplyMinGapMs.HasValue && options.ApplyMinGapMs.Value > 0)
+        {
+            LibSEIntegration.ApplyMinGap(subtitle, options.ApplyMinGapMs.Value);
+        }
+
         if (!string.IsNullOrWhiteSpace(options.MultipleReplaceFile))
         {
             MultipleReplaceLoader.Apply(subtitle, options.MultipleReplaceFile);
@@ -357,6 +367,12 @@ internal class ConversionOptions
 
     /// <summary>Speed change as a percent: 125 = 1.25x faster (times scaled by 100/125), 80 = slower.</summary>
     public double? ChangeSpeedPercent { get; init; }
+
+    /// <summary>Bridge gaps shorter than this many ms by extending the previous end time. Null disables.</summary>
+    public int? BridgeGapsMaxMs { get; init; }
+
+    /// <summary>Enforce a minimum gap of this many ms between consecutive paragraphs. Null disables.</summary>
+    public int? ApplyMinGapMs { get; init; }
     public (int Width, int Height)? Resolution { get; init; }
     public string? AssaStyleFile { get; init; }
     public int? PacCodePage { get; init; }

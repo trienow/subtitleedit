@@ -149,6 +149,14 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
         [Description("Apply duration limits")]
         public bool ApplyDurationLimits { get; init; }
 
+        [CommandOption("--apply-min-gap|--ApplyMinGap")]
+        [Description("Enforce a minimum gap of N ms between paragraphs")]
+        public int? ApplyMinGap { get; init; }
+
+        [CommandOption("--bridge-gaps|--BridgeGaps")]
+        [Description("Bridge gaps shorter than N ms by extending the previous end time")]
+        public int? BridgeGaps { get; init; }
+
         [CommandOption("--balance-lines|--BalanceLines")]
         [Description("Balance lines")]
         public bool BalanceLines { get; init; }
@@ -393,6 +401,8 @@ internal sealed class ConvertCommand : AsyncCommand<ConvertCommand.Settings>
                 Renumber = settings.Renumber,
                 AdjustDurationMs = settings.AdjustDuration,
                 ChangeSpeedPercent = settings.ChangeSpeed,
+                BridgeGapsMaxMs = settings.BridgeGaps,
+                ApplyMinGapMs = settings.ApplyMinGap,
                 Resolution = resolution,
                 AssaStyleFile = settings.AssaStyleFile,
                 PacCodePage = pacCodePage,

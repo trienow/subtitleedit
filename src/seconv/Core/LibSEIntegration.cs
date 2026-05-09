@@ -515,6 +515,60 @@ internal static class LibSEIntegration
         }
     }
 
+    /// <summary>
+    /// Bridges gaps shorter than <paramref name="maxMs"/> by extending the previous paragraph's
+    /// end time. Leaves a gap equal to <c>Configuration.Settings.General.MinimumMillisecondsBetweenLines</c>
+    /// (so it composes correctly with --apply-min-gap and the configured profile).
+    /// </summary>
+    public static void BridgeGaps(Subtitle subtitle, int maxMs)
+    {
+        if (subtitle == null || maxMs <= 0)
+        {
+            return;
+        }
+
+        var minGap = Math.Max(1, Configuration.Settings.General.MinimumMillisecondsBetweenLines);
+        if (minGap > maxMs)
+        {
+            // BridgeGaps requires minGap <= maxMs. Clamp to keep the call valid.
+            minGap = Math.Max(1, maxMs - 1);
+        }
+
+        DurationsBridgeGaps.BridgeGaps(subtitle, minGap, divideEven: false, maxMs, fixedIndexes: null, dic: null, useFrames: false);
+    }
+
+    /// <summary>
+    /// Enforces a minimum gap of <paramref name="minMs"/> between consecutive paragraphs by pulling
+    /// the earlier end time backwards. Skips edits that would shrink a paragraph below the
+    /// configured minimum display duration.
+    /// </summary>
+    public static void ApplyMinGap(Subtitle subtitle, int minMs)
+    {
+        if (subtitle == null || minMs <= 0)
+        {
+            return;
+        }
+
+        var minDisplayMs = Configuration.Settings.General.SubtitleMinimumDisplayMilliseconds;
+        for (var i = 0; i < subtitle.Paragraphs.Count - 1; i++)
+        {
+            var current = subtitle.Paragraphs[i];
+            var next = subtitle.Paragraphs[i + 1];
+            var gapMs = next.StartTime.TotalMilliseconds - current.EndTime.TotalMilliseconds;
+            if (gapMs >= minMs)
+            {
+                continue;
+            }
+
+            var newEndMs = next.StartTime.TotalMilliseconds - minMs;
+            var newDuration = newEndMs - current.StartTime.TotalMilliseconds;
+            if (newDuration > minDisplayMs)
+            {
+                current.EndTime.TotalMilliseconds = newEndMs;
+            }
+        }
+    }
+
     public static void DeleteFirst(Subtitle subtitle, int count)
     {
         if (count <= 0)

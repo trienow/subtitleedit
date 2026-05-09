@@ -176,6 +176,8 @@ internal class Program
         "--delete-last", "--DeleteLast",
         "--delete-contains", "--DeleteContains",
         "--fix-common-errors-rules", "--FixCommonErrorsRules",
+        "--bridge-gaps", "--BridgeGaps",
+        "--apply-min-gap", "--ApplyMinGap",
     };
 
     private static bool HasFormatOption(string[] args)
