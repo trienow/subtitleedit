@@ -1,8 +1,3 @@
----
-layout: default
-title: ASSA Apply Advanced Effects
----
-
 # ASSA Apply Advanced Effects
 
 Apply cinematic and creative ASS/SSA override tag effects to subtitles with real-time video preview.

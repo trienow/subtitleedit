@@ -1,8 +1,3 @@
----
-layout: default
-title: Third-Party Components
----
-
 # Third-Party Components
 
 Subtitle Edit uses several third-party tools for features like video playback, audio extraction, and OCR. While Subtitle Edit includes built-in downloaders for these components, you might want to use a specific version or a custom build.

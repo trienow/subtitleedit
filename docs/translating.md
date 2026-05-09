@@ -1,8 +1,3 @@
----
-layout: default
-title: Translating Subtitle Edit
----
-
 # Translating Subtitle Edit
 
 You can translate Subtitle Edit's user interface into any language by creating a JSON language file. Translations are warmly welcomed — please share them so they can be included in future releases!
