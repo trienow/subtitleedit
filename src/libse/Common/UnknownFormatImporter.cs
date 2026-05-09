@@ -17,6 +17,15 @@ namespace Nikse.SubtitleEdit.Core.Common
 
         public Subtitle AutoGuessImport(List<string> lines, string fileName)
         {
+            if (!string.IsNullOrEmpty(fileName) && fileName.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase))
+            {
+                var xlsxSubtitle = new UnknownFormatImporterXlsx().AutoGuessImport(fileName);
+                if (xlsxSubtitle != null && xlsxSubtitle.Paragraphs.Count > 0)
+                {
+                    return xlsxSubtitle;
+                }
+            }
+
             var subtitle = ImportTimeCodesOnSameSeparateLine(lines);
             if (subtitle.Paragraphs.Count < 2)
             {
