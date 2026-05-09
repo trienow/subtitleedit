@@ -802,19 +802,64 @@ public partial class TextToSpeechViewModel : ObservableObject
         {
             if (!await engine.IsInstalled(SelectedRegion))
             {
-                var answer = await MessageBox.Show(
-                    Window,
-                    "Download OmniVoice TTS?",
-                    $"{Environment.NewLine}\"Text to speech\" requires OmniVoice TTS.{Environment.NewLine}{Environment.NewLine}Download and use OmniVoice TTS?",
-                    MessageBoxButtons.YesNoCancel,
-                    MessageBoxIcon.Question);
-
-                if (answer != MessageBoxResult.Yes)
+                var omniVariant = OmniVoiceDownloadService.WindowsVariantVulkan;
+                if (Configuration.IsRunningOnWindows)
                 {
-                    return false;
+                    var variantAnswer = await MessageBox.Show(
+                        Window,
+                        "Download OmniVoice TTS?",
+                        $"{Environment.NewLine}\"Text to speech\" requires OmniVoice TTS.{Environment.NewLine}{Environment.NewLine}Select a build to download:",
+                        MessageBoxButtons.Cancel,
+                        MessageBoxIcon.Question,
+                        "CPU",
+                        "Vulkan");
+
+                    if (variantAnswer == MessageBoxResult.None || variantAnswer == MessageBoxResult.Cancel)
+                    {
+                        return false;
+                    }
+
+                    omniVariant = variantAnswer == MessageBoxResult.Custom1
+                        ? OmniVoiceDownloadService.WindowsVariantCpu
+                        : OmniVoiceDownloadService.WindowsVariantVulkan;
+
+                    if (omniVariant == OmniVoiceDownloadService.WindowsVariantVulkan && !VulkanHelper.IsInstalled())
+                    {
+                        var vulkanAnswer = await MessageBox.Show(
+                            Window,
+                            "Vulkan runtime may be required",
+                            $"The Vulkan version requires the Vulkan runtime (vulkan-1.dll) which usually ships with current GPU drivers, but was not detected on this system.{Environment.NewLine}{Environment.NewLine}You can install it from:{Environment.NewLine}https://vulkan.lunarg.com/sdk/home{Environment.NewLine}{Environment.NewLine}Continue with Vulkan download anyway?",
+                            MessageBoxButtons.YesNoCancel,
+                            MessageBoxIcon.Question);
+
+                        if (vulkanAnswer == MessageBoxResult.No)
+                        {
+                            UiUtil.OpenUrl("https://vulkan.lunarg.com/sdk/home");
+                            return false;
+                        }
+
+                        if (vulkanAnswer != MessageBoxResult.Yes)
+                        {
+                            return false;
+                        }
+                    }
+                }
+                else
+                {
+                    var answer = await MessageBox.Show(
+                        Window,
+                        "Download OmniVoice TTS?",
+                        $"{Environment.NewLine}\"Text to speech\" requires OmniVoice TTS.{Environment.NewLine}{Environment.NewLine}Download and use OmniVoice TTS?",
+                        MessageBoxButtons.YesNoCancel,
+                        MessageBoxIcon.Question);
+
+                    if (answer != MessageBoxResult.Yes)
+                    {
+                        return false;
+                    }
                 }
 
-                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadOmniVoice());
+                var dlResult = await _windowService.ShowDialogAsync<DownloadTtsWindow, DownloadTtsViewModel>(Window, vm => vm.StartDownloadOmniVoice(omniVariant));
                 if (!dlResult.OkPressed)
                 {
                     return false;

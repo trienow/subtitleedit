@@ -11,7 +11,7 @@ public interface IOmniVoiceDownloadService
 {
     Task DownloadModels(string modelsFolder, IProgress<float>? progress, Action<string>? titleProgress, CancellationToken cancellationToken);
 
-    Task DownloadEngine(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
+    Task DownloadEngine(Stream stream, string windowsVariant, IProgress<float>? progress, CancellationToken cancellationToken);
 
     Task DownloadVoices(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken);
 }
@@ -23,10 +23,14 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
     public const string ModelBaseFileName = "omnivoice-base-Q8_0.gguf";
     public const string ModelTokenizerFileName = "omnivoice-tokenizer-F32.gguf";
 
+    public const string WindowsVariantCpu = "cpu";
+    public const string WindowsVariantVulkan = "vulkan";
+
     private const string ModelBaseUrl = "https://huggingface.co/Serveurperso/OmniVoice-GGUF/resolve/main/omnivoice-base-Q8_0.gguf";
     private const string ModelTokenizerUrl = "https://huggingface.co/Serveurperso/OmniVoice-GGUF/resolve/main/omnivoice-tokenizer-F32.gguf";
 
-    private const string WindowsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-win64-cpu.zip";
+    private const string WindowsCpuUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-win64-cpu.zip";
+    private const string WindowsVulkanUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-win64-vulkan.zip";
     private const string MacOsUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-macos-universal-cpu-metal.zip";
     private const string LinuxUrl = "https://github.com/SubtitleEdit/support-files/releases/download/omnivoice-26-06/omnivoice-linux-x64-cpu.zip";
 
@@ -60,9 +64,9 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
         }
     }
 
-    public async Task DownloadEngine(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
+    public async Task DownloadEngine(Stream stream, string windowsVariant, IProgress<float>? progress, CancellationToken cancellationToken)
     {
-        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrl(), stream, progress, cancellationToken);
+        await DownloadHelper.DownloadFileAsync(_httpClient, GetUrl(windowsVariant), stream, progress, cancellationToken);
     }
 
     public async Task DownloadVoices(Stream stream, IProgress<float>? progress, CancellationToken cancellationToken)
@@ -70,11 +74,11 @@ public class OmniVoiceDownloadService : IOmniVoiceDownloadService
         await DownloadHelper.DownloadFileAsync(_httpClient, VoicesUrl, stream, progress, cancellationToken);
     }
 
-    private static string GetUrl()
+    private static string GetUrl(string windowsVariant)
     {
         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
         {
-            return WindowsUrl;
+            return windowsVariant == WindowsVariantCpu ? WindowsCpuUrl : WindowsVulkanUrl;
         }
 
         if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))

@@ -29,9 +29,12 @@ public class PromptTextBoxWindow : Window
             TextWrapping = TextWrapping.Wrap,
         };
 
+        var buttonExtra = UiUtil.MakeButton(string.Empty, vm.ExtraButtonCommand)
+            .WithBindIsVisible(nameof(vm.IsExtraButtonVisible));
+        buttonExtra.Bind(ContentControl.ContentProperty, new Binding(nameof(vm.ExtraButtonText)));
         var buttonOk = UiUtil.MakeButtonOk(vm.OkCommand);
         var buttonCancel = UiUtil.MakeButtonCancel(vm.CancelCommand);
-        var buttonPanel = UiUtil.MakeButtonBar(buttonOk, buttonCancel);
+        var buttonPanel = UiUtil.MakeButtonBar(buttonExtra, buttonOk, buttonCancel);
 
         var grid = new Grid
         {

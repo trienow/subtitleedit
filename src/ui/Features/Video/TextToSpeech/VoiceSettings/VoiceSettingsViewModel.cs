@@ -4,11 +4,13 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Nikse.SubtitleEdit.Features.Shared;
 using Nikse.SubtitleEdit.Features.Shared.PromptTextBox;
+using Nikse.SubtitleEdit.Features.Video.SpeechToText;
 using Nikse.SubtitleEdit.Features.Video.TextToSpeech.Engines;
 using Nikse.SubtitleEdit.Logic;
 using Nikse.SubtitleEdit.Logic.Config;
 using Nikse.SubtitleEdit.Logic.Media;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Nikse.SubtitleEdit.Features.Video.TextToSpeech.VoiceSettings;
@@ -67,6 +69,7 @@ public partial class VoiceSettingsViewModel : ObservableObject
             var transcript = TryReadSiblingTranscript(fileName);
             if (string.IsNullOrWhiteSpace(transcript))
             {
+                var audioFileName = fileName;
                 var result = await _windowService.ShowDialogAsync<PromptTextBoxWindow, PromptTextBoxViewModel>(Window!, vm =>
                 {
                     vm.Initialize(
@@ -74,6 +77,9 @@ public partial class VoiceSettingsViewModel : ObservableObject
                         string.Empty,
                         500,
                         150);
+                    vm.ConfigureExtraButton(
+                        Se.Language.Video.TextToSpeech.UseSpeechToTextDotDotDot,
+                        () => RunSpeechToTextAsync(audioFileName));
                 });
 
                 if (!result.OkPressed || string.IsNullOrWhiteSpace(result.Text))
@@ -115,6 +121,28 @@ public partial class VoiceSettingsViewModel : ObservableObject
         {
             return null;
         }
+    }
+
+    private async Task<string?> RunSpeechToTextAsync(string audioFileName)
+    {
+        if (Window == null)
+        {
+            return null;
+        }
+
+        var sttResult = await _windowService.ShowDialogAsync<SpeechToTextWindow, SpeechToTextViewModel>(Window, vm =>
+        {
+            vm.Initialize(audioFileName, -1);
+        });
+
+        if (!sttResult.OkPressed || sttResult.TranscribedSubtitle == null || sttResult.TranscribedSubtitle.Paragraphs.Count == 0)
+        {
+            return null;
+        }
+
+        return string.Join(' ', sttResult.TranscribedSubtitle.Paragraphs
+            .Select(p => p.Text?.Replace('\n', ' ').Replace('\r', ' ').Trim())
+            .Where(t => !string.IsNullOrWhiteSpace(t)));
     }
 
     [RelayCommand]

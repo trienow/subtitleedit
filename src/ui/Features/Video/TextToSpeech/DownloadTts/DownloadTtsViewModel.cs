@@ -887,9 +887,9 @@ public partial class DownloadTtsViewModel : ObservableObject
             _chatterboxTtsCppDownloadService.DownloadModels(ChatterboxTtsCpp.GetSetModelsFolder(), downloadProgress, titleProgress, _cancellationTokenSource.Token);
     }
 
-    public void StartDownloadOmniVoice()
+    public void StartDownloadOmniVoice(string windowsVariant = OmniVoiceDownloadService.WindowsVariantVulkan)
     {
-        TitleText = "Downloading OmniVoice TTS";
+        TitleText = $"Downloading OmniVoice TTS ({windowsVariant})";
 
         var downloadProgress = new Progress<float>(number =>
         {
@@ -900,7 +900,7 @@ public partial class DownloadTtsViewModel : ObservableObject
         });
 
         _downloadTaskOmniVoice =
-            _omniVoiceDownloadService.DownloadEngine(_downloadStreamOmniVoice, downloadProgress, _cancellationTokenSource.Token);
+            _omniVoiceDownloadService.DownloadEngine(_downloadStreamOmniVoice, windowsVariant, downloadProgress, _cancellationTokenSource.Token);
     }
 
     public void StartDownloadOmniVoiceModels()

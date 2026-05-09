@@ -30,6 +30,7 @@ public class LanguageTextToSpeech
     public string VoiceImportSuccessTitle { get; set; }
     public string VoiceXImported { get; set; }
     public string VoiceCloneTranscriptTitle { get; set; }
+    public string UseSpeechToTextDotDotDot { get; set; }
     public string AdvancedTtsSettings { get; set; }
     public string ProAudioPostProcessing { get; set; }
     public string ProAudioPostProcessingDescription { get; set; }
@@ -81,6 +82,7 @@ public class LanguageTextToSpeech
         VoiceImportSuccessTitle = "Voice imported";
         VoiceXImported = "Voice '{0}' imported successfully";
         VoiceCloneTranscriptTitle = "Enter transcript of the audio (required for voice cloning)";
+        UseSpeechToTextDotDotDot = "Use speech-to-text...";
         AdvancedTtsSettings = "Advanced TTS settings";
         ProAudioPostProcessing = "Pro audio post-processing";
         ProAudioPostProcessingDescription = "Applies EQ warmth, noise gate, compression, loudness normalization (-16 LUFS), and fade in/out to each segment.";
