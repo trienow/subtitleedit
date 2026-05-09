@@ -26,6 +26,7 @@ v5.0.0-beta23 (xth May 2026)
 * Update Polish translation - thx potplayer-fanpack 
 * Don't invert waveform zoom direction with "Invert mouse wheel" - thx bereld
 * Add OmniVoice TTS
+* Update Japanese translation - thx hisui3393
 
 -----------------------------------------------------------------------------------------------------
 
