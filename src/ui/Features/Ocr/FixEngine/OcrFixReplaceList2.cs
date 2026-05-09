@@ -5,6 +5,7 @@ using Nikse.SubtitleEdit.Logic.Config;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -152,6 +153,13 @@ namespace Nikse.SubtitleEdit.Core.Dictionaries
                 if (!_regExList.ContainsKey(kp.Key))
                 {
                     _regExList.Add(kp.Key, kp.Value);
+                }
+            }
+            foreach (var kp in SpellCheckRegex.LoadRegExList(userDoc, "RegularExpressionsIfSpelledCorrectly"))
+            {
+                if(!_regExSpellCheckList.Any((item)=> item.Find == kp.Find))
+                {
+                    _regExSpellCheckList.Add(kp);
                 }
             }
         }
