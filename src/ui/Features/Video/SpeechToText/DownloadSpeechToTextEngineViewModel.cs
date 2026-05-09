@@ -186,6 +186,10 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
                         WriteCrispAsrInstalledHash(folder);
                         RemoveStaleCrispAsrBinaries(folder);
                     }
+                    else if (Engine is WhisperEngineCpp or WhisperEngineCppCuBlas or WhisperEngineCppVulkan)
+                    {
+                        WriteWhisperCppInstalledHash(folder);
+                    }
 
                     TitleText = Se.Language.Video.AudioToText.UnpackingSpeechToTextEngine;
                     Unpack(folder, skipFolder);
@@ -292,6 +296,28 @@ public partial class DownloadSpeechToTextEngineViewModel : ObservableObject
         try
         {
             var key = DownloadHashManager.ResolveCrispAsrKey(CrispAsrWindowsVariant);
+            if (string.IsNullOrEmpty(key) || _downloadStream.Length == 0)
+            {
+                return;
+            }
+
+            _downloadStream.Position = 0;
+            var hash = DownloadHashManager.ComputeSha256(_downloadStream);
+
+            var sidecar = Path.Combine(folder, ".installed.sha256");
+            File.WriteAllText(sidecar, key + Environment.NewLine + hash);
+        }
+        catch
+        {
+            // ignore — hash side-car is best-effort
+        }
+    }
+
+    private void WriteWhisperCppInstalledHash(string folder)
+    {
+        try
+        {
+            var key = DownloadHashManager.ResolveWhisperCppKey(Engine?.Choice);
             if (string.IsNullOrEmpty(key) || _downloadStream.Length == 0)
             {
                 return;

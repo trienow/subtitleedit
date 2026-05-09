@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
+using Nikse.SubtitleEdit.Core.AudioToText;
 
 namespace Nikse.SubtitleEdit.Logic.Download;
 
@@ -45,6 +46,27 @@ public static class DownloadHashManager
         public const string WindowsCpuLegacyExecutable = "CrispAsr.Windows.CpuLegacy.Executable";
         public const string MacOsExecutable = "CrispAsr.MacOs.Executable";
         public const string LinuxExecutable = "CrispAsr.Linux.Executable";
+    }
+
+    public static class WhisperCpp
+    {
+        // Hashes of the release archive (.zip) — used when a sidecar hash exists alongside the install.
+        // Each backend has its own folder (Cpp / CppCuBlas / CppVulkan), so the variant is implicit.
+        public const string WindowsBlas = "WhisperCpp.Windows.Blas";       // whisper-blas-bin-x64.zip — default Cpp on Windows
+        public const string WindowsCuBlas = "WhisperCpp.Windows.CuBlas";   // whisper-cublas-12.4.0-bin-x64.zip
+        public const string WindowsVulkan = "WhisperCpp.Windows.Vulkan";   // whisper-vulkan-x64.zip
+        public const string MacOs = "WhisperCpp.MacOs";                    // whisper-mac.zip
+        public const string LinuxVulkan = "WhisperCpp.Linux.Vulkan";       // whisper-vulkan-linux64.zip — default Cpp on Linux
+        public const string LinuxCuda = "WhisperCpp.Linux.Cuda";           // whisper-cuda-linux64.zip — CuBlas backend on Linux
+
+        // Hashes of the unpacked main executable (whisper-cli / whisper-cli.exe) — used to detect
+        // the installed version when no sidecar is present (e.g. installs from older SE builds).
+        // Linux Vulkan and Linux CUDA produce identical whisper-cli binaries (the backend lives in
+        // libggml-*.so), so executable-hash fallback is intentionally Windows + Mac only.
+        public const string WindowsBlasExecutable = "WhisperCpp.Windows.Blas.Executable";
+        public const string WindowsCuBlasExecutable = "WhisperCpp.Windows.CuBlas.Executable";
+        public const string WindowsVulkanExecutable = "WhisperCpp.Windows.Vulkan.Executable";
+        public const string MacOsExecutable = "WhisperCpp.MacOs.Executable";
     }
 
     // For each key, hashes are ordered newest-first. Index 0 is the latest known release.
@@ -155,6 +177,52 @@ public static class DownloadHashManager
                 "7ea6e45b16f396c5cfee8447b0245e872399e504b6dc3d8bb81c3a3c262acbb5", // v0.5.4
                 "a92723269e7e16b93184aadadef3868396e75994665066b817218a0d208c1d2e", // v0.5.3
                 "b99c7d6f51652f7bcddfb6b5bd73f11c541f9947256f040758a20bd1c7ad6591", // v0.5.2
+            },
+
+            // whisper.cpp — https://github.com/ggml-org/whisper.cpp/releases (and SE-repackaged builds
+            // under https://github.com/SubtitleEdit/support-files/releases). Index 0 must match
+            // whatever URL WhisperDownloadService.cs is pinned to.
+            [WhisperCpp.WindowsBlas] = new[]
+            {
+                "5f8d6b1bcdf86edf898d21379468ae8329bb783803dab9c5dbc1fa65e7f2da6c", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+            [WhisperCpp.WindowsCuBlas] = new[]
+            {
+                "b07cff4e59831b227896018facbb6334907bf324a342c84597c44f087823d252", // v1.8.4 (current download URL — fetched directly from ggml-org/whisper.cpp)
+            },
+            [WhisperCpp.WindowsVulkan] = new[]
+            {
+                "42f90548f551f525666b96bd734f4ee23e58f82dcc2a1b68c4eba5e453ba7080", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+            [WhisperCpp.MacOs] = new[]
+            {
+                "81dbd530f21a6daf10b1c9cece61d7e56d774e3bcb3d21af4d17299caa532a4d", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+            [WhisperCpp.LinuxVulkan] = new[]
+            {
+                "7a7d131b5fbb605fef6a8d39b6f2480480d8a26ec8a1dbec3b3740485023158d", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+            [WhisperCpp.LinuxCuda] = new[]
+            {
+                "708ea1c502ac5082d4eb9afc86c8adb9d67d76da25e70fd81cb6fae2cfcf00ce", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+
+            // SHA-256 of whisper-cli / whisper-cli.exe extracted from each archive above.
+            [WhisperCpp.WindowsBlasExecutable] = new[]
+            {
+                "80865086479dfedb0ce8d0c03f061629dd83e9d1e86b14343e5cf9fd01927098", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+            [WhisperCpp.WindowsCuBlasExecutable] = new[]
+            {
+                "03947f51efb42abc82a0208cb0ead74822eff8e88a41df4c1f4536f6b78188ae", // v1.8.4 (current download URL)
+            },
+            [WhisperCpp.WindowsVulkanExecutable] = new[]
+            {
+                "69a270fb42b98fc4927e6e9a79bda16ec7bf152825e2af68df09ff99f43479e6", // whispercpp-184 / v1.8.4 (current download URL)
+            },
+            [WhisperCpp.MacOsExecutable] = new[]
+            {
+                "11d902af004d1e79538f8f801b4a42ac3a21094370c9063f67d885d04dccdd96", // whispercpp-184 / v1.8.4 (current download URL)
             },
         };
 
@@ -392,5 +460,78 @@ public static class DownloadHashManager
         {
             return null;
         }
+    }
+
+    /// <summary>
+    /// Resolves the WhisperCpp archive hash key for the given engine choice on the current OS.
+    /// <paramref name="whisperChoice"/> is one of the <c>WhisperChoice</c> constants (Cpp / CppCuBlas / CppVulkan).
+    /// Returns null when the platform / choice combination is unsupported or unknown.
+    /// </summary>
+    public static string? ResolveWhisperCppKey(string? whisperChoice)
+    {
+        if (string.IsNullOrEmpty(whisperChoice))
+        {
+            return null;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return whisperChoice switch
+            {
+                WhisperChoice.Cpp => WhisperCpp.WindowsBlas,
+                WhisperChoice.CppCuBlas => WhisperCpp.WindowsCuBlas,
+                WhisperChoice.CppVulkan => WhisperCpp.WindowsVulkan,
+                _ => null,
+            };
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return whisperChoice == WhisperChoice.Cpp ? WhisperCpp.MacOs : null;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+        {
+            return whisperChoice switch
+            {
+                WhisperChoice.Cpp => WhisperCpp.LinuxVulkan,        // SE-packaged Linux build for the default Cpp backend uses Vulkan.
+                WhisperChoice.CppCuBlas => WhisperCpp.LinuxCuda,
+                _ => null,
+            };
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Resolves the WhisperCpp executable-hash key for the given engine choice on the current OS.
+    /// Used as a fallback when no sidecar hash exists alongside the install.
+    /// Returns null on Linux: the same whisper-cli binary ships in both the Vulkan and CUDA archives,
+    /// so executable hashing cannot disambiguate.
+    /// </summary>
+    public static string? ResolveWhisperCppExecutableKey(string? whisperChoice)
+    {
+        if (string.IsNullOrEmpty(whisperChoice))
+        {
+            return null;
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            return whisperChoice switch
+            {
+                WhisperChoice.Cpp => WhisperCpp.WindowsBlasExecutable,
+                WhisperChoice.CppCuBlas => WhisperCpp.WindowsCuBlasExecutable,
+                WhisperChoice.CppVulkan => WhisperCpp.WindowsVulkanExecutable,
+                _ => null,
+            };
+        }
+
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+        {
+            return whisperChoice == WhisperChoice.Cpp ? WhisperCpp.MacOsExecutable : null;
+        }
+
+        return null;
     }
 }

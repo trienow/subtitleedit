@@ -133,6 +133,7 @@ public partial class SpeechToTextViewModel : ObservableObject
     private bool _isUpdatingWhisperCppBackend;
     private bool _isUpdatingCrispAsrBackend;
     private static bool _crispAsrUpdatePromptShown;
+    private static bool _whisperCppUpdatePromptShown;
 
     public SpeechToTextViewModel(IWindowService windowService, IFileHelper fileHelper)
     {
@@ -3084,6 +3085,11 @@ public partial class SpeechToTextViewModel : ObservableObject
         {
             Dispatcher.UIThread.Post(async () => await CheckCrispAsrForUpdateAsync());
         }
+        else if (engine is WhisperEngineCpp or WhisperEngineCppCuBlas or WhisperEngineCppVulkan
+                 && !_whisperCppUpdatePromptShown)
+        {
+            Dispatcher.UIThread.Post(async () => await CheckWhisperCppForUpdateAsync());
+        }
     }
 
     private async Task CheckCrispAsrForUpdateAsync()
@@ -3134,6 +3140,74 @@ public partial class SpeechToTextViewModel : ObservableObject
                 viewModel.CrispAsrWindowsVariant = crispVariant;
                 viewModel.StartDownload();
             });
+    }
+
+    private async Task CheckWhisperCppForUpdateAsync()
+    {
+        if (_whisperCppUpdatePromptShown || Window == null)
+        {
+            return;
+        }
+
+        var engine = GetEffectiveSelectedEngine();
+        if (engine is not (WhisperEngineCpp or WhisperEngineCppCuBlas or WhisperEngineCppVulkan)
+            || !engine.IsEngineInstalled())
+        {
+            return;
+        }
+
+        var folder = engine.GetAndCreateWhisperFolder();
+        var lookup = TryReadSidecarHash(folder) ?? TryHashWhisperCppExecutable(engine);
+        if (lookup is not var (key, hash))
+        {
+            return;
+        }
+
+        if (DownloadHashManager.GetStatus(key, hash) != DownloadHashManager.UpdateStatus.UpdateAvailable)
+        {
+            return;
+        }
+
+        _whisperCppUpdatePromptShown = true;
+
+        var answer = await MessageBox.Show(
+            Window!,
+            string.Format(Se.Language.Video.AudioToText.UpdateXTitle, engine.Name),
+            string.Format(Se.Language.Video.AudioToText.UpdateXMessage, engine.Name, Environment.NewLine),
+            MessageBoxButtons.YesNoCancel,
+            MessageBoxIcon.Question);
+
+        if (answer != MessageBoxResult.Yes)
+        {
+            return;
+        }
+
+        await _windowService.ShowDialogAsync<DownloadSpeechToTextEngineWindow, DownloadSpeechToTextEngineViewModel>(
+            Window!, viewModel =>
+            {
+                viewModel.Engine = engine;
+                viewModel.StartDownload();
+            });
+    }
+
+    private static (string key, string hash)? TryHashWhisperCppExecutable(ISpeechToTextEngine engine)
+    {
+        try
+        {
+            var key = DownloadHashManager.ResolveWhisperCppExecutableKey(engine.Choice);
+            if (key == null)
+            {
+                return null;
+            }
+
+            var exePath = engine.GetExecutable();
+            var hash = DownloadHashManager.ComputeSha256(exePath);
+            return hash == null ? null : (key, hash);
+        }
+        catch
+        {
+            return null;
+        }
     }
 
     private static (string key, string hash)? TryReadSidecarHash(string folder)
