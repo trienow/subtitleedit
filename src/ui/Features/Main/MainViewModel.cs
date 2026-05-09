@@ -112,6 +112,7 @@ using Nikse.SubtitleEdit.Features.Tools.ConvertActors;
 using Nikse.SubtitleEdit.Features.Tools.FixCommonErrors;
 using Nikse.SubtitleEdit.Features.Tools.FixNetflixErrors;
 using Nikse.SubtitleEdit.Features.Tools.JoinSubtitles;
+using Nikse.SubtitleEdit.Features.Tools.MergeTwoSubtitles;
 using Nikse.SubtitleEdit.Features.Tools.MergeShortLines;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameText;
 using Nikse.SubtitleEdit.Features.Tools.MergeSubtitlesWithSameTimeCodes;
@@ -3847,6 +3848,39 @@ public partial class MainViewModel :
                           SubtitleFormats[0]);
         SelectAndScrollToRow(0);
         ShowStatus(Se.Language.Main.JoinedSubtitleLoaded);
+    }
+
+    [RelayCommand]
+    private async Task ShowToolsMergeTwoSubtitles()
+    {
+        if (Window == null)
+        {
+            return;
+        }
+
+        if (IsEmpty)
+        {
+            ShowSubtitleNotLoadedMessage();
+            return;
+        }
+
+        var lines = Subtitles.ToList();
+        var hasOriginal = ShowColumnOriginalText && lines.Any(p => !string.IsNullOrEmpty(p.OriginalText));
+        var result = await ShowDialogAsync<MergeTwoSubtitlesWindow, MergeTwoSubtitlesViewModel>(vm =>
+        {
+            vm.Initialize(lines, hasOriginal);
+        });
+
+        if (!result.OkPressed)
+        {
+            return;
+        }
+
+        ResetSubtitle();
+        SetSubtitles(result.ResultSubtitle);
+        SetSubtitleFormat(SubtitleFormats.FirstOrDefault(p => p.Name == result.ResultFormat.Name) ??
+                          SubtitleFormats[0]);
+        SelectAndScrollToRow(0);
     }
 
     [RelayCommand]

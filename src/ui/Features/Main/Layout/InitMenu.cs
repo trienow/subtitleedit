@@ -448,6 +448,11 @@ public static class InitMenu
             },
             new MenuItem
             {
+                Header = l.MergeTwoSubtitles,
+                Command = vm.ShowToolsMergeTwoSubtitlesCommand,
+            },
+            new MenuItem
+            {
                 Header = l.SortSubtitles,
                 Command = vm.ShowSortByCommand,
             },
