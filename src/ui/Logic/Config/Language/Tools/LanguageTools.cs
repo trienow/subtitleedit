@@ -15,6 +15,7 @@ public class LanguageTools
     public LanguageChangeFormatting ChangeFormatting { get; set; } = new();
     public LanguageConvertActors ConvertActors { get; set; } = new();
     public LanguageJoinSubtitles JoinSubtitles { get; set; } = new();
+    public LanguageMergeTwoSubtitles MergeTwoSubtitles { get; set; } = new();
     public LanguageSplitSubtitle SplitSubtitle { get; set; } = new();
     public LanguageSplitBreakLongLines SplitBreakLongLines { get; set; } = new();
     public LanguageMergeShortLines MergeShortLines { get; set; } = new();

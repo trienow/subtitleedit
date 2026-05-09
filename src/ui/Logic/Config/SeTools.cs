@@ -30,6 +30,26 @@ public class SeTools
     public string NvidiaPrompt { get; set; }
     public bool JoinKeepTimeCodes { get; set; }
     public int JoinAppendMilliseconds { get; set; }
+
+    public string MergeTwoSubtitlesOutputFormat { get; set; }
+    public string MergeTwoSubtitlesFontName1 { get; set; }
+    public int MergeTwoSubtitlesFontSize1 { get; set; }
+    public bool MergeTwoSubtitlesBold1 { get; set; }
+    public bool MergeTwoSubtitlesItalic1 { get; set; }
+    public string MergeTwoSubtitlesPrimaryColor1 { get; set; }
+    public string MergeTwoSubtitlesOutlineColor1 { get; set; }
+    public decimal MergeTwoSubtitlesOutlineWidth1 { get; set; }
+    public decimal MergeTwoSubtitlesShadowWidth1 { get; set; }
+    public bool MergeTwoSubtitlesAlignTop1 { get; set; }
+    public string MergeTwoSubtitlesFontName2 { get; set; }
+    public int MergeTwoSubtitlesFontSize2 { get; set; }
+    public bool MergeTwoSubtitlesBold2 { get; set; }
+    public bool MergeTwoSubtitlesItalic2 { get; set; }
+    public string MergeTwoSubtitlesPrimaryColor2 { get; set; }
+    public string MergeTwoSubtitlesOutlineColor2 { get; set; }
+    public decimal MergeTwoSubtitlesOutlineWidth2 { get; set; }
+    public decimal MergeTwoSubtitlesShadowWidth2 { get; set; }
+    public bool MergeTwoSubtitlesAlignTop2 { get; set; }
     public int SplitNumberOfEqualParts { get; set; }
     public string SplitOutputFolder { get; set; }
     public bool SplitByLines { get; set; }
@@ -98,6 +118,22 @@ public class SeTools
         OpenRouterPrompt = string.Empty;
         NvidiaPrompt = string.Empty;
         JoinKeepTimeCodes = true;
+
+        MergeTwoSubtitlesOutputFormat = AdvancedSubStationAlpha.NameOfFormat;
+        MergeTwoSubtitlesFontName1 = "Arial";
+        MergeTwoSubtitlesFontSize1 = 20;
+        MergeTwoSubtitlesPrimaryColor1 = Colors.White.FromColorToHex();
+        MergeTwoSubtitlesOutlineColor1 = Colors.Black.FromColorToHex();
+        MergeTwoSubtitlesOutlineWidth1 = 2;
+        MergeTwoSubtitlesShadowWidth1 = 1;
+        MergeTwoSubtitlesAlignTop1 = true;
+        MergeTwoSubtitlesFontName2 = "Arial";
+        MergeTwoSubtitlesFontSize2 = 20;
+        MergeTwoSubtitlesPrimaryColor2 = Colors.White.FromColorToHex();
+        MergeTwoSubtitlesOutlineColor2 = Colors.Black.FromColorToHex();
+        MergeTwoSubtitlesOutlineWidth2 = 2;
+        MergeTwoSubtitlesShadowWidth2 = 1;
+        MergeTwoSubtitlesAlignTop2 = false;
         SplitNumberOfEqualParts = 2;
         SplitByLines = true;
         SplitOutputFolder = string.Empty;

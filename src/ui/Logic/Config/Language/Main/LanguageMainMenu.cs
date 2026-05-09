@@ -58,6 +58,7 @@ public class LanguageMainMenu
     public string ConvertActors { get; set; }
     public string JoinSubtitles { get; set; }
     public string SplitSubtitle { get; set; }
+    public string MergeTwoSubtitles { get; set; }
 
     public string AssaTools { get; set; }
     public string AssaProgressBar { get; set; }
@@ -184,6 +185,7 @@ public class LanguageMainMenu
         BatchConvert = "_Batch convert...";
         JoinSubtitles = "_Join subtitles...";
         SplitSubtitle = "_Split subtitle...";
+        MergeTwoSubtitles = "Merge two subtitles...";
 
         AssaTools = "_ASSA tools";
         AssaChangeResolution = "Change _resolution...";
