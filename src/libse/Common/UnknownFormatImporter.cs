@@ -26,6 +26,15 @@ namespace Nikse.SubtitleEdit.Core.Common
                 }
             }
 
+            if (!string.IsNullOrEmpty(fileName) && fileName.EndsWith(".ods", StringComparison.OrdinalIgnoreCase))
+            {
+                var odsSubtitle = new UnknownFormatImporterOds().AutoGuessImport(fileName);
+                if (odsSubtitle != null && odsSubtitle.Paragraphs.Count > 0)
+                {
+                    return odsSubtitle;
+                }
+            }
+
             var subtitle = ImportTimeCodesOnSameSeparateLine(lines);
             if (subtitle.Paragraphs.Count < 2)
             {
