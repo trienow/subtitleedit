@@ -5815,8 +5815,35 @@ public partial class MainViewModel :
             Subtitles[i].Text = result.Rows[i].TranslatedText;
         }
 
+        var targetLanguageCode = result.SelectedTargetLanguage?.TwoLetterIsoLanguageName;
         _subtitleFileNameOriginal = _subtitleFileName;
-        _subtitleFileName = string.Empty;
+        if (!string.IsNullOrEmpty(_subtitleFileName) && !string.IsNullOrEmpty(targetLanguageCode))
+        {
+            var directory = Path.GetDirectoryName(_subtitleFileName) ?? string.Empty;
+            var nameWithoutExt = Path.GetFileNameWithoutExtension(_subtitleFileName);
+            var extension = Path.GetExtension(_subtitleFileName);
+
+            var lastDot = nameWithoutExt.LastIndexOf('.');
+            if (lastDot > 0)
+            {
+                var possibleCode = nameWithoutExt.Substring(lastDot + 1);
+                if ((possibleCode.Length == 2 || possibleCode.Length == 3) &&
+                    Iso639Dash2LanguageCode.List.Any(l =>
+                        possibleCode.Equals(l.TwoLetterCode, StringComparison.OrdinalIgnoreCase) ||
+                        possibleCode.Equals(l.ThreeLetterCode, StringComparison.OrdinalIgnoreCase)))
+                {
+                    nameWithoutExt = nameWithoutExt.Substring(0, lastDot);
+                }
+            }
+
+            _subtitleFileName = Path.Combine(directory, nameWithoutExt + "." + targetLanguageCode + extension);
+        }
+        else
+        {
+            _subtitleFileName = string.Empty;
+        }
+
+        _converted = true;
         ShowColumnOriginalText = true;
         AutoFitColumns();
         _updateAudioVisualizer = true;
@@ -12235,6 +12262,9 @@ public partial class MainViewModel :
         var allowedExtensions = SubtitleFormats.Select(f => f.Extension).ToList();
         allowedExtensions.AddRange(Utilities.VideoFileExtensions);
         allowedExtensions.AddRange(Utilities.AudioFileExtensions);
+        allowedExtensions.Add(".xlsx");
+        allowedExtensions.Add(".ods");
+
         foreach (var ext in allowedExtensions)
         {
             if (fileName.EndsWith(ext, StringComparison.OrdinalIgnoreCase))
