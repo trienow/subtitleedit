@@ -816,7 +816,7 @@ public class LanguageGeneral
         Effect = "Effect";
         Enabled = "Enabled";
         Encoding = "Encoding";
-        EndTime = "End time";
+        EndTime = "Hide time";
         Engine = "Engine";
         EnterProfileName = "Enter profile name";
         Error = "Error";
