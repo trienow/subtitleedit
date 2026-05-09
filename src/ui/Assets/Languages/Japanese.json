@@ -2121,7 +2121,7 @@
       "waveformPauseOnSingleClick": "シングルクリックで再生一時停止",
       "waveformDrawStyle": "波形のスタイル",
       "vlcWidRendering": "OSネイティブvlc描画",
-      "subtitleSEnterKeyAction": "字幕一覧で Enterを押した時の動作",
+      "subtitleGridEnterKeyAction": "字幕一覧で Enterを押した時の動作",
       "subtitleSingleClickAction": "字幕一覧で シングルクリックした時の動作",
       "subtitleDoubleClickAction": "字幕一覧で ダブルクリックした時の動作",
       "saveAsBehavior": "\"名前を付けて保存\"の動作",

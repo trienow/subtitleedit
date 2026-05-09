@@ -2121,7 +2121,7 @@
       "waveformPauseOnSingleClick": "Pozastavit jedním kliknutím",
       "waveformDrawStyle": "Styl vykreslování křivky",
       "vlcWidRendering": "libVLC – nativní vykreslování pomocí ID okna",
-      "subtitleSEnterKeyAction": "Akce klávesy Enter v mřížce titulků",
+      "subtitleGridEnterKeyAction": "Akce klávesy Enter v mřížce titulků",
       "subtitleSingleClickAction": "Akce při jednom kliknutí v mřížce titulků",
       "subtitleDoubleClickAction": "Akce při dvojitém kliknutí v mřížce titulků",
       "saveAsBehavior": "Chování funkce \"Uložit jako\"",

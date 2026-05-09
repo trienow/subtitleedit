@@ -231,7 +231,7 @@ public class LanguageSettings
     public string WaveformPauseOnSingleClick { get; set; }
     public string WaveformDrawStyle { get; set; }
     public string VlcWidRendering { get; set; }
-    public string SubtitleSEnterKeyAction { get; set; }
+    public string SubtitleGridEnterKeyAction { get; set; }
     public string SubtitleSingleClickAction { get; set; }
     public string SubtitleDoubleClickAction { get; set; }
     public string SaveAsBehavior { get; set; }
@@ -515,7 +515,7 @@ public class LanguageSettings
         WaveformRightClickSelectsSubtitle = "Select subtitle on right click";
         WaveformPauseOnSingleClick = "Pause on single click";
         WaveformDrawStyle = "Waveform draw style";
-        SubtitleSEnterKeyAction = "Subtitle grid Enter-key action";
+        SubtitleGridEnterKeyAction = "Subtitle grid Enter-key action";
         SubtitleSingleClickAction = "Subtitle grid single-click action";
         SubtitleDoubleClickAction = "Subtitle grid double-click action";
         SaveAsBehavior = "\"Save as\" behavior";

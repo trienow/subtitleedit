@@ -241,7 +241,7 @@ public class SettingsPage : UserControl
                 ItemTemplate = new FuncDataTemplate<FormatViewModel>((f, _) =>
                     new TextBlock { Text = f?.Name }, true)
             }),
-            new SettingsItem(Se.Language.Options.Settings.SubtitleSEnterKeyAction, () => new ComboBox
+            new SettingsItem(Se.Language.Options.Settings.SubtitleGridEnterKeyAction, () => new ComboBox
             {
                 MinWidth = 200,
                 DataContext = _vm,

@@ -2140,7 +2140,7 @@
       "WaveformPauseOnSingleClick": "Pause ved enkeltklikk",
       "WaveformDrawStyle": "Bølgeform tegnestil",
       "VlcWidRendering": "libVLC - Native Window ID-rendering",
-      "SubtitleSEnterKeyAction": "Undertekstrutenett Enter-tast handling",
+      "SubtitleGridEnterKeyAction": "Undertekstrutenett Enter-tast handling",
       "SubtitleSingleClickAction": "Undertekstrutenett enkeltklikk-handling",
       "SubtitleDoubleClickAction": "Undertekstrutenett dobbeltklikk-handling",
       "SaveAsBehavior": "\"Lagre som\"-atferd",

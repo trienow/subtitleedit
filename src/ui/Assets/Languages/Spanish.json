@@ -2031,7 +2031,7 @@
       "WaveformPauseOnSingleClick": "Clic pausa reproducción",
       "WaveformDrawStyle": "Estilo dibujo onda",
       "VlcWidRendering": "libVLC - Nativo Window ID",
-      "SubtitleSEnterKeyAction": "Acción tecla Enter en lista",
+      "SubtitleGridEnterKeyAction": "Acción tecla Enter en lista",
       "SubtitleSingleClickAction": "Acción un clic en lista",
       "SubtitleDoubleClickAction": "Acción doble clic en lista",
       "SaveAsBehavior": "Comportamiento \"Guardar como\"",

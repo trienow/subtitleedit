@@ -1929,7 +1929,7 @@
       "waveformPauseOnSingleClick": "Пауза при одинарному кліку",
       "waveformDrawStyle": "Стиль малювання хвильової форми",
       "vlcWidRendering": "libVLC - Відображення ID вікна",
-      "subtitleSEnterKeyAction": "Дія клавіші Enter в таблиці субтитрів",
+      "subtitleGridEnterKeyAction": "Дія клавіші Enter в таблиці субтитрів",
       "subtitleSingleClickAction": "Дія одинарного кліку в таблиці субтитрів",
       "subtitleDoubleClickAction": "Дія подвійного кліку в таблиці субтитрів",
       "saveAsBehavior": "Поведінка \"Зберегти як\"",

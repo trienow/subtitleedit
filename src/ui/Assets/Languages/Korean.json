@@ -2083,7 +2083,7 @@
       "WaveformPauseOnSingleClick": "한 번 클릭하면 일시 중지",
       "WaveformDrawStyle": "파형 그리기 스타일",
       "VlcWidRendering": "libVLC - 기본 창 ID 렌더링",
-      "SubtitleSEnterKeyAction": "자막 격자 엔터 키 동작",
+      "SubtitleGridEnterKeyAction": "자막 격자 엔터 키 동작",
       "SubtitleSingleClickAction": "자막 격자 원클릭 동작",
       "SubtitleDoubleClickAction": "자막 격자 더블클릭 동작",
       "SaveAsBehavior": "\"다른 이름으로 저장\" 동작",

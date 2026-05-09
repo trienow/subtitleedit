@@ -1996,7 +1996,7 @@
       "WaveformPauseOnSingleClick": "Pausar com um único clique",
       "WaveformDrawStyle": "Estilo de desenho de forma de onda",
       "VlcWidRendering": "libVLC - Renderização de ID de janela nativa",
-      "SubtitleSEnterKeyAction": "Ação da tecla Enter na grade da legenda",
+      "SubtitleGridEnterKeyAction": "Ação da tecla Enter na grade da legenda",
       "SubtitleSingleClickAction": "Ação do clique simples na grade da legenda",
       "SubtitleDoubleClickAction": "Ação do clique duplo na grade da legenda",
       "SaveAsBehavior": "Comportamento \"Salvar como\"",

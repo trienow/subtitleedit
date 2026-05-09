@@ -2141,7 +2141,7 @@
       "waveformPauseOnSingleClick": "Pause on single click",
       "waveformDrawStyle": "Waveform draw style",
       "vlcWidRendering": "libVLC - Native Window ID rendering",
-      "subtitleSEnterKeyAction": "Subtitle grid Enter-key action",
+      "subtitleGridEnterKeyAction": "Subtitle grid Enter-key action",
       "subtitleSingleClickAction": "Subtitle grid single-click action",
       "subtitleDoubleClickAction": "Subtitle grid double-click action",
       "saveAsBehavior": "\"Save as\" behavior",

@@ -2140,7 +2140,7 @@
       "WaveformPauseOnSingleClick": "Pause ved et enkelt klik",
       "WaveformDrawStyle": "Bølgeform tegnestil",
       "VlcWidRendering": "libVLC - Native Window ID-gengivelse",
-      "SubtitleSEnterKeyAction": "Undertekstgitter Enter-tasthandling",
+      "SubtitleGridEnterKeyAction": "Undertekstgitter Enter-tasthandling",
       "SubtitleSingleClickAction": "Undertekstgitter handling med et enkelt klik",
       "SubtitleDoubleClickAction": "Undertekstgitter dobbeltklik på handling",
       "SaveAsBehavior": "\"Gem som\" adfærd",

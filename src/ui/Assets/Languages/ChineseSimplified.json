@@ -1761,7 +1761,7 @@
       "waveformPauseOnSingleClick": "单击时暂停",
       "waveformDrawStyle": "波形图绘制样式",
       "vlcWidRendering": "libVLC - 原生窗口 ID 渲染",
-      "subtitleSEnterKeyAction": "字幕表格 Enter 键动作",
+      "subtitleGridEnterKeyAction": "字幕表格 Enter 键动作",
       "subtitleSingleClickAction": "字幕表格单击动作",
       "subtitleDoubleClickAction": "字幕网格双击操作",
       "saveAsBehavior": "\u0022另存为\u0022 行为",

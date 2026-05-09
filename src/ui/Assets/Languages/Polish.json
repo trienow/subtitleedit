@@ -2141,7 +2141,7 @@
       "waveformPauseOnSingleClick": "Wstrzymaj pojedynczym kliknięciem",
       "waveformDrawStyle": "Styl rysowania przebiegu fali",
       "vlcWidRendering": "libVLC - renderowanie Native Window ID",
-      "subtitleSEnterKeyAction": "Siatka napisów – działanie klawisza Enter",
+      "subtitleGridEnterKeyAction": "Siatka napisów – działanie klawisza Enter",
       "subtitleSingleClickAction": "Siatka napisów – działanie pojedynczego kliknięcia",
       "subtitleDoubleClickAction": "Siatka napisów – działanie dwukrotnego kliknięcia",
       "saveAsBehavior": "Zachowanie funkcji \"Zapisz jako\"",

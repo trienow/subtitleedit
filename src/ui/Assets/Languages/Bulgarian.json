@@ -2117,7 +2117,7 @@
       "waveformPauseOnSingleClick": "Пауза с едно щракване",
       "waveformDrawStyle": "Стил на рисуване на вълнова форма",
       "vlcWidRendering": "libVLC - рендиране на Native Window ID",
-      "subtitleSEnterKeyAction": "Мрежа със субтитри Действие с клавиша Enter",
+      "subtitleGridEnterKeyAction": "Мрежа със субтитри Действие с клавиша Enter",
       "subtitleSingleClickAction": "Действие с едно щракване върху мрежата със субтитри",
       "subtitleDoubleClickAction": "Двойно щракване върху мрежата със субтитри",
       "saveAsBehavior": "Поведение \"Запазване като“",

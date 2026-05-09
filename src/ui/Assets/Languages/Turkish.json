@@ -1928,7 +1928,7 @@
       "waveformPauseOnSingleClick": "Tek tıklamada duraklat",
       "waveformDrawStyle": "Dalga formu çizim stili",
       "vlcWidRendering": "libVLC - Yerel Pencere ID oluşturma",
-      "subtitleSEnterKeyAction": "Altyazı ızgarası Enter tuşu eylemi",
+      "subtitleGridEnterKeyAction": "Altyazı ızgarası Enter tuşu eylemi",
       "subtitleSingleClickAction": "Altyazı ızgarası tek tıklama eylemi",
       "subtitleDoubleClickAction": "Altyazı ızgarası çift tıklama eylemi",
       "saveAsBehavior": "\"Farklı kaydet\" davranışı",

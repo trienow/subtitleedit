@@ -2120,7 +2120,7 @@
       "WaveformPauseOnSingleClick": "Pausa con singolo clic",
       "WaveformDrawStyle": "Stile disegno forma d'onda",
       "VlcWidRendering": "libVLC - rendering ID finestra nativa",
-      "SubtitleSEnterKeyAction": "Griglia sottotitoli - azione tasto Invio ",
+      "SubtitleGridEnterKeyAction": "Griglia sottotitoli - azione tasto Invio ",
       "SubtitleSingleClickAction": "Griglia sottotitoli - azione singolo clic ",
       "SubtitleDoubleClickAction": "Griglia sottotitoli - azione doppio clic",
       "SaveAsBehavior": "Comportamento \"Salva con nome\".",
