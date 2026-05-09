@@ -2913,6 +2913,8 @@ public partial class SpeechToTextViewModel : ObservableObject
         }
     }
 
+    private const int MaxConsoleLogLines = 500;
+
     private void LogToConsole(string s, bool skipOutputText = false)
     {
         if (!skipOutputText)
@@ -2920,7 +2922,25 @@ public partial class SpeechToTextViewModel : ObservableObject
             _outputText.Enqueue(s);
         }
 
-        ConsoleLog += s.Trim() + "\n";
+        var combined = ConsoleLog + s.Trim() + "\n";
+        var newlineCount = 0;
+        var startIdx = 0;
+        for (var i = combined.Length - 1; i >= 0; i--)
+        {
+            if (combined[i] != '\n')
+            {
+                continue;
+            }
+
+            newlineCount++;
+            if (newlineCount > MaxConsoleLogLines)
+            {
+                startIdx = i + 1;
+                break;
+            }
+        }
+
+        ConsoleLog = startIdx == 0 ? combined : combined.Substring(startIdx);
 
         Dispatcher.UIThread.Post(() => { TextBoxConsoleLog.CaretIndex = TextBoxConsoleLog.Text?.Length ?? 0; },
            DispatcherPriority.Background);

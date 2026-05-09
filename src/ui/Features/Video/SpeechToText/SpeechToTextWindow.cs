@@ -313,7 +313,8 @@ public class SpeechToTextWindow : Window
         {
             RowDefinitions =
             {
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Engine
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Console log label
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Console log (right) / Engine (left)
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Backend
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Forced aligner
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Language
@@ -322,9 +323,8 @@ public class SpeechToTextWindow : Window
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Post processing
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // Advanced settings
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Star) }, // Console log
-                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) },
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // textBoxAdvancedSettings
+                new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // panelProgress
                 new RowDefinition { Height = new GridLength(1, GridUnitType.Auto) }, // OK/Cancel
             },
             ColumnDefinitions =
@@ -367,7 +367,7 @@ public class SpeechToTextWindow : Window
 
         var row = 0;
 
-        grid.Add(labelConsoleLog, row, 2, 2, 1);
+        grid.Add(labelConsoleLog, row, 2);
         row++;
 
         grid.Add(consoleLogAndBatchView, row, 2, 9);
