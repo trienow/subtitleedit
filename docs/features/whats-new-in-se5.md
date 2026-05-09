@@ -1,6 +1,6 @@
 # What's New in Subtitle Edit 5
 
-Subtitle Edit 5 is the Avalonia-based, cross-platform version of Subtitle Edit. It keeps the familiar subtitle editing workflow from the Windows Forms version, but many feature areas were rebuilt or expanded.
+Subtitle Edit 5 is the Avalonia-based, cross-platform version of Subtitle Edit. It keeps the familiar subtitle editing workflow from the Windows Forms version, but many feature were expanded.
 
 ## Application Platform
 
@@ -8,8 +8,7 @@ Subtitle Edit 5 is the Avalonia-based, cross-platform version of Subtitle Edit. 
 - Cleaner, High-DPI-aware UI that scales correctly on modern displays.
 - Follow system theme (light, dark, etc.) automatically, or pick a theme manually.
 - New Flatpak packaging work for Linux.
-- More windows remember their size and position.
-- Settings dialog has a built-in search to quickly find any option.
+- Many new settings, and the settings dialog has a built-in search to quickly find any option.
 - Native pick-folder dialog wherever a folder is needed (was missing in the WinForms 4.x line).
 
 ## Editing and Grid
@@ -18,13 +17,14 @@ Subtitle Edit 5 is the Avalonia-based, cross-platform version of Subtitle Edit. 
 - Edit controls Show/Hide/Duration are now optional and can be toggled on/off.
 - Deleting many lines at once in the subtitle grid / list view is dramatically faster.
 - New **Tools → Change formatting** dialog for adding or removing italic, bold, underline, and other formatting across selected lines.
+- New **Tools → Merge two subtitles** tool that combines two subtitles (or the loaded subtitle's text + translation) into one bilingual subtitle. Output as SubRip (overlapping pairs stacked as line 1 / line 2) or ASSA with two configurable styles (font, color, outline, shadow, top/bottom alignment) and a live preview.
 
 ## Video
 
 - New **Video → Re-encode** tool that re-encodes a video into a format better suited for subtitling work.
 - New **Video → Cut video** tool for trimming video segments directly from Subtitle Edit.
 - **Video → Burn-in with logo** — a logo/watermark image can now be included when burning subtitles into video.
-- **Whisper CTranslate2** engine added for speech-to-text transcription.
+- Many new speech-to-text engines (see [Speech to Text](#speech-to-text) below).
 - Improved reading of subtitles embedded in MP4 files.
 
 ## Sync
@@ -81,7 +81,7 @@ See [OCR](ocr.md), [Batch Convert](batch-convert.md), and [Command Line (seconv)
 
 ## Command Line (seconv)
 
-The `seconv` headless converter now lives in the main Subtitle Edit repository — it builds, ships, and updates in lockstep with the desktop app. No more drift between a separately maintained tool and the libraries it depends on.
+The `seconv` headless converter now lives in the main Subtitle Edit repository — it builds, ships, and updates in lockstep with the desktop app. 
 
 - **Polished terminal UI** — colored output with progress per file, summary tables, and a `--json` mode for CI pipelines and scripting.
 - **Cross-platform** — runs on Windows, Linux, and macOS with only the .NET runtime; no display or GUI required, suitable for servers and Docker.
