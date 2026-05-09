@@ -5,6 +5,7 @@ using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ public class OllamaOcr
         _httpClient = new HttpClient();
         _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("Content-Type", "application/json");
         _httpClient.DefaultRequestHeaders.TryAddWithoutValidation("accept", "application/json");
-        _httpClient.Timeout = TimeSpan.FromMinutes(25);
+        _httpClient.Timeout = TimeSpan.FromMinutes(5);
     }
 
     public async Task<string> Ocr(SKBitmap bitmap, string url, string model, string language, CancellationToken cancellationToken)
@@ -35,11 +36,29 @@ public class OllamaOcr
 
             //var pngBytes = paddedBitmap.ToPngArray();
             //System.IO.File.WriteAllBytes("c:\\temp\\ollama-ocr-image.png", pngBytes);
+            //var prompt = string.Format("Act as a precise OCR engine. Transcribe every line of text from this image exactly as it appears. The language is {0}. Maintain the vertical order. Use a single '\\n' to separate each line. Do not skip any text. Output only the transcribed text", language);
+            var prompt = string.Format("Act as a precise OCR engine. Transcribe every line of text from this image exactly as it appears. Maintain the vertical order. Use a single '\\n' to separate each line. Do not skip any text. Output only the transcribed text");
+            //prompt = string.Format("Soy un motor OCR preciso. Transcribo cada línea de texto exactamente como aparece. El idioma es {0}. Mantén la alineación vertical. Usa un solo \n para separar las líneas de texto.", language);
 
-            var modelJson = "\"model\": \"" + model + "\",";
-            var optionsJson = string.Empty; // "\"options\": { \"temperature\": 0, \"repeat_penalty\": 1.0 },";
-            var prompt = string.Format("Act as a precise OCR engine. Transcribe every line of text from this image exactly as it appears. The language is {0}. Maintain the vertical order. Use a single '\\n' to separate each line. Do not skip any text. Output only the transcribed text", language);
-            var input = "{ " + modelJson + optionsJson + "  \"messages\": [ { \"role\": \"user\", \"content\": \"" + prompt + "\", \"images\": [ \"" + base64Image + "\"] } ], \"stream\": false }";
+            var obj = new JsonObject
+            {
+                ["model"] = model,
+                ["prompt"] = prompt,
+                ["images"] = new JsonArray(base64Image),
+                ["stream"] = false,
+                ["think"] = false,
+                ["options"] = new JsonObject
+                {
+                    //["temperature"] = 0.1,
+                    ["num_ctx"] = 100,
+                    ["num_predict"] = 100
+                }
+            };
+
+            //var modelJson = "\"model\": \"" + model + "\",";
+            //var optionsJson = "\"options\": { \"temperature\": 0, \"repeat_penalty\": 1.0 },";
+            //var input = "{ " + modelJson + optionsJson + "  \"messages\": [ { \"role\": \"user\", \"content\": \"" + prompt + "\", \"images\": [ \"" + base64Image + "\"] } ], \"stream\": false }";
+            var input = obj.ToJsonString();
             var content = new StringContent(input, Encoding.UTF8);
             content.Headers.ContentType = MediaTypeHeaderValue.Parse("application/json");
             var result = await _httpClient.PostAsync(url, content, cancellationToken);
@@ -54,8 +73,14 @@ public class OllamaOcr
             result.EnsureSuccessStatusCode();
 
             var parser = new SeJsonParser();
-            var outputTexts = parser.GetAllTagsByNameAsStrings(json, "content");
-            var resultText = string.Join(string.Empty, outputTexts).Trim();
+            var doneReasons = parser.GetAllTagsByNameAsStrings(json, "done_reason");
+            var doneReason = string.Join(string.Empty, doneReasons).Trim();
+            string resultText = "";
+            //if (doneReason != "length")
+            //{
+                var outputTexts = parser.GetAllTagsByNameAsStrings(json, "response");
+            resultText = string.Join(string.Empty, outputTexts).Trim();
+            //}
 
             // sanitize
             resultText = resultText.Trim();
